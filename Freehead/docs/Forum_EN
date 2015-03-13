@@ -1,0 +1,8 @@
+In order to establish the link to your forum, you must do the following:
+ 
+  1. Navigate to the folder templates/wowhead/js
+  2. Open the file locale_enus.js
+  3. Find the line [,"Forum"], (you can use the search CTRL + F)
+  4. Replace references to its
+ 
+  The installation of your forum in completed 

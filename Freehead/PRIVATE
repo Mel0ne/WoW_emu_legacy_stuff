@@ -1,0 +1,17 @@
+------------Changelog of private version------------
+
+
+-------- 11 march 2013 --------
+
++ Version is updated to 13.0.0
+  + Cache fixes
+  + SQLite configuration for DBSimple DataBase Handler
+  + Profiler for characters (will be availible soon on http://db.freedomcore.ru)
+  + Reputation fixes
+  + Optimisation of files
+  + Size of repo reduced from 87 MB to 70 MB
+  + DB Checker implemented
+  + Cleanup for TPL files
+  + All PHP code excluded from TPL and moved to PHP files
+  + Added support link for administrators (GM Level 4 is required) to contact me
+  + Basic bugtracker implementation (only accessable if you have special code to activate it, of course you  can just wipe code to use it, but i will see that your website havent sent me your code)

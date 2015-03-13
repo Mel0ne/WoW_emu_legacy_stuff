@@ -1,0 +1,21 @@
+Order Deny,Allow
+<FilesMatch "\.(conf|php|tpl|in)$">
+	Deny from all
+</FilesMatch>
+<FilesMatch "^(index|ajax|opensearch|gathererdb|searchbox).php$">
+	Allow from all
+</FilesMatch>
+Options -Indexes
+# Поддержка UTF8
+DirectoryIndex index.php
+AddDefaultCharset utf8
+<IfModule mod_charset.c>
+	CharsetDisable on
+	CharsetRecodeMultipartForms Off
+</IfModule>
+php_flag display_errors on
+AddType application/x-httpd-php .js
+AddHandler x-httpd-php5 .js
+<FilesMatch "\.(js|php)$">
+SetHandler application/x-httpd-php
+</FilesMatch>

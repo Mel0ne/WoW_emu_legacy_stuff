@@ -1,0 +1,30 @@
+--------- Installation and Configuration of FreedomHead ---------
+For successful installation you will need FreedomHead Mysql 5.x, Apache 2.2.x, PHP 5.3.x
+
+Begin the installation:
+1) Create a folder on your site or a separate subdomain, and load all the files in that folder     
+	example:           
+		cd Folder_name           
+		git clone git :/ / github.com/darki73/Freehead.git
+2) Change access rights for  folder / subdomain and set them to 777
+3) Edit the file config.php.in (do not forget to rename it to config.php)
+4) Open your database
+5) Select the database world
+6) Import aowow_sql.sql from folder tools / sql
+7) Import aowow_sql_loc_ *. Sql folder of tools / sql, if required
+8) Import the following files from the tools / sql in the following order:   
+	a) comments.sql   
+	b) faction.sql   
+	c) instances.sql   
+	d) news.sql   
+	e) screenshots.sql
+9) Installation completed
+
+-----------------------------------------------------
+Installation advises
+
+1) Better way to import SQL files is to use MySQL console
+2) The best performance and lagless connection and data retriving may be achieved by importing FreedomDB main sql (aowow_*.sql) into your world database
+3) If you are facing errors due to updating to latest revision, you may try to use next commands
+	a) git stash
+	b) git pull

@@ -1,0 +1,251 @@
+div.announce {
+	border-radius: 9px; 
+	-moz-border-radius: 9px; 
+	-webkit-border-radius: 9px; 
+	border: 1px solid #000000;
+}
+
+div.cata {
+    margin-top: 10px;
+    padding: 10px; border: 1px solid #101010; background-color: #e67529; width: 300px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+}
+
+div.mop {
+    margin-top: 10px;
+    padding: 10px; border: 1px solid #101010; background-color: #1A2924; width: 300px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+}
+
+/********/
+/* MAIN */
+/********/
+
+.main {
+
+}
+
+.main-precontents {
+	background: #141414;
+	padding: 10px;
+	border-left: 1px solid #101010;
+	border-right: 1px solid #101010;
+}
+
+.main-contents {
+	border: 1px solid #404040;
+	background-color: #242424;
+	padding: 10px;
+	min-height: 550px;
+
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+}
+
+/* Adblock messages */
+
+.header-bg {
+	width: 728px;
+	height: 90px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	padding-top: 10px;
+}
+
+.footer-bg {
+	width: 728px;
+	height: 90px;
+	margin: 0 auto;
+	padding-top: 10px;
+}
+
+.dashboard-bg {
+	width: 1px;
+	height: 1px;
+    position: absolute;
+    bottom: 0;
+    top: 0;
+}
+
+.block-bgimg {
+	width: 300px;
+	height: 250px;
+	background: transparent url(//wowimg.zamimg.com/images/backgrounds/block.png) no-repeat 0px 0px;
+}
+
+.sidebar-bgimg {
+	width: 160px;
+	height: 600px;
+	background: transparent url(//wowimg.zamimg.com/images/backgrounds/sidebar.png) no-repeat 0px 0px;
+}
+
+.header-bgimg {
+	background: transparent url(//wowimg.zamimg.com/images/backgrounds/header.png) no-repeat 0px 10px;
+}
+
+.block-bgimg iframe, .sidebar-bgimg iframe, .header-bgimg iframe {background:#000}
+
+.text > div.ad-medrect {
+	float: right;
+	margin: 0 0 10px 10px;
+}
+
+#fi > div.ad-medrect {
+	float: right;
+	margin: 0 0 10px 10px;
+}
+
+.profiler > div.ad-medrect {
+	float: right;
+	margin: 0 0 10px 10px;
+}
+
+.talentcalc-sidebar > div.ad-medrect {
+	background-position: 0px 13px;
+	padding-top: 13px;
+}
+
+.text .block-bg {
+	float: right;
+	margin: 0 0 10px 10px;
+}
+
+#bh .block-bg {
+	float: right;
+	margin-left: 10px;
+}
+
+#fi .block-bg {
+	float: right;
+	margin: 0 0 10px 10px;
+}
+
+.profiler .block-bg {
+	float: right;
+	margin: 0 0 10px 10px;
+}
+
+.talentcalc-sidebar .block-bg {
+	background-position: 0px 13px;
+	padding-top: 13px;
+}
+
+
+div.announcement-pagetop div.announcement-inner {
+	margin-top: 10px;
+}
+
+div.announcement-pagetop div.announcement-inner, div.announcement-contenttop div.announcement-inner {
+	background-color: #141414;
+	border: 1px solid #101010;
+
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+}
+
+div.announcement-inner {
+	background-position: 0 center;
+	background-repeat: no-repeat;
+	margin-bottom: 10px;
+	padding: 8px;
+	position: relative;
+}
+
+/*************/
+/* TOP LINKS */
+/*************/
+
+.toplinks {
+	// float: right;
+	line-height: 30px;
+	height: 30px;
+	overflow: hidden;
+	position: absolute;
+	right: 0;
+}
+
+.toplinks a {
+	font-size: 13px;
+}
+
+/*************/
+/* LINK LIST */
+/*************/
+
+.linklist {
+	color: #666666;
+	font-size: 11px;
+}
+
+.linklist a {
+	margin: 0 0.8em;
+	text-decoration: none;
+	color: #FFCD55;
+}
+
+.linklist a:hover, .linklist a.open {
+	color: #F6E6B3;
+	text-decoration: underline;
+}
+
+.linklist a.hassubmenu {
+	padding-right: 13px;
+	background: url(//wowimg.zamimg.com/images/Menu/arrow-down-ffcd55.gif) right center no-repeat;
+}
+
+.text span.rep-difficulty {
+	font-weight: bold;
+	text-shadow: 0px 0px 6px gray;
+	color: lightgrey;
+	filter: dropshadow(color=gray, offx=0, offy=0);
+}
+
+.icontab2 {
+    border-collapse: collapse;
+    margin-top: 4px;
+}
+
+.icontab2 tr {
+    background: none !important;
+}
+
+.icontab2 th, .icontab2 td {
+    border: 0 !important;
+}
+
+.icontab2 td {
+    padding: 0;
+    width: 10em;
+    font-size: 12px;
+    line-height: 1.5em;
+}
+
+.icontab2 th {
+    padding: 0 3px 0 0;
+}
+
+.icontab2-box {
+    margin-top: 0;
+    border-spacing: 0 6px;
+    border-collapse: separate;
+}
+
+.icontab2-box th {
+    padding: 0 0 0 4px;
+}
+
+.icontab2-box td {
+    background-color: #141414;
+    padding: 0 6px;
+
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}

@@ -1,0 +1,8 @@
+ Afin d'etablir le lien de votre forum, vous devez faire ce qui suit:
+ 
+  1. Accedez au dossier templates/wowhead/js
+  2. Ouvrez les fichiers locale_frfr.js
+  3. Trouvez la ligne [,"Forum"], (vous pouvez utiliser la recherche sur CTRL + F)
+  4. Remplacer les references a son
+ 
+  L'installation de votre forum complete

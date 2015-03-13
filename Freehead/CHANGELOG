@@ -1,0 +1,82 @@
+----------------- Changelog from 15.02.2013 ----------------- 
+Date: 21.12.2012 - 15.02.2013
+FDB Version: 12.1.0 - 12.4.0
+Commit HASH: 9a1d4fcb11f30e58a4959255dff5cc56ef9bc599
+Changes: 
+		+ 3D Viewer full support for flash viewer
+		+ Fixed forum links
+		+ Spanish translations
+		+ Separation of equipement
+		+ Itemsets now both in English and Russian (full list)
+		+ Search box implementation
+		+ Updated installation guides
+		+ Data generator for Gatherer DB addon
+		+ Sharing option and Updater option
+		+ NPC Quotes implementation
+		+ French locales (serjevane 12.02.2013)
+		+ French maps (serjevane 12.02.2013)
+		+ French phrases (serjevane 12.02.2013)
+		+ Many fixes from angelShlesser (15.02.2013)
+-------------------------------------------------------------
+
+
+
+
+----------------- Changelog from 21.12.2012 ----------------- 
+Date: 21.12.2012
+FDB Version: 12.1.0
+Commit HASH: fb1c99efb463b3d3a3fa0ece70a7cdb85768e29d
+Changes: 
+		+ New Powered page to provide info about Tooltips
+		+ New phrases for powered page
+		+ Redisigned main page
+-------------------------------------------------------------
+
+
+
+
+----------------- Changelog from 20.12.2012 -----------------
+Date: 20.12.2012
+FDB Version: 12.0.2
+Commit HASH: fb8db4fe12aecc44741b6695e1c1d3a01ef9aa7d
+Changes: 
+		+ Implemented version comparer
+		+ Few changes in newsbox.tpl
+		+ 2 new pics for Winterveil Event for news box on main page
+-------------------------------------------------------------
+
+
+
+
+----------------- Changelog from 20.12.2012 -----------------
+Date: 1738fdbf911c565a835582dc334a3d7ba2d31d5d
+FDB Version: 12.0.1
+Commit HASH: 1738fdbf911c565a835582dc334a3d7ba2d31d5d
+Changes:
+		+ Power.js finally fixed
+		+ Added newline for items tooltip
+-------------------------------------------------------------
+
+
+
+
+----------------- Changelog from 20.12.2012 -----------------
+Date: 20.12.2012
+FDB Version: 12.0.0
+Commit HASH: ee28ce0d178b65ad97b1498d4fbcdd06585a70bf
+Changes:
+		+ Implemented version checker
+		+ 2 new pics for events for newsbox on main page
+		+ config.php.in cleanup
+		+ New phrases for version checker
+-------------------------------------------------------------
+
+
+
+
+----------------- Changelog from TEMP -----------------
+Date:  
+FDB Version: 
+Commit HASH: 
+Changes: 
+-------------------------------------------------------------
