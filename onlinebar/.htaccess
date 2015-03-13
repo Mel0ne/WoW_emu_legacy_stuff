@@ -1,0 +1,4 @@
+RewriteEngine On
+# Тут необходимо прописать путь до папки с личным кабинетом относительно папки www || htdocs
+RewriteBase /onlinebar/
+RewriteRule  status.png banner.php?status [L,QSA]
