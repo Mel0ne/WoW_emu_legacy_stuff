@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SummonProperties" format="niiiii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="Group" type="uint32" key="0" />
+	<field id="2" count="1" name="FactionId" type="uint32" key="0" />
+	<field id="3" count="1" name="Title" type="uint32" key="0" />
+	<field id="4" count="1" name="Slot" type="uint32" key="0" />
+	<field id="5" count="1" name="Flags" type="uint32" key="0" />
+</file>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="FactionTemplate" format="niiiiiiiiiiiii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="faction" type="uint32" key="0" />
+	<field id="2" count="1" name="factionFlags" type="uint32" key="0" />
+	<field id="3" count="1" name="ourMask" type="uint32" key="0" />
+	<field id="4" count="1" name="friendlyMask" type="uint32" key="0" />
+	<field id="5" count="1" name="hostileMask" type="uint32" key="0" />
+	<field id="6" count="4" name="enemyFaction" type="uint32" key="0" />
+	<field id="10" count="4" name="friendFaction" type="uint32" key="0" />
+</file>

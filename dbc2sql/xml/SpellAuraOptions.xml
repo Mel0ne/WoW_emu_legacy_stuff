@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SpellAuraOptions" format="diiii">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="1" name="StackAmount" type="uint32" key="0" />
+	<field id="2" count="1" name="procChance" type="uint32" key="0" />
+	<field id="3" count="1" name="procCharges" type="uint32" key="0" />
+	<field id="4" count="1" name="procFlags" type="uint32" key="0" />
+</file>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="OverrideSpellData" format="niiiiiiiiiiix">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="10" name="Spells" type="uint32" key="0" />
+	<field id="11" count="1" name="flags" type="uint32" key="0" />
+	<field id="12" count="1" name="unk12" type="unknown" key="0" />
+</file>

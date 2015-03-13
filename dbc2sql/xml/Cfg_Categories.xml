@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="Cfg_Categories" format="iiiis">
+	<field id="0" count="1" name="catId" type="uint32" key="1" />
+	<field id="1" count="1" name="localeMask" type="uint32" key="0" />
+	<field id="2" count="1" name="charsetMask" type="uint32" key="0" />
+	<field id="3" count="1" name="isTournamentRealm" type="uint32" key="0" />
+	<field id="4" count="1" name="categoryName" type="string" key="0" />
+</file>

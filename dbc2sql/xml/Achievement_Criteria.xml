@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="Achievement_Criteria" format="niiiiiiiisiiiiixxiiiiii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="referredAchievement" type="uint32" key="0" />
+	<field id="2" count="1" name="requiredType" type="uint32" key="0" />
+	<field id="3" count="6" name="paramAchiev" type="uint32" key="0" />
+	<field id="9" count="1" name="name" type="string" key="0" />
+	<field id="10" count="1" name="completionFlag" type="uint32" key="0" />
+	<field id="11" count="1" name="timedCriteriaStartType" type="uint32" key="0" />
+	<field id="12" count="1" name="timedCriteriaMiscId" type="uint32" key="0" />
+	<field id="13" count="1" name="timeLimit" type="uint32" key="0" />
+	<field id="14" count="1" name="showOrder" type="uint32" key="0" />
+	<field id="15" count="1" name="unk15" type="unknown" key="0" />
+	<field id="16" count="1" name="unk16" type="unknown" key="0" />
+	<field id="17" count="3" name="moreRequirement" type="uint32" key="0" />
+	<field id="20" count="3" name="moreRequirementValue" type="uint32" key="0" />
+</file>

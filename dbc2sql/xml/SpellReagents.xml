@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SpellReagents" format="diiiiiiiiiiiiiiii">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="8" name="Reagent" type="uint32" key="0" />
+	<field id="9" count="8" name="ReagentCount" type="uint32" key="0" />
+</file>

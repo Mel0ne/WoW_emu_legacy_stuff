@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="BattlemasterList" format="niiiiiiiiiisiiiiiixx">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="8" name="mapId" type="uint32" key="0" />
+	<field id="9" count="1" name="type" type="uint32" key="0" />
+	<field id="10" count="1" name="canJoinAsGroup" type="uint32" key="0" />
+	<field id="11" count="1" name="name" type="string" key="0" />
+	<field id="12" count="1" name="maxGroupSize" type="uint32" key="0" />
+	<field id="13" count="1" name="HolIdayWorldStateId" type="uint32" key="0" />
+	<field id="14" count="1" name="minLevel" type="uint32" key="0" />
+	<field id="15" count="1" name="maxLevel" type="uint32" key="0" />
+	<field id="16" count="1" name="maxGroupSizeRated" type="uint32" key="0" />
+	<field id="17" count="1" name="maxPlayers" type="uint32" key="0" />
+	<field id="18" count="1" name="unk18" type="unknown" key="0" />
+	<field id="19" count="1" name="unk19" type="unknown" key="0" />
+</file>

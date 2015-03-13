@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SpellItemEnchantment" format="niiiiiiixxxiiisiiiiiixx">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="charges" type="uint32" key="0" />
+	<field id="2" count="3" name="effectArg" type="uint32" key="0" />
+	<field id="5" count="1" name="unk5" type="uint32" key="0" />
+	<field id="6" count="1" name="unk6" type="uint32" key="0" />
+	<field id="7" count="1" name="unk7" type="uint32" key="0" />
+	<field id="8" count="1" name="unk8" type="unknown" key="0" />
+	<field id="9" count="1" name="unk9" type="unknown" key="0" />
+	<field id="10" count="1" name="unk10" type="unknown" key="0" />
+	<field id="11" count="1" name="unk11" type="uint32" key="0" />
+	<field id="12" count="1" name="unk12" type="uint32" key="0" />
+	<field id="13" count="1" name="unk13" type="uint32" key="0" />
+	<field id="14" count="1" name="unk14" type="string" key="0" />
+	<field id="15" count="1" name="itemVisual" type="uint32" key="0" />
+	<field id="16" count="1" name="flags" type="uint32" key="0" />
+	<field id="17" count="1" name="GemID" type="uint32" key="0" />
+	<field id="18" count="1" name="EnchantmentCondition" type="uint32" key="0" />
+	<field id="19" count="1" name="requiredSkill" type="uint32" key="0" />
+	<field id="20" count="1" name="requiredSkillValue" type="uint32" key="0" />
+	<field id="21" count="1" name="unk21" type="unknown" key="0" />
+	<field id="22" count="1" name="unk22" type="unknown" key="0" />
+</file>

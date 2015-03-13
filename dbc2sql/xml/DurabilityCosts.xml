@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="DurabilityCosts" format="niiiiiiiiiiiiiiiiiiiiiiiiiiiii">
+	<field id="0" count="1" name="Itemlvl" type="uint32" key="0" />
+	<field id="1" count="29" name="multiplier" type="uint32" key="0" />
+</file>

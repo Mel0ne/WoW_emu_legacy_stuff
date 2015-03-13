@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="CreatureSpellData" format="niiiiiiii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="4" name="spellId" type="uint32" key="0" />
+	<field id="5" count="4" name="availability" type="uint32" key="0" />
+</file>

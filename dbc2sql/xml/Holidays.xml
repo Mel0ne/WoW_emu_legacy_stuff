@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="Holidays" format="niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="10" name="duration" type="uint32" key="0" />
+	<field id="11" count="26" name="date" type="uint32" key="0" />
+	<field id="37" count="1" name="region" type="uint32" key="0" />
+	<field id="38" count="1" name="looping" type="uint32" key="0" />
+	<field id="39" count="10" name="calendarFlags" type="uint32" key="0" />
+	<field id="49" count="1" name="holIdayNameId" type="uint32" key="0" />
+	<field id="50" count="1" name="holIdayDescriptionId" type="uint32" key="0" />
+	<field id="51" count="1" name="textureFilename" type="string" key="0" />
+	<field id="52" count="1" name="priority" type="uint32" key="0" />
+	<field id="53" count="1" name="calendarFilterType" type="uint32" key="0" />
+	<field id="54" count="1" name="flags" type="uint32" key="0" />
+</file>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="Lock" format="niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="8" name="Type" type="uint32" key="0" />
+	<field id="9" count="8" name="Index" type="uint32" key="0" />
+	<field id="17" count="8" name="Skill" type="uint32" key="0" />
+	<field id="25" count="8" name="Action" type="uint32" key="0" />
+</file>

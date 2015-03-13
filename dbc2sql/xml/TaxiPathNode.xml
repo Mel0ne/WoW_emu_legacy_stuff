@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="TaxiPathNode" format="diiifffiiii">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="1" name="path" type="uint32" key="0" />
+	<field id="2" count="1" name="index" type="uint32" key="0" />
+	<field id="3" count="1" name="mapid" type="uint32" key="0" />
+	<field id="4" count="1" name="x" type="float" key="0" />
+	<field id="5" count="1" name="y" type="float" key="0" />
+	<field id="6" count="1" name="z" type="float" key="0" />
+	<field id="7" count="1" name="actionFlag" type="uint32" key="0" />
+	<field id="8" count="1" name="delay" type="uint32" key="0" />
+	<field id="9" count="1" name="arrivalEventID" type="uint32" key="0" />
+	<field id="10" count="1" name="departureEventID" type="uint32" key="0" />
+</file>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<file name="CharHairTextures" format="xxxxxxxx">
+	<field id="0" count="1" name="unk0" type="unknown" key="0" />
+	<field id="1" count="1" name="unk1" type="unknown" key="0" />
+	<field id="2" count="1" name="unk2" type="unknown" key="0" />
+	<field id="3" count="1" name="unk3" type="unknown" key="0" />
+	<field id="4" count="1" name="unk4" type="unknown" key="0" />
+	<field id="5" count="1" name="unk5" type="unknown" key="0" />
+	<field id="6" count="1" name="unk6" type="unknown" key="0" />
+	<field id="7" count="1" name="unk7" type="unknown" key="0" />
+</file>

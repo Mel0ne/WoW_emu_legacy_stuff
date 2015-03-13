@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SpellScaling" format="diiiiffffffffffi">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="1" name="castTimeMin" type="uint32" key="0" />
+	<field id="2" count="1" name="castTimeMax" type="uint32" key="0" />
+	<field id="3" count="1" name="castScalingMaxLevel" type="uint32" key="0" />
+	<field id="4" count="1" name="playerClass" type="uint32" key="0" />
+	<field id="5" count="3" name="coeff1" type="float" key="0" />
+	<field id="8" count="3" name="coeff2" type="float" key="0" />
+	<field id="11" count="3" name="coeff3" type="float" key="0" />
+	<field id="14" count="1" name="unkMult" type="float" key="0" />
+	<field id="15" count="1" name="unkLevel" type="uint32" key="0" />
+</file>

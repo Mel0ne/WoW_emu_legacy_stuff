@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SpellItemEnchantmentCondition" format="nbbbbbiiiiibbbbbbbbbbiiiiibbbbb">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="5" name="LTOperandType" type="uint8" key="0" />
+	<field id="6" count="5" name="LTOperand" type="uint32" key="0" />
+	<field id="11" count="5" name="Comparator" type="uint8" key="0" />
+	<field id="16" count="1" name="unk16" type="uint8" key="0" />
+	<field id="17" count="1" name="unk17" type="uint8" key="0" />
+	<field id="18" count="1" name="unk18" type="uint8" key="0" />
+	<field id="19" count="1" name="unk19" type="uint8" key="0" />
+	<field id="20" count="1" name="unk20" type="uint8" key="0" />
+	<field id="21" count="5" name="Value" type="uint32" key="0" />
+	<field id="26" count="1" name="unk26" type="uint8" key="0" />
+	<field id="27" count="1" name="unk27" type="uint8" key="0" />
+	<field id="28" count="1" name="unk28" type="uint8" key="0" />
+	<field id="29" count="1" name="unk29" type="uint8" key="0" />
+	<field id="30" count="1" name="unk30" type="uint8" key="0" />
+</file>

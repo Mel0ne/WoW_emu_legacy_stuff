@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="PvpDifficulty" format="diiiii">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="1" name="mapId" type="uint32" key="0" />
+	<field id="2" count="1" name="bracketId" type="uint32" key="0" />
+	<field id="3" count="1" name="minLevel" type="uint32" key="0" />
+	<field id="4" count="1" name="maxLevel" type="uint32" key="0" />
+	<field id="5" count="1" name="difficulty" type="uint32" key="0" />
+</file>

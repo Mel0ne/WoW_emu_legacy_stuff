@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="ItemArmorTotal" format="niffff">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="id2" type="uint32" key="0" />
+	<field id="2" count="4" name="Value" type="float" key="0" />
+</file>

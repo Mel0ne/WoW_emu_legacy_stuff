@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="AreaTrigger" format="nifffxxxfffff">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="mapId" type="uint32" key="0" />
+	<field id="2" count="1" name="x" type="float" key="0" />
+	<field id="3" count="1" name="y" type="float" key="0" />
+	<field id="4" count="1" name="z" type="float" key="0" />
+	<field id="5" count="1" name="unk5" type="unknown" key="0" />
+	<field id="6" count="1" name="unk6" type="unknown" key="0" />
+	<field id="7" count="1" name="unk7" type="unknown" key="0" />
+	<field id="8" count="1" name="radius" type="float" key="0" />
+	<field id="9" count="1" name="box_length" type="float" key="0" />
+	<field id="10" count="1" name="box_wIdth" type="float" key="0" />
+	<field id="11" count="1" name="box_heigh" type="float" key="0" />
+	<field id="12" count="1" name="box_yaw" type="float" key="0" />
+</file>

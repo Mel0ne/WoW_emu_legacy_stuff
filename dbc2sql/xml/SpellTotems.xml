@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SpellTotems" format="diiii">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="2" name="TotemCategory" type="uint32" key="0" />
+	<field id="3" count="2" name="Totem" type="uint32" key="0" />
+</file>

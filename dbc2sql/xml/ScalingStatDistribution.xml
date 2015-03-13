@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="ScalingStatDistribution" format="niiiiiiiiiiiiiiiiiiiixi">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="10" name="StatMod" type="uint32" key="0" />
+	<field id="11" count="10" name="Modifier" type="uint32" key="0" />
+	<field id="21" count="1" name="unk21" type="unknown" key="0" />
+	<field id="22" count="1" name="MaxLevel" type="uint32" key="0" />
+</file>

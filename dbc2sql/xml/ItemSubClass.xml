@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="ItemSubClass" format="niixxxxxxxxss">
+	<field id="0" count="1" name="unk0" type="uint32" key="0" />
+	<field id="1" count="1" name="unk1" type="uint32" key="0" />
+	<field id="2" count="1" name="unk2" type="uint32" key="0" />
+	<field id="3" count="1" name="unk3" type="unknown" key="0" />
+	<field id="4" count="1" name="unk4" type="unknown" key="0" />
+	<field id="5" count="1" name="unk5" type="unknown" key="0" />
+	<field id="6" count="1" name="unk6" type="unknown" key="0" />
+	<field id="7" count="1" name="unk7" type="unknown" key="0" />
+	<field id="8" count="1" name="unk8" type="unknown" key="0" />
+	<field id="9" count="1" name="unk9" type="unknown" key="0" />
+	<field id="10" count="1" name="unk10" type="unknown" key="0" />
+	<field id="11" count="1" name="unk11" type="string" key="0" />
+	<field id="12" count="1" name="unk12" type="string" key="0" />
+</file>

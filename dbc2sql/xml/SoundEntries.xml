@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SoundEntries" format="nisssssssssssiiiiiiiiiisfxxxxxxxxx">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="Type" type="uint32" key="0" />
+	<field id="2" count="1" name="InternalName" type="string" key="0" />
+	<field id="3" count="10" name="FileName" type="string" key="0" />
+	<field id="13" count="10" name="Freq" type="uint32" key="0" />
+	<field id="23" count="1" name="DirectoryBase" type="string" key="0" />
+	<field id="24" count="1" name="volumeFloat" type="float" key="0" />
+	<field id="25" count="1" name="unk25" type="unknown" key="0" />
+	<field id="26" count="1" name="unk26" type="unknown" key="0" />
+	<field id="27" count="1" name="unk27" type="unknown" key="0" />
+	<field id="28" count="1" name="unk28" type="unknown" key="0" />
+	<field id="29" count="1" name="unk29" type="unknown" key="0" />
+	<field id="30" count="1" name="unk30" type="unknown" key="0" />
+	<field id="31" count="1" name="unk31" type="unknown" key="0" />
+	<field id="32" count="1" name="unk32" type="unknown" key="0" />
+	<field id="33" count="1" name="unk33" type="unknown" key="0" />
+</file>

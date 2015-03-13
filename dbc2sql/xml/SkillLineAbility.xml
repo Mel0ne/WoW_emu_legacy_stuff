@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SkillLineAbility" format="niiiiiiiiiiixx">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="skillId" type="uint32" key="0" />
+	<field id="2" count="1" name="spellId" type="uint32" key="0" />
+	<field id="3" count="1" name="racemask" type="uint32" key="0" />
+	<field id="4" count="1" name="classmask" type="uint32" key="0" />
+	<field id="5" count="1" name="racemaskNot" type="uint32" key="0" />
+	<field id="6" count="1" name="classmaskNot" type="uint32" key="0" />
+	<field id="7" count="1" name="req_skill_value" type="uint32" key="0" />
+	<field id="8" count="1" name="forward_spellId" type="uint32" key="0" />
+	<field id="9" count="1" name="learnOnGetSkill" type="uint32" key="0" />
+	<field id="10" count="1" name="max_value" type="uint32" key="0" />
+	<field id="11" count="1" name="min_value" type="uint32" key="0" />
+	<field id="12" count="1" name="unk12" type="unknown" key="0" />
+	<field id="13" count="1" name="unk13" type="unknown" key="0" />
+</file>

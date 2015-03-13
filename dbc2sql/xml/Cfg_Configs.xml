@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="Cfg_Configs" format="iiiix">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="Type" type="uint32" key="0" />
+	<field id="2" count="1" name="isPvp" type="uint32" key="0" />
+	<field id="3" count="1" name="isRp" type="uint32" key="0" />
+	<field id="4" count="1" name="unk4" type="unknown" key="0" />
+</file>

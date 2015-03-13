@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="QuestXP" format="niiiiiiiiii">
+	<field id="0" count="1" name="questLevel" type="uint32" key="0" />
+	<field id="1" count="10" name="xpIndex" type="uint32" key="0" />
+</file>

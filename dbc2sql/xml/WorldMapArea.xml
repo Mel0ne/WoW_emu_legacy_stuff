@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="WorldMapArea" format="iinsffffiiix">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="map_id" type="uint32" key="0" />
+	<field id="2" count="1" name="area_id" type="uint32" key="0" />
+	<field id="3" count="1" name="internalName" type="string" key="0" />
+	<field id="4" count="1" name="locLeft" type="float" key="0" />
+	<field id="5" count="1" name="locRight" type="float" key="0" />
+	<field id="6" count="1" name="locTop" type="float" key="0" />
+	<field id="7" count="1" name="locBottom" type="float" key="0" />
+	<field id="8" count="1" name="virtualMapId" type="uint32" key="0" />
+	<field id="9" count="1" name="dungeonMapId" type="uint32" key="0" />
+	<field id="10" count="1" name="someMapID" type="uint32" key="0" />
+	<field id="11" count="1" name="unk11" type="unknown" key="0" />
+</file>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="SpellEquippedItems" format="diii">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="1" name=" EquippedItemClass" type="uint32" key="0" />
+	<field id="2" count="1" name=" EquippedItemInventoryTypeMask" type="uint32" key="0" />
+	<field id="3" count="1" name=" EquippedItemSubClassMask" type="uint32" key="0" />
+</file>

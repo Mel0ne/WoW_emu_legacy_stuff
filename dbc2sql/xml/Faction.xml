@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="Faction" format="niiiiiiiiiiiiiiiiiiffiissx">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="reputationListId" type="uint32" key="0" />
+	<field id="2" count="4" name="BaseRepRaceMask" type="uint32" key="0" />
+	<field id="6" count="4" name="BaseRepClassMask" type="uint32" key="0" />
+	<field id="10" count="4" name="BaseRepValue" type="uint32" key="0" />
+	<field id="14" count="4" name="ReputationFlags" type="uint32" key="0" />
+	<field id="18" count="1" name="team" type="uint32" key="0" />
+	<field id="19" count="1" name="n" type="float" key="0" />
+	<field id="20" count="1" name="t" type="float" key="0" />
+	<field id="21" count="1" name="spilloverMaxRankIn" type="uint32" key="0" />
+	<field id="22" count="1" name="spilloverRank" type="uint32" key="0" />
+	<field id="23" count="1" name="name" type="string" key="0" />
+	<field id="24" count="1" name="description" type="string" key="0" />
+	<field id="25" count="1" name="unk25" type="unknown" key="0" />
+</file>

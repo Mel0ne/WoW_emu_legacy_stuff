@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="CharStartOutfit" format="niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiixXXXX">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="RaceClassGender" type="uint32" key="0" />
+	<field id="2" count="24" name="ItemId" type="uint32" key="0" />
+	<field id="26" count="24" name="ItemDisplayId" type="uint32" key="0" />
+	<field id="50" count="24" name="ItemInventorySlot" type="uint32" key="0" />
+	<field id="74" count="1" name="unk74" type="unknown" key="0" />
+	<field id="75" count="1" name="unk75" type="unknown" key="0" />
+	<field id="76" count="1" name="unk76" type="unknown" key="0" />
+	<field id="77" count="1" name="unk77" type="unknown" key="0" />
+	<field id="78" count="1" name="unk78" type="unknown" key="0" />
+</file>

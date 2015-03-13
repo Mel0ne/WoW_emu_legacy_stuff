@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="ItemSet" format="dsiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="1" name="name" type="string" key="0" />
+	<field id="2" count="17" name="itemId" type="uint32" key="0" />
+	<field id="19" count="8" name="spells" type="uint32" key="0" />
+	<field id="27" count="8" name="items_to_triggerspell" type="uint32" key="0" />
+	<field id="35" count="1" name="required_skill_Id" type="uint32" key="0" />
+	<field id="36" count="1" name="required_skill_value" type="uint32" key="0" />
+</file>

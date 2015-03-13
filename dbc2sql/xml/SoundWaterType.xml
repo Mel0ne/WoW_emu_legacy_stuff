@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<file name="SoundWaterType" format="xxxx">
+	<field id="0" count="1" name="unk0" type="unknown" key="0" />
+	<field id="1" count="1" name="unk1" type="unknown" key="0" />
+	<field id="2" count="1" name="unk2" type="unknown" key="0" />
+	<field id="3" count="1" name="unk3" type="unknown" key="0" />
+</file>

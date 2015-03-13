@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="WorldMapOverlay" format="niiiiisxxxxxxxx">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="worldMapAreaId" type="uint32" key="0" />
+	<field id="2" count="4" name="areatableID" type="uint32" key="0" />
+	<field id="6" count="1" name="textureName" type="string" key="0" />
+	<field id="7" count="1" name="unk7" type="unknown" key="0" />
+	<field id="8" count="1" name="unk8" type="unknown" key="0" />
+	<field id="9" count="1" name="unk9" type="unknown" key="0" />
+	<field id="10" count="1" name="unk10" type="unknown" key="0" />
+	<field id="11" count="1" name="unk11" type="unknown" key="0" />
+	<field id="12" count="1" name="unk12" type="unknown" key="0" />
+	<field id="13" count="1" name="unk13" type="unknown" key="0" />
+	<field id="14" count="1" name="unk14" type="unknown" key="0" />
+</file>

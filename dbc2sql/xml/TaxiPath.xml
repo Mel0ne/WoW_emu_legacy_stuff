@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="TaxiPath" format="niii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="from" type="uint32" key="0" />
+	<field id="2" count="1" name="to" type="uint32" key="0" />
+	<field id="3" count="1" name="price" type="uint32" key="0" />
+</file>

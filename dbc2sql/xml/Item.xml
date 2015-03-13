@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="Item" format="niiiiiii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="Class" type="uint32" key="0" />
+	<field id="2" count="1" name="SubClass" type="uint32" key="0" />
+	<field id="3" count="1" name="unk3" type="uint32" key="0" />
+	<field id="4" count="1" name="Material" type="uint32" key="0" />
+	<field id="5" count="1" name="DisplayId" type="uint32" key="0" />
+	<field id="6" count="1" name="InventoryType" type="uint32" key="0" />
+	<field id="7" count="1" name="Sheath" type="uint32" key="0" />
+</file>

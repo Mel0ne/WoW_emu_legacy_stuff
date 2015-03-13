@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="MapDifficulty" format="diisiis">
+	<field id="0" count="1" name="id" type="sorted" key="1" />
+	<field id="1" count="1" name="MapId" type="uint32" key="0" />
+	<field id="2" count="1" name="Difficulty" type="uint32" key="0" />
+	<field id="3" count="1" name="areaTriggerText" type="string" key="0" />
+	<field id="4" count="1" name="resetTime" type="uint32" key="0" />
+	<field id="5" count="1" name="maxPlayers" type="uint32" key="0" />
+	<field id="6" count="1" name="difficultyString" type="string" key="0" />
+</file>

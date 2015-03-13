@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="ItemExtendedCost" format="niiiiiiiiiiiiiixiiiiiiiiiiiiiii">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="reqhonorpoints" type="uint32" key="0" />
+	<field id="2" count="1" name="reqarenapoints" type="uint32" key="0" />
+	<field id="3" count="1" name="reqarenaslot" type="uint32" key="0" />
+	<field id="4" count="1" name="unk4" type="uint32" key="0" />
+	<field id="5" count="4" name="reqitem" type="uint32" key="0" />
+	<field id="9" count="4" name="reqitemcount" type="uint32" key="0" />
+	<field id="13" count="1" name="unk13" type="uint32" key="0" />
+	<field id="14" count="1" name="reqpersonalarenarating" type="uint32" key="0" />
+	<field id="15" count="1" name="unk15" type="unknown" key="0" />
+	<field id="16" count="5" name="someId" type="uint32" key="0" />
+	<field id="21" count="5" name="someCount" type="uint32" key="0" />
+	<field id="26" count="5" name="something" type="uint32" key="0" />
+</file>

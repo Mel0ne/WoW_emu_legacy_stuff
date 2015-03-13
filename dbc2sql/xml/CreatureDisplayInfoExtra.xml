@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="CreatureDisplayInfoExtra" format="niiiiiiiiiiiiiiiiiiis">
+	<field id="0" count="1" name="DisplayExtraId" type="uint32" key="1" />
+	<field id="1" count="1" name="Race" type="uint32" key="0" />
+	<field id="2" count="1" name="Gender" type="uint32" key="0" />
+	<field id="3" count="1" name="SkinColor" type="uint32" key="0" />
+	<field id="4" count="1" name="FaceType" type="uint32" key="0" />
+	<field id="5" count="1" name="HairType" type="uint32" key="0" />
+	<field id="6" count="1" name="HairStyle" type="uint32" key="0" />
+	<field id="7" count="1" name="BeardStyle" type="uint32" key="0" />
+	<field id="8" count="11" name="Equipment" type="uint32" key="0" />
+	<field id="19" count="1" name="CanEquip" type="uint32" key="0" />
+	<field id="20" count="1" name="bakeName" type="string" key="0" />
+</file>

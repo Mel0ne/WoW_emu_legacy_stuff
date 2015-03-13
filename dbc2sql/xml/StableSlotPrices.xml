@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<file name="StableSlotPrices" format="ni">
+	<field id="0" count="1" name="Slot" type="uint32" key="0" />
+	<field id="1" count="1" name="Price" type="uint32" key="0" />
+</file>

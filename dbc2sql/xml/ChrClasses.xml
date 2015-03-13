@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="ChrClasses" format="nixssssiiiixxx">
+	<field id="0" count="1" name="ClassId" type="uint32" key="1" />
+	<field id="1" count="1" name="powerType" type="uint32" key="0" />
+	<field id="2" count="1" name="unk2" type="unknown" key="0" />
+	<field id="3" count="1" name="name" type="string" key="0" />
+	<field id="4" count="1" name="nameFemale" type="string" key="0" />
+	<field id="5" count="1" name="nameNeutralGender" type="string" key="0" />
+	<field id="6" count="1" name="capitalizedName" type="string" key="0" />
+	<field id="7" count="1" name="spellfamily" type="uint32" key="0" />
+	<field id="8" count="1" name="flags" type="uint32" key="0" />
+	<field id="9" count="1" name="CinematicSequence" type="uint32" key="0" />
+	<field id="10" count="1" name="expansion" type="uint32" key="0" />
+	<field id="11" count="1" name="unk11" type="unknown" key="0" />
+	<field id="12" count="1" name="unk12" type="unknown" key="0" />
+	<field id="13" count="1" name="unk13" type="unknown" key="0" />
+</file>

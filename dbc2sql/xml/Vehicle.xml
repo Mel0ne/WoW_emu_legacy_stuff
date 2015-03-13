@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file name="Vehicle" format="niffffiiiiiiiifffffffffffffffssssfifixxx">
+	<field id="0" count="1" name="id" type="uint32" key="1" />
+	<field id="1" count="1" name="m_flags" type="uint32" key="0" />
+	<field id="2" count="1" name="m_turnSpeed" type="float" key="0" />
+	<field id="3" count="1" name="m_pitchSpeed" type="float" key="0" />
+	<field id="4" count="1" name="m_pitchMin" type="float" key="0" />
+	<field id="5" count="1" name="m_pitchMax" type="float" key="0" />
+	<field id="6" count="8" name="m_seatID" type="uint32" key="0" />
+	<field id="14" count="1" name="m_mouseLookOffsetPitch" type="float" key="0" />
+	<field id="15" count="1" name="m_cameraFadeDistScalarMin" type="float" key="0" />
+	<field id="16" count="1" name="m_cameraFadeDistScalarMax" type="float" key="0" />
+	<field id="17" count="1" name="m_cameraPitchOffset" type="float" key="0" />
+	<field id="18" count="1" name="m_facingLimitRight" type="float" key="0" />
+	<field id="19" count="1" name="m_facingLimitLeft" type="float" key="0" />
+	<field id="20" count="1" name="m_msslTrgtTurnLingering" type="float" key="0" />
+	<field id="21" count="1" name="m_msslTrgtPitchLingering" type="float" key="0" />
+	<field id="22" count="1" name="m_msslTrgtMouseLingering" type="float" key="0" />
+	<field id="23" count="1" name="m_msslTrgtEndOpacity" type="float" key="0" />
+	<field id="24" count="1" name="m_msslTrgtArcSpeed" type="float" key="0" />
+	<field id="25" count="1" name="m_msslTrgtArcRepeat" type="float" key="0" />
+	<field id="26" count="1" name="m_msslTrgtArcWidth" type="float" key="0" />
+	<field id="27" count="2" name="m_msslTrgtImpactRadius" type="float" key="0" />
+	<field id="29" count="1" name="m_msslTrgtArcTexture" type="string" key="0" />
+	<field id="30" count="1" name="m_msslTrgtImpactTexture" type="string" key="0" />
+	<field id="31" count="2" name="m_msslTrgtImpactModel" type="string" key="0" />
+	<field id="33" count="1" name="m_cameraYawOffset" type="float" key="0" />
+	<field id="34" count="1" name="m_uiLocomotionType" type="uint32" key="0" />
+	<field id="35" count="1" name="m_msslTrgtImpactTexRadius" type="float" key="0" />
+	<field id="36" count="1" name="m_uiSeatIndicatorType" type="uint32" key="0" />
+	<field id="37" count="1" name="unk37" type="unknown" key="0" />
+	<field id="38" count="1" name="unk38" type="unknown" key="0" />
+	<field id="39" count="1" name="unk39" type="unknown" key="0" />
+</file>

@@ -1,0 +1,9 @@
+body 		{ background: #e0e4d6; color: #000000; }
+fieldset		{ padding: 5px 5px 5px 5px; }
+div.loading 	{ background: url(images/loader.gif); width: 16px; height: 16px;float: left;margin-top:3px;margin-right: 5px;  }
+div.updated	{ background: url(images/update.gif); width: 16px; height: 16px;float: left;margin-top:3px;margin-right: 5px;  }
+div.skiped	{ background: url(images/skip.gif); width: 16px; height: 16px;float: left;margin-top:3px;margin-right: 5px;  }
+div.conflict	{ background: url(images/conflict.gif); width: 16px; height: 16px;float: left;margin-top:3px;margin-right: 5px;  }
+
+.even	{ background-color: #e0e4d6; }
+.odd	{ background-color: #ccd0c7; }
