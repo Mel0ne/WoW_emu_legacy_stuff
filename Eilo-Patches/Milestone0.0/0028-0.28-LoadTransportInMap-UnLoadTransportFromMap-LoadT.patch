@@ -1,0 +1,179 @@
+From 96bf5f8749e5c3650ad75f9145ff296bfa6d8117 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 17:15:48 -0500
+Subject: [PATCH 28/29] =?UTF-8?q?0.28=20LoadTransportInMap,=20UnLoadTranspor?=
+ =?UTF-8?q?tFromMap,=20LoadTransportForPlayers,=20UnLoadTransportForPlayers=20?=
+ =?UTF-8?q?a=C3=B1adidas=20al=20nucleo?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Entities/Transport/Transport.cpp |  127 ++++++++++++++++++++++
+ src/server/game/Maps/MapManager.h                |    7 ++
+ 2 files changed, 134 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Entities/Transport/Transport.cpp b/src/server/game/Entities/Transport/Transport.cpp
+index 8483afa..fe8c3a0 100755
+--- a/src/server/game/Entities/Transport/Transport.cpp
++++ b/src/server/game/Entities/Transport/Transport.cpp
+@@ -239,6 +239,133 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
+     return true;
+ }
+ 
++Transport* MapManager::LoadTransportInMap(Map* instance, uint32 goEntry, uint32 period)
++{
++    const GameObjectTemplate* goInfo = sObjectMgr->GetGameObjectTemplate(goEntry);
++
++    if (!goInfo)
++    {
++        sLog->outErrorDb("Transport ID:%u, will not be loaded, gameobject_template missing", goEntry);
++        return NULL;
++    }
++
++    if (goInfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
++    {
++        sLog->outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template type wrong", goEntry, goInfo->name.c_str());
++        return NULL;
++    }
++
++    Transport* t = new Transport(period, goInfo->ScriptId);
++    std::set<uint32> mapsUsed;
++    if (!t->GenerateWaypoints(goInfo->moTransport.taxiPathId, mapsUsed))
++    {
++        sLog->outErrorDb("Transport (path id %u) path size = 0. Transport ignored, check DBC files or the gameobject's data0 field.", goInfo->moTransport.taxiPathId);
++        delete t;
++        return NULL;
++    }
++    uint32 transportLowGuid = sObjectMgr->GenerateLowGuid(HIGHGUID_MO_TRANSPORT);
++
++    if (!t->Create(transportLowGuid, goEntry, t->m_WayPoints[0].mapid, t->m_WayPoints[0].x, t->m_WayPoints[0].y, t->m_WayPoints[0].z-10, 0.0f, 0, 0))
++    {
++        delete t;
++        return NULL;
++    }
++
++    m_Transports.insert(t);
++    m_TransportsByInstanceIdMap[instance->GetInstanceId()].insert(t);
++    t->SetMap(instance);
++    t->AddToWorld();
++
++    // Spameando la nave quieta
++    t->BuildWaitMovePacket(instance);
++
++    sLog->outDetail("Creando el transporte <---");
++
++    return t;
++}
++
++void MapManager::UnLoadTransportFromMap(Transport* t)
++{
++    Map* map = t->GetMap();
++
++    for (Transport::CreatureSet::iterator itr = t->m_NPCPassengerSet.begin(); itr != t->m_NPCPassengerSet.end();)
++    {
++        if (Creature* npc = *itr)
++        {
++            npc->SetTransport(NULL);
++            npc->setActive(false);
++            npc->RemoveFromWorld();
++        }
++        ++itr;
++    }
++
++    UpdateData transData;
++    t->BuildOutOfRangeUpdateBlock(&transData);
++    WorldPacket out_packet;
++    transData.BuildPacket(&out_packet);
++
++    for (Map::PlayerList::const_iterator itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
++        if (t != itr->getSource()->GetTransport())
++            itr->getSource()->SendDirectMessage(&out_packet);
++
++    t->m_NPCPassengerSet.clear();
++    m_TransportsByInstanceIdMap[t->GetInstanceId()].erase(t);
++    m_Transports.erase(t);
++    t->m_WayPoints.clear();
++    t->RemoveFromWorld();
++
++    sLog->outDetail("Quitando el transporte --->");
++}
++
++void MapManager::LoadTransportForPlayers(Player* player)
++{
++    MapManager::TransportMap& tmap = sMapMgr->m_TransportsByInstanceIdMap;
++
++    UpdateData transData;
++
++    MapManager::TransportSet& tset = tmap[player->GetInstanceId()];
++
++    for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
++    {
++        (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
++        sLog->outDetail("Cargando el transporte <---> Aqui hasta el de TransportSet");
++    }
++
++    WorldPacket packet;
++    transData.BuildPacket(&packet);
++    player->SendDirectMessage(&packet);
++}
++
++void MapManager::UnLoadTransportForPlayers(Player* player)
++{
++    MapManager::TransportMap& tmap = sMapMgr->m_TransportsByInstanceIdMap;
++ 
++    UpdateData transData;
++
++    MapManager::TransportSet& tset = tmap[player->GetInstanceId()];
++
++    for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
++    {
++        for (Transport::CreatureSet::iterator itr = (*i)->m_NPCPassengerSet.begin(); itr != (*i)->m_NPCPassengerSet.end();)
++        {
++            if (Creature* npc = *itr)
++            {
++                npc->SetTransport(NULL);
++                npc->setActive(false);
++                npc->RemoveFromWorld();
++            }
++            ++itr;
++        }
++
++        (*i)->BuildOutOfRangeUpdateBlock(&transData);
++        sLog->outDetail("Descargando el transporte >---< Aqui desde el de TransportSet");
++    }
++
++    WorldPacket packet;
++    transData.BuildPacket(&packet);
++    player->SendDirectMessage(&packet);
++}
++
+ struct keyFrame
+ {
+     explicit keyFrame(TaxiPathNodeEntry const& _node) : node(&_node),
+diff --git a/src/server/game/Maps/MapManager.h b/src/server/game/Maps/MapManager.h
+index 1049325..df2a0e9 100755
+--- a/src/server/game/Maps/MapManager.h
++++ b/src/server/game/Maps/MapManager.h
+@@ -124,11 +124,18 @@ class MapManager
+         void LoadTransports();
+         void LoadTransportNPCs();
+ 
++        //Load transport to instance
++        Transport* LoadTransportInMap(Map* instance, uint32 goEntry, uint32 period);
++        void UnLoadTransportFromMap(Transport* t);
++        void LoadTransportForPlayers(Player* player);
++        void UnLoadTransportForPlayers(Player* player);
++
+         typedef std::set<Transport*> TransportSet;
+         TransportSet m_Transports;
+ 
+         typedef std::map<uint32, TransportSet> TransportMap;
+         TransportMap m_TransportsByMap;
++        TransportMap m_TransportsByInstanceIdMap;
+ 
+         bool CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck = false);
+         void InitializeVisibilityDistanceInfo();
+-- 
+1.7.8.msysgit.0
+

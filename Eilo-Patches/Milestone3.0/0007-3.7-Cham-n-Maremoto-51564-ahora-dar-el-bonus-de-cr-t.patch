@@ -1,0 +1,41 @@
+From a601e0c8338f1da812b6336b1374db1e6eeebc78 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sun, 11 Dec 2011 22:49:39 +0100
+Subject: [PATCH 07/22] =?UTF-8?q?3.7=20Cham=C3=A1n:=20Maremoto=20(51564)=20a?=
+ =?UTF-8?q?hora=20dar=C3=A1=20el=20bonus=20de=20cr=C3=ADtico=20correspondien?=
+ =?UTF-8?q?te?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Spells/Spell.cpp |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/server/game/Spells/Spell.cpp b/src/server/game/Spells/Spell.cpp
+index 0347c48..632f166 100755
+--- a/src/server/game/Spells/Spell.cpp
++++ b/src/server/game/Spells/Spell.cpp
+@@ -1293,9 +1293,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
+     // Do healing and triggers
+     if (m_healing > 0)
+     {
+-        bool crit = caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask);
+         uint32 addhealth = m_healing;
+-        if (crit)
++        if (target->crit)
+         {
+             procEx |= PROC_EX_CRITICAL_HIT;
+             addhealth = caster->SpellCriticalHealingBonus(m_spellInfo, addhealth, NULL);
+@@ -1307,7 +1306,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
+         if (canEffectTrigger && missInfo != SPELL_MISS_REFLECT)
+             caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, addhealth, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
+ 
+-        int32 gain = caster->HealBySpell(unitTarget, m_spellInfo, addhealth, crit);
++        int32 gain = caster->HealBySpell(unitTarget, m_spellInfo, addhealth, target->crit);
+         unitTarget->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, m_spellInfo);
+         m_healing = gain;
+     }
+-- 
+1.7.8.msysgit.0
+

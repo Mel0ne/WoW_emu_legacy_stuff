@@ -1,0 +1,32 @@
+From a58ce8f7b084fa42aadbce86fb6d506749d175ec Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 11:57:00 -0500
+Subject: [PATCH 30/65] 2.2.27 ICC: Rotface ajuste triggers
+
+---
+ .../2011_11_24_100_world_correcciones_icc.sql      |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
+
+diff --git a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+index 711b991..d10f7fa 100644
+--- a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
++++ b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+@@ -19,3 +19,14 @@ UPDATE `creature` SET `position_z` = 42.1 WHERE `guid`=200934;
+ -- Ajuste de velocidades para babosas de putricidio, amenorada la velocidad
+ -- Originalmente speed_walk=2
+ UPDATE `creature_template` SET `speed_walk`=0.68 WHERE `entry` IN (37697,38604,38758,38759);
++
++-- Icc triggers de Rotface
++-- Eliminado algunos Puddle Stalker(37013) que hacen que salga en el aire los charcos
++DELETE FROM `creature` WHERE `guid`=201602;
++DELETE FROM `creature` WHERE `guid`=201332;
++DELETE FROM `creature` WHERE `guid`=201651;
++DELETE FROM `creature` WHERE `guid`=201494;
++DELETE FROM `creature` WHERE `guid`=201600;
++DELETE FROM `creature` WHERE `guid`=201648;
++DELETE FROM `creature` WHERE `guid`=201441;
++DELETE FROM `creature` WHERE `guid`=200922;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

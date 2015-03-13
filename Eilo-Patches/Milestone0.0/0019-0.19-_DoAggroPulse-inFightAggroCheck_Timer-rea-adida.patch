@@ -1,0 +1,70 @@
+From ef73fb47d6a9a01910e615eaddf1d55cee0f9f58 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 15 Dec 2011 22:28:27 -0500
+Subject: [PATCH 19/29] =?UTF-8?q?0.19=20=5FDoAggroPulse,=20inFightAggroCheck?=
+ =?UTF-8?q?=5FTimer=20rea=C3=B1adidas?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/AI/ScriptedAI/ScriptedCreature.cpp |   14 ++++++++++++++
+ src/server/game/AI/ScriptedAI/ScriptedCreature.h   |    3 +++
+ 2 files changed, 17 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/AI/ScriptedAI/ScriptedCreature.cpp b/src/server/game/AI/ScriptedAI/ScriptedCreature.cpp
+index bd6c901..9a15029 100644
+--- a/src/server/game/AI/ScriptedAI/ScriptedCreature.cpp
++++ b/src/server/game/AI/ScriptedAI/ScriptedCreature.cpp
+@@ -487,6 +487,20 @@ void BossAI::_Reset()
+     summons.DespawnAll();
+     if (instance)
+         instance->SetBossState(_bossId, NOT_STARTED);
++
++    inFightAggroCheck_Timer = MAX_AGGRO_PULSE_TIMER;
++}
++
++void BossAI::_DoAggroPulse(const uint32 diff)
++{
++    if (inFightAggroCheck_Timer < diff)
++    {
++        if (me->getVictim() && me->getVictim()->ToPlayer())
++            DoAttackerGroupInCombat(me->getVictim()->ToPlayer());
++        inFightAggroCheck_Timer = MAX_AGGRO_PULSE_TIMER;
++    }
++    else
++        inFightAggroCheck_Timer -= diff;
+ }
+ 
+ void BossAI::_JustDied()
+diff --git a/src/server/game/AI/ScriptedAI/ScriptedCreature.h b/src/server/game/AI/ScriptedAI/ScriptedCreature.h
+index a01c993..c6f61a9 100644
+--- a/src/server/game/AI/ScriptedAI/ScriptedCreature.h
++++ b/src/server/game/AI/ScriptedAI/ScriptedCreature.h
+@@ -27,6 +27,7 @@
+ #define CAST_PLR(a)     (dynamic_cast<Player*>(a))
+ #define CAST_CRE(a)     (dynamic_cast<Creature*>(a))
+ #define CAST_AI(a, b)   (dynamic_cast<a*>(b))
++#define MAX_AGGRO_PULSE_TIMER            5000
+ 
+ class InstanceScript;
+ 
+@@ -255,6 +256,7 @@ class BossAI : public ScriptedAI
+         BossAI(Creature* creature, uint32 bossId);
+         virtual ~BossAI() {}
+ 
++        uint32 inFightAggroCheck_Timer;
+         InstanceScript* const instance;
+         BossBoundaryMap const* GetBoundary() const { return _boundary; }
+ 
+@@ -279,6 +281,7 @@ class BossAI : public ScriptedAI
+         void _EnterCombat();
+         void _JustDied();
+         void _JustReachedHome() { me->setActive(false); }
++        void _DoAggroPulse(const uint32 diff);
+ 
+         bool CheckInRoom()
+         {
+-- 
+1.7.8.msysgit.0
+

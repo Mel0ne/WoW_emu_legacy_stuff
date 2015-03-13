@@ -1,0 +1,27 @@
+From dffbbbd39fa3da5f4ac6d634ad807a78cfb13987 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 20:49:33 -0500
+Subject: [PATCH 18/22] 3.18 Cazador: Distraer (1725) ahora se interrumpen
+ efectos de comer beber
+
+---
+ src/server/game/Spells/SpellEffects.cpp |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
+index 6a4a692..475fe04 100755
+--- a/src/server/game/Spells/SpellEffects.cpp
++++ b/src/server/game/Spells/SpellEffects.cpp
+@@ -3388,6 +3388,9 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
+     unitTarget->ClearUnitState(UNIT_STATE_MOVING);
+ 
+     if (unitTarget->GetTypeId() == TYPEID_UNIT)
++        // For players just turn them & make them stand up
++        if (unitTarget->ToPlayer()->IsSitState())
++            unitTarget->ToPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
+         unitTarget->GetMotionMaster()->MoveDistract(damage * IN_MILLISECONDS);
+ }
+ 
+-- 
+1.7.8.msysgit.0
+

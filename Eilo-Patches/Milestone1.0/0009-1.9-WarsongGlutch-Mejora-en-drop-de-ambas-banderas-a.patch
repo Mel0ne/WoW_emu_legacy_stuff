@@ -1,0 +1,35 @@
+From ea542fcc7889330ff3b17e8ccab45a986f12247a Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 17:56:42 -0500
+Subject: [PATCH 09/26] 1.9 WarsongGlutch: Mejora en drop de ambas banderas a
+ cercania
+
+---
+ .../game/Battlegrounds/Zones/BattlegroundWS.cpp    |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/game/Battlegrounds/Zones/BattlegroundWS.cpp b/src/server/game/Battlegrounds/Zones/BattlegroundWS.cpp
+index 226bf17..e6fcf3c 100755
+--- a/src/server/game/Battlegrounds/Zones/BattlegroundWS.cpp
++++ b/src/server/game/Battlegrounds/Zones/BattlegroundWS.cpp
+@@ -482,7 +482,7 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player* Source, GameObject* target
+     }
+ 
+     //Alliance flag on ground(not in base) (returned or picked up again from ground!)
+-    if (GetFlagState(ALLIANCE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
++    if (GetFlagState(ALLIANCE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10) && target_obj->GetEntry() == 179785)
+     {
+         if (Source->GetTeam() == ALLIANCE)
+         {
+@@ -516,7 +516,7 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player* Source, GameObject* target
+     }
+ 
+     //Horde flag on ground(not in base) (returned or picked up again)
+-    if (GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10))
++    if (GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_GROUND && Source->IsWithinDistInMap(target_obj, 10) && target_obj->GetEntry() == 179786)
+     {
+         if (Source->GetTeam() == HORDE)
+         {
+-- 
+1.7.8.msysgit.0
+

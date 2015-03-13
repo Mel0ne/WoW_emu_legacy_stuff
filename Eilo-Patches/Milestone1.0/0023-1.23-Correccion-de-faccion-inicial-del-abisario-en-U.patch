@@ -1,0 +1,23 @@
+From 8c221d8f91b9a89bb7fafb25b667ad2dc3e6a533 Mon Sep 17 00:00:00 2001
+From: Muzashi <santiago_rho_psi@hotmail.com>
+Date: Tue, 7 Feb 2012 00:09:58 -0500
+Subject: [PATCH 23/26] 1.23 Correccion de faccion inicial del abisario en
+ Undercity
+
+---
+ .../2012_01_14_100_world_faccion_abisario.sql      |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2012_01_14_100_world_faccion_abisario.sql
+
+diff --git a/sql/updates/world/reanemu/2012_01_14_100_world_faccion_abisario.sql b/sql/updates/world/reanemu/2012_01_14_100_world_faccion_abisario.sql
+new file mode 100644
+index 0000000..7622536
+--- /dev/null
++++ b/sql/updates/world/reanemu/2012_01_14_100_world_faccion_abisario.sql
+@@ -0,0 +1,2 @@
++-- Cambio en facciones del NPC "Abisario invocado"
++UPDATE `creature_template` SET `faction_A`=189, `faction_H`=189 WHERE `entry`=5676;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

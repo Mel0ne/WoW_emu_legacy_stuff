@@ -1,0 +1,108 @@
+From 9367af479de30aee98997791ec96c77daa70ade9 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 2 Jan 2012 12:16:38 -0500
+Subject: [PATCH 65/65] Milestone2.0
+
+---
+ WHAT_IS_INSIDE |   68 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 68 insertions(+), 0 deletions(-)
+
+diff --git a/WHAT_IS_INSIDE b/WHAT_IS_INSIDE
+index 1186cd3..0257660 100644
+--- a/WHAT_IS_INSIDE
++++ b/WHAT_IS_INSIDE
+@@ -16,6 +16,9 @@ Milestone0.0: Reiniciando el repo y readaptando cosas varias, inclusion de nuevo
+               para complemento del nucleo y funciones de soporte.
+ Milestone1.0: Jugabilidad en general, adecuaciones de codigo vario en mapas
+               comportamiento de bgs, arenas, players-units-pets y mejoras.
++Milestone2.0: Mejoras en Instances y dungeons, escencialmente para darles funcionalidad
++              y detalles menores de funcionamiento para tenerlas lo mas cercano
++			  a blizzlike, solucion de bugs varios.
+ 
+ 
+ ##################################
+@@ -85,16 +88,81 @@ Milestone1.0: Jugabilidad en general, adecuaciones de codigo vario en mapas
+ ###############################
+ # Dungeons e Instances Varias #
+ ###############################
++2.1.1 - 08/10/2011: Trial Of Crusader: Añadida inmunidad a grip y knockback por Karlos
++2.1.2 - 10/10/2011: Trial Of Crusader: Mejorada la AI de los campeones por Gigatotem
++2.1.3 - 01/11/2011: Trial Of Crusader: Inmunidades en db de los bosses y adds por Eilo
++2.4.1 - 28/03/2011: Onyxia: Inmunidades en script por Souler
++2.5.1 - 13/11/2011: Eye of Eternity: Reimplementacion, original por Darkman, final por Eilo
++2.8.1 - 08/08/2011: Obsidian Sanctum: Mejora de script e implementacion de trash mob por Zwerg
++2.10.1 - 03/08/2011: Ahn'Kahet: Taldaram combate en invisible por Greymane
++2.10.2 - 16/12/2011: Ahn'Kahet: Taldaram daño esferas ajustado por Eilo
++2.12.1 - 17/12/2011: CullingOfStratholme: Arthas no desaparece a distancia por Eilo
++2.12.2 - 17/12/2011: CullingOfStratholme: Arthas camina en la segunda fase por Eilo
++2.13.1 - 27/11/2011: TrialOfTheChampions: Reimplementacion y soporte spells por Souler, mejoras, reordenacion y complementos por Eilo
++2.14.1 - 17/12/2011: Drak'Tharon: Visuales y flags varias del trash y reward de LFG por Treak y Eilo
++2.14.2 - 11/02/2011: Drak'Tharon: Novos permitir reinicio boss por Odyssey
++2.14.3 - 24/03/2011: Drak'Tharon: Tharon'Ja no atacable hasta terminar demas bosses por Souler
++2.15.1 - 09/08/2011: Gundrak: Colossus desactiva el aura de MojoVolley al morir por Odyssey
++2.16.1 - 08/10/2011: HallsOfReflection: Reimplementacion y añadido LichKing por Odyssey, editada por Eilo
++2.17.1 - 24/12/2011: PitOfSaron: Correccion de varios mobs por Eilo
++2.19.1 - 05/12/2011: TheNexus: Correccion de trash mob y varias flags por Treak
++2.20.1 - 19/12/2011: ThOculus: Reimplementacion de scripts, logros y adecuaciones de spells por Zwerg
++2.24.1 - 01/10/2011: UtgardeKeep: Ingvar permitiendo que se le pueda atacar en el reseteo por Eilo
++2.25.1 - 25/12/2011: UtgardePinnacle: Svala ahora es atacable con normalidad por Eilo
+ 
+ 
+ #################
+ # Sagrario Rubí #
+ #################
++2.9.1  - 27/12/2011: TheRubySanctum: Reimplementacion de script, original por Vlad, mejoras por Ws, ajustes/mejoras en traducciones y Script por Eilo
+ 
+ 
+ #######
+ # ICC #
+ #######
++2.2.1 - 08/07/2011: Valithria spawn de baul de loot por Karlos
++2.2.2 - 04/08/2011: Sindragosa no tumba en pets por Odyssey
++2.2.3 - 05/08/2011: Valithria mejora en evento spawn adds y pelea por Greymane
++2.2.4 - 26/11/2011: Inmunidades en script para todos los bosses y mini bosses por Eilo
++2.2.5 - 16/11/2011: Marrowgar daño de Bone Storm proporcional a distancia por Retriman
++2.2.6 - 24/10/2011: Trash mob Deathbound Ward disminuido rango de aggro por Plangcoder
++2.2.7 - 02/11/2011: LichKing apaño a tirion cuando se congela por Retriman
++2.2.8 - 02/10/2011: Putricide inmune en los balcones por Retriman
++2.2.9 - 02/10/2011: Putricide Volatile Ooze y Gas Cloud inmunes a knockback por Retriman
++2.2.10 - 21/11/2011: Putricidio despawn de Volatile Ooze y Gas Cloud entre fases por Eilo
++2.2.11 - 16/10/2011: Sindragosa evitando crash en spell fury por Retriman
++2.2.12 - 28/10/2011: Putricide Volatile Ooze efecto explosion por Greymane
++2.2.13 - 30/10/2011: Putricide Stinky spell Plague Stench por Greymane, actualizado por Eilo
++2.2.14 - 30/10/2011: Sindragosa LoS para tumbas y Mystic Buffet original Retriman, cambios por Eilo
++2.2.15 - 24/11/2011: Marrowgar aggrea a 20y por Eilo
++2.2.16 - 24/11/2011: Marrowgar Coldflame haca daño a los melees debajo por Eilo
++2.2.17 - 24/11/2011: Saurfang aggrea apenas termina el dialogo por Eilo
++2.2.18 - 25/11/2011: Rotface aggrea a 20y por Eilo
++2.2.19 - 24/11/2011: Festergut aggrea a 20y por Eilo
++2.2.20 - 24/11/2011: Putricidio aggrea si se acercan por Eilo
++2.2.21 - 24/11/2011: Sindragosa prevencion para que tenga target cuando baja por Eilo
++2.2.22 - 24/11/2011: Principes aggrea si se les acercan por Eilo
++2.2.23 - 24/11/2011: Rimefang aggrea a 20y por Eilo
++2.2.23 - 24/11/2011: Spinestalker aggrea a 20y por Eilo
++2.2.24 - 25/11/2011: LichKing aggrea apenas termina el dialogo con tirion por Eilo
++2.2.25 - 24/11/2011: Correcciones en npcs Nerubar Broodkeeper por Eilo
++2.2.26 - 24/11/2011: Putricidio ajuste velocidad de Volatile Ooze por Eilo
++2.2.27 - 26/11/2011: Rotface ajuste triggers por Eilo
++2.2.28 - 26/11/2011: Putricidio ajuste inmunidades de Volatile Ooze por Eilo
++2.2.29 - 04/12/2011: LichKing Valkyrs ajuste inmunidades por Eilo
++2.2.30 - 25/11/2011: ICC Trashmob implementacion completa por Eilo
++2.2.31 - 21/11/2011: Inmunidades en db para todos los bosses y mini bosses por Eilo
++2.2.32 - 26/11/2011: Sindragosa tercera fase 1pj en tumba por Retriman
++2.2.33 - 04/12/2011: LichKing Valkyrs ajuste velocidad en script por Eilo
++2.2.34 - 26/11/2011: Putricidio evento gas naranja ya no stunea a putricidio por Eilo
++2.2.35 - 27/11/2011: Daño fisico de todos los bosses ajustado por Eilo
++2.2.36 - 13/11/2011: Sindragosa arreglo para no perder target apenas baje por Retriman
++2.2.37 - 15/12/2011: Svalna correccion para que no caiga bajo el suelo por Aios
++2.2.38 - 11/12/2011: Saurfang kickear al que intente robar el loot dejando la raid por Aios
++2.2.39 - 28/12/2011: Sindragosa no mete al tank en tumba por Eilo
++2.2.40 - 13/01/2012: Check de logros para entrar en heroico por Odyssey
++2.2.41 - 13/01/2012: LichKing inmune a taunt en cambio de fase por Odyssey
++2.2.42 - 06/02/2012: GunshipBattle añadida por Eilo
+ 
+ 
+ ##########
+-- 
+1.7.8.msysgit.0
+

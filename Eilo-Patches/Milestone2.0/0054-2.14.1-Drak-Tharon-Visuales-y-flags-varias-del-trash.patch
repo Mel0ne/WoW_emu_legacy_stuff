@@ -1,0 +1,56 @@
+From 803c4e1552c988778d1c3b3bf8b72b53ad7cceb9 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sun, 25 Dec 2011 01:54:03 -0500
+Subject: [PATCH 54/65] 2.14.1 Drak'Tharon: Visuales y flags varias del trash
+ y reward de LFG
+
+---
+ .../reanemu/2011_12_17_100_world_draktharon.sql    |   36 ++++++++++++++++++++
+ 1 files changed, 36 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_12_17_100_world_draktharon.sql
+
+diff --git a/sql/updates/world/reanemu/2011_12_17_100_world_draktharon.sql b/sql/updates/world/reanemu/2011_12_17_100_world_draktharon.sql
+new file mode 100644
+index 0000000..56e70d0
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_12_17_100_world_draktharon.sql
+@@ -0,0 +1,36 @@
++-- Eilo (https://github.com/eilo)
++-- Recopilacion y adecuacion de querys originales de Zwerg mas unas mias
++-- Drakkari Guardian (no deberia estar todos muertos)
++UPDATE `creature_template` SET 
++	`faction_A`=1814,
++	`faction_H`=1814,
++	`unit_flags`=`unit_flags`&~33554432&~2,
++	`dynamicflags`=`dynamicflags`&~32,
++	`type_flags`=`type_flags`&~128,
++	`flags_extra`=`flags_extra`&~2 
++WHERE `entry` IN (26620,31339); 
++
++-- Drakkari Bat mas flags hasta que desmonte
++UPDATE `creature_template` SET `unit_flags`=`unit_flags`|0x2, `flags_extra`=`flags_extra`|0x2 WHERE `entry`=27490;
++
++-- Risen Drakkari Bat Rider correccion de sus flags para atacarle
++UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~33554432&~2 WHERE `entry` IN (26638,31351); 
++UPDATE `creature_template` SET `dynamicflags`=`dynamicflags`&~32 WHERE `entry` IN (26638,31351);
++UPDATE `creature` SET `unit_flags`=0,`dynamicflags`=`dynamicflags`&~32 WHERE `id` IN (26638,31351);
++
++-- Quien esta vivo y quien se queda muerto o aparentemente muerto sin que se le pueda atacar
++UPDATE `creature` SET 
++	`unit_flags`= IF(`guid` IN (127589,127590,127580,127591,127579,127578,127582),0,(`unit_flags`|33554432|512|2)),
++	`dynamicflags`= IF(`guid` IN (127589,127590,127580,127591,127579,127578,127582),0,(`dynamicflags`|32))
++WHERE `id`=26620;
++
++-- Mismas facciones para que no se puedan pegar entre si
++UPDATE `creature_template` SET `faction_A`=1814,`faction_H`=1814 WHERE `entry` IN 
++(
++26639,  -- Drakkari Shaman
++31345,  -- Drakkari Shaman H
++26830,  -- Risen Drakkari Death Knight
++31352,  -- Risen Drakkari Death Knight H
++27431,  -- Drakkari Commander
++31338   -- Drakkari Commander H
++);
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,47 @@
+From db3b075177661bd3d171202cf52f64dafd9b2354 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 30 Dec 2011 17:22:54 -0500
+Subject: [PATCH 21/29] =?UTF-8?q?0.21=20HasAchieved=20funcion=20de=20soporte?=
+ =?UTF-8?q?=20rea=C3=B1adida?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Entities/Player/Player.cpp |    7 +++++++
+ src/server/game/Entities/Player/Player.h   |    1 +
+ 2 files changed, 8 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index a0877ab..200bcf1 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -24119,6 +24119,13 @@ void Player::CompletedAchievement(AchievementEntry const* entry)
+     GetAchievementMgr().CompletedAchievement(entry);
+ }
+ 
++bool Player::HasAchieved(uint32 entry)
++{
++    if(AchievementEntry const *achievement = sAchievementStore.LookupEntry(entry))
++        return GetAchievementMgr().HasAchieved(entry);
++    return false;
++}
++
+ void Player::LearnTalent(uint32 talentId, uint32 talentRank)
+ {
+     uint32 CurTalentPoints = GetFreeTalentPoints();
+diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
+index e77b04d..6a3741d 100755
+--- a/src/server/game/Entities/Player/Player.h
++++ b/src/server/game/Entities/Player/Player.h
+@@ -2537,6 +2537,7 @@ class Player : public Unit, public GridObject<Player>
+         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
+         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 = 0, uint32 miscValue2 = 0, Unit* unit = NULL);
+         void CompletedAchievement(AchievementEntry const* entry);
++        bool HasAchieved(uint32 entry);
+ 
+         bool HasTitle(uint32 bitIndex);
+         bool HasTitle(CharTitlesEntry const* title) { return HasTitle(title->bit_index); }
+-- 
+1.7.8.msysgit.0
+

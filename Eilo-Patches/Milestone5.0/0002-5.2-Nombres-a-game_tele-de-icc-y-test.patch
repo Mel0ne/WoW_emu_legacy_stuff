@@ -1,0 +1,25 @@
+From 8c2d447971969d4a8f55dfc31539b2b71b95e648 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Tue, 3 Jan 2012 18:11:08 -0500
+Subject: [PATCH 2/3] 5.2 Nombres a game_tele de icc y test
+
+---
+ sql/updates/world/traducciones/game_tele_rean.sql |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/traducciones/game_tele_rean.sql
+
+diff --git a/sql/updates/world/traducciones/game_tele_rean.sql b/sql/updates/world/traducciones/game_tele_rean.sql
+new file mode 100644
+index 0000000..2f89e1f
+--- /dev/null
++++ b/sql/updates/world/traducciones/game_tele_rean.sql
+@@ -0,0 +1,5 @@
++-- Cambio de nombre de 2 sitios que se usa mucho por el staff
++-- Eilo (https://github.com/eilo)
++
++UPDATE game_tele SET NAME='test' WHERE id=817;
++UPDATE game_tele SET NAME='icc' WHERE id=1418;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

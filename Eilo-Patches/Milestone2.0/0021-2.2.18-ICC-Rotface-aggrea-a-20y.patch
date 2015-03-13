@@ -1,0 +1,32 @@
+From 99b0619a101a98eb4caa7dba0232d105d532dd6f Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 02:43:49 -0500
+Subject: [PATCH 21/65] 2.2.18 ICC: Rotface aggrea a 20y
+
+---
+ .../Northrend/IcecrownCitadel/boss_rotface.cpp     |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_rotface.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_rotface.cpp
+index b887093..a487a75 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_rotface.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_rotface.cpp
+@@ -159,9 +159,13 @@ class boss_rotface : public CreatureScript
+                     Talk(SAY_SLIME_SPRAY);
+             }
+ 
+-            void MoveInLineOfSight(Unit* /*who*/)
++            void MoveInLineOfSight(Unit* who)
+             {
+-                // don't enter combat
++                if (me->IsWithinDistInMap(who, 20.0f))
++                {
++                    me->SetReactState(REACT_AGGRESSIVE);
++                    me->SetInCombatWithZone();
++                }
+             }
+ 
+             void UpdateAI(const uint32 diff)
+-- 
+1.7.8.msysgit.0
+

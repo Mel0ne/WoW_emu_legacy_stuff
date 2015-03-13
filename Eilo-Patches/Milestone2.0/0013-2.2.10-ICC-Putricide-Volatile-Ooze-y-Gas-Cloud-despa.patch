@@ -1,0 +1,34 @@
+From 76049d2960c2416cfef4cffccd5127f10002a16a Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 02:11:53 -0500
+Subject: [PATCH 13/65] 2.2.10 ICC: Putricide Volatile Ooze y Gas Cloud
+ despawn entre fases
+
+---
+ .../IcecrownCitadel/boss_professor_putricide.cpp   |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
+index 2e6c71c..f3216be 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
+@@ -302,12 +302,16 @@ class boss_professor_putricide : public CreatureScript
+                             return;
+                         me->SetReactState(REACT_PASSIVE);
+                         DoAction(ACTION_CHANGE_PHASE);
++                        UnsummonSpecificCreaturesNearby(me,NPC_VOLATILE_OOZE,100.0f);
++                        UnsummonSpecificCreaturesNearby(me,NPC_GAS_CLOUD,100.0f);
+                         break;
+                     case PHASE_COMBAT_2:
+                         if (HealthAbovePct(35))
+                             return;
+                         me->SetReactState(REACT_PASSIVE);
+                         DoAction(ACTION_CHANGE_PHASE);
++                        UnsummonSpecificCreaturesNearby(me,NPC_VOLATILE_OOZE,100.0f);
++                        UnsummonSpecificCreaturesNearby(me,NPC_GAS_CLOUD,100.0f);
+                         break;
+                     default:
+                         break;
+-- 
+1.7.8.msysgit.0
+

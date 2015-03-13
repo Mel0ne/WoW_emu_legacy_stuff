@@ -1,0 +1,70 @@
+From b39d608fba2c7807bbf672d0517d16b3a74534e9 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 15 Dec 2011 22:23:53 -0500
+Subject: [PATCH 18/29] =?UTF-8?q?0.18=20DoAttackerGroupInCombat=20rea=C3=B1a?=
+ =?UTF-8?q?dida=20al=20nucleo?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/AI/CreatureAI.cpp |   22 ++++++++++++++++++++++
+ src/server/game/AI/CreatureAI.h   |    2 ++
+ 2 files changed, 24 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/AI/CreatureAI.cpp b/src/server/game/AI/CreatureAI.cpp
+index 37b55ef..282ef78 100755
+--- a/src/server/game/AI/CreatureAI.cpp
++++ b/src/server/game/AI/CreatureAI.cpp
+@@ -22,6 +22,7 @@
+ #include "World.h"
+ #include "SpellMgr.h"
+ #include "Vehicle.h"
++#include "Group.h"
+ #include "Log.h"
+ #include "MapReference.h"
+ #include "Player.h"
+@@ -166,6 +167,27 @@ void CreatureAI::MoveInLineOfSight(Unit* who)
+     //    me->GetMotionMaster()->MoveChase(who->getVictim());
+ }
+ 
++void CreatureAI::DoAttackerGroupInCombat(Player* attacker)
++{
++    if (attacker)
++    {
++        if (Group* pGroup = attacker->GetGroup() )
++        {
++            for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
++            {
++                Player* pGroupGuy = itr->getSource();
++
++                if (pGroupGuy && pGroupGuy->isAlive() && pGroupGuy->GetMapId() == me->GetMapId())
++                {
++                    me->SetInCombatWith(pGroupGuy);
++                    pGroupGuy->SetInCombatWith(me);
++                    me->AddThreat(pGroupGuy, 0.0f);
++                }
++            }
++        }
++    }
++}
++
+ void CreatureAI::EnterEvadeMode()
+ {
+     if (!_EnterEvadeMode())
+diff --git a/src/server/game/AI/CreatureAI.h b/src/server/game/AI/CreatureAI.h
+index b62455f..3dcb49a 100755
+--- a/src/server/game/AI/CreatureAI.h
++++ b/src/server/game/AI/CreatureAI.h
+@@ -131,6 +131,8 @@ class CreatureAI : public UnitAI
+         //virtual void SpellClick(Player* player) {}
+ 
+         // Called at reaching home after evade
++        void DoAttackerGroupInCombat(Player* attacker);
++
+         virtual void JustReachedHome() {}
+ 
+         void DoZoneInCombat(Creature* creature = NULL, float maxRangeToNearestTarget = 50.0f);
+-- 
+1.7.8.msysgit.0
+

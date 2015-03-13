@@ -1,0 +1,24 @@
+From 7cc2e48f28e48a345f04eb5085986771a51c5507 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 12:39:39 -0500
+Subject: [PATCH 35/65] 2.2.32 ICC: Sindragosa tercera fase 1pj en tumba
+
+---
+ .../Northrend/IcecrownCitadel/boss_sindragosa.cpp  |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+index bc1ade7..6f638ef 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+@@ -366,7 +366,6 @@ class boss_sindragosa : public CreatureScript
+                     Talk(SAY_PHASE_2);
+                     events.CancelEvent(EVENT_AIR_PHASE);
+                     events.ScheduleEvent(EVENT_ICE_TOMB, urand(7000, 10000));
+-                    events.ScheduleEvent(EVENT_THIRD_PHASE_CHECK, 1000);
+                     events.RescheduleEvent(EVENT_ICY_GRIP, urand(35000, 40000));
+                     DoCast(me, SPELL_MYSTIC_BUFFET, true);
+                     me->RemoveAurasDueToSpell(SPELL_BUFFET_VULNERABILITY);
+-- 
+1.7.8.msysgit.0
+

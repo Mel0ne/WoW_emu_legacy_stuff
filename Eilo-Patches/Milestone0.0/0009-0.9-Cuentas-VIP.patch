@@ -1,0 +1,257 @@
+From 66c59a31b80c81b96098a4296ace343a928e6f70 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 20 Jan 2012 14:18:40 -0500
+Subject: [PATCH 09/29] 0.9 Cuentas VIP
+
+---
+ .../reanemu/2011_10_14_100_auth_vipaccount.sql     |    8 ++++++++
+ .../AuctionHouseBot/AuctionHouseBot.cpp            |    2 +-
+ src/server/game/Entities/Player/Player.cpp         |    6 ++++++
+ src/server/game/Miscellaneous/Formulas.h           |    4 +++-
+ src/server/game/Server/WorldSession.cpp            |    4 ++--
+ src/server/game/Server/WorldSession.h              |    4 +++-
+ src/server/game/Server/WorldSocket.cpp             |   14 +++++++++++++-
+ src/server/game/World/World.cpp                    |    3 +++
+ src/server/game/World/World.h                      |    3 +++
+ .../Database/Implementation/LoginDatabase.cpp      |    1 +
+ .../shared/Database/Implementation/LoginDatabase.h |    1 +
+ src/server/worldserver/worldserver.conf.dist       |    9 +++++++++
+ 12 files changed, 53 insertions(+), 6 deletions(-)
+ create mode 100644 sql/updates/auth/reanemu/2011_10_14_100_auth_vipaccount.sql
+
+diff --git a/sql/updates/auth/reanemu/2011_10_14_100_auth_vipaccount.sql b/sql/updates/auth/reanemu/2011_10_14_100_auth_vipaccount.sql
+new file mode 100644
+index 0000000..df317ed
+--- /dev/null
++++ b/sql/updates/auth/reanemu/2011_10_14_100_auth_vipaccount.sql
+@@ -0,0 +1,8 @@
++CREATE TABLE IF NOT EXISTS `account_premium` (
++  `id` int(11) NOT NULL default '0' COMMENT 'Account id',
++  `setdate` bigint(40) NOT NULL default '0',
++  `unsetdate` bigint(40) NOT NULL default '0',
++  `premium_type` tinyint(4) unsigned NOT NULL default '1',
++  `active` tinyint(4) NOT NULL default '1',
++  PRIMARY KEY  (`id`,`setdate`)
++) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Premium Accounts';
+\ No newline at end of file
+diff --git a/src/server/game/AuctionHouse/AuctionHouseBot/AuctionHouseBot.cpp b/src/server/game/AuctionHouse/AuctionHouseBot/AuctionHouseBot.cpp
+index c0c64a3..5d770a9 100644
+--- a/src/server/game/AuctionHouse/AuctionHouseBot/AuctionHouseBot.cpp
++++ b/src/server/game/AuctionHouse/AuctionHouseBot/AuctionHouseBot.cpp
+@@ -714,7 +714,7 @@ void AuctionHouseBot::Update()
+    if ((!AHBSeller) && (!AHBBuyer))
+        return;
+ 
+-   WorldSession _session(AHBplayerAccount, NULL, SEC_PLAYER, true, 0, LOCALE_enUS, 0, 0);
++   WorldSession _session(AHBplayerAccount, NULL, SEC_PLAYER, false, true, 0, LOCALE_enUS, 0, 0);
+    Player _AHBplayer(&_session);
+    _AHBplayer.Initialize(AHBplayerGUID);
+    sObjectAccessor->AddObject(&_AHBplayer);
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index e306c95..9c270cd 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -6855,6 +6855,9 @@ void Player::CheckAreaExploreAndOutdoor()
+                     XP = uint32(sObjectMgr->GetBaseXP(p->area_level)*sWorld->getRate(RATE_XP_EXPLORE));
+                 }
+ 
++                if(GetSession()->IsPremium())
++                XP *= sWorld->getRate(RATE_XP_EXPLORE_PREMIUM);
++
+                 GiveXP(XP, NULL);
+                 SendExplorationExperience(area, XP);
+             }
+@@ -15075,6 +15078,9 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver,
+     for (Unit::AuraEffectList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
+         AddPctN(XP, (*i)->GetAmount());
+ 
++    if (GetSession()->IsPremium())
++        XP *= sWorld->getRate(RATE_XP_QUEST_PREMIUM);
++
+     int32 moneyRew = 0;
+     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+         GiveXP(XP, NULL);
+diff --git a/src/server/game/Miscellaneous/Formulas.h b/src/server/game/Miscellaneous/Formulas.h
+index 4faacc1..d5bd221 100755
+--- a/src/server/game/Miscellaneous/Formulas.h
++++ b/src/server/game/Miscellaneous/Formulas.h
+@@ -178,7 +178,9 @@ namespace Trinity
+                         gain *= 2;
+                 }
+ 
+-                gain = uint32(gain * sWorld->getRate(RATE_XP_KILL));
++                float premium_rate = player->GetSession()->IsPremium() ? sWorld->getRate(RATE_XP_KILL_PREMIUM) : 1.0f;
++
++                return uint32(gain*sWorld->getRate(RATE_XP_KILL)*premium_rate);
+             }
+ 
+             sScriptMgr->OnGainCalculation(gain, player, u);
+diff --git a/src/server/game/Server/WorldSession.cpp b/src/server/game/Server/WorldSession.cpp
+index ce418c6..07c4de9 100755
+--- a/src/server/game/Server/WorldSession.cpp
++++ b/src/server/game/Server/WorldSession.cpp
+@@ -88,9 +88,9 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
+ }
+ 
+ /// WorldSession constructor
+-WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter):
++WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, bool ispremium, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter):
+ m_muteTime(mute_time), m_timeOutTime(0), _player(NULL), m_Socket(sock),
+-_security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
++_security(sec), _ispremium(ispremium), _accountId(id), m_expansion(expansion), _logoutTime(0),
+ m_inQueue(false), m_playerLoading(false), m_playerLogout(false),
+ m_playerRecentlyLogout(false), m_playerSave(false),
+ m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
+diff --git a/src/server/game/Server/WorldSession.h b/src/server/game/Server/WorldSession.h
+index 30bda36..7dee661 100755
+--- a/src/server/game/Server/WorldSession.h
++++ b/src/server/game/Server/WorldSession.h
+@@ -213,7 +213,7 @@ class CharacterCreateInfo
+ class WorldSession
+ {
+     public:
+-        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter);
++        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, bool ispremium, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter);
+         ~WorldSession();
+ 
+         bool PlayerLoading() const { return m_playerLoading; }
+@@ -241,6 +241,7 @@ class WorldSession
+         void SendClientCacheVersion(uint32 version);
+ 
+         AccountTypes GetSecurity() const { return _security; }
++        bool IsPremium() const { return _ispremium; }
+         uint32 GetAccountId() const { return _accountId; }
+         Player* GetPlayer() const { return _player; }
+         char const* GetPlayerName() const;
+@@ -936,6 +937,7 @@ class WorldSession
+         AccountTypes _security;
+         uint32 _accountId;
+         uint8 m_expansion;
++        bool _ispremium;
+ 
+         typedef std::list<AddonInfo> AddonsList;
+ 
+diff --git a/src/server/game/Server/WorldSocket.cpp b/src/server/game/Server/WorldSocket.cpp
+index 2c6098f..d313ab4 100755
+--- a/src/server/game/Server/WorldSocket.cpp
++++ b/src/server/game/Server/WorldSocket.cpp
+@@ -778,6 +778,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
+     //uint8 expansion = 0;
+     LocaleConstant locale;
+     std::string account;
++    bool isPremium = false;
+     SHA1Hash sha;
+     BigNumber v, s, g, N;
+     WorldPacket packet, SendAddonPacked;
+@@ -933,6 +934,17 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
+         return -1;
+     }
+ 
++    QueryResult premresult =
++        LoginDatabase.PQuery ("SELECT 1 "
++                                "FROM account_premium "
++                                "WHERE id = '%u' "
++                                "AND active = 1",
++                                id);
++    if (premresult) // if account premium
++    {
++        isPremium = true;
++    }
++
+     // Check locked state for server
+     AccountTypes allowedAccountType = sWorld->GetPlayerSecurityLimit();
+     sLog->outDebug(LOG_FILTER_NETWORKIO, "Allowed Level: %u Player Level %u", allowedAccountType, AccountTypes(security));
+@@ -992,7 +1004,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
+     LoginDatabase.Execute(stmt);
+ 
+     // NOTE ATM the socket is single-threaded, have this in mind ...
+-    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter), -1);
++    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), isPremium, expansion, mutetime, locale, recruiter, isRecruiter), -1);
+ 
+     m_Crypt.Init(&k);
+ 
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 5b0a83a..d7bc7e2 100755
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -462,8 +462,11 @@ void World::LoadConfigSettings(bool reload)
+     rate_values[RATE_DROP_ITEM_REFERENCED_AMOUNT] = ConfigMgr::GetFloatDefault("Rate.Drop.Item.ReferencedAmount", 1.0f);
+     rate_values[RATE_DROP_MONEY]  = ConfigMgr::GetFloatDefault("Rate.Drop.Money", 1.0f);
+     rate_values[RATE_XP_KILL]     = ConfigMgr::GetFloatDefault("Rate.XP.Kill", 1.0f);
++    rate_values[RATE_XP_KILL_PREMIUM]    = ConfigMgr::GetFloatDefault("Rate.XP.Kill.Premium", 1.0f);
+     rate_values[RATE_XP_QUEST]    = ConfigMgr::GetFloatDefault("Rate.XP.Quest", 1.0f);
++    rate_values[RATE_XP_QUEST_PREMIUM]   = ConfigMgr::GetFloatDefault("Rate.XP.Quest.Premium", 1.0f);
+     rate_values[RATE_XP_EXPLORE]  = ConfigMgr::GetFloatDefault("Rate.XP.Explore", 1.0f);
++    rate_values[RATE_XP_EXPLORE_PREMIUM] = ConfigMgr::GetFloatDefault("Rate.XP.Explore.Premium", 1.0f);
+     rate_values[RATE_REPAIRCOST]  = ConfigMgr::GetFloatDefault("Rate.RepairCost", 1.0f);
+     if (rate_values[RATE_REPAIRCOST] < 0.0f)
+     {
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index ed31d84..0a4a95f 100755
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -355,8 +355,11 @@ enum Rates
+     RATE_DROP_ITEM_REFERENCED_AMOUNT,
+     RATE_DROP_MONEY,
+     RATE_XP_KILL,
++    RATE_XP_KILL_PREMIUM,
+     RATE_XP_QUEST,
++    RATE_XP_QUEST_PREMIUM,
+     RATE_XP_EXPLORE,
++    RATE_XP_EXPLORE_PREMIUM,
+     RATE_REPAIRCOST,
+     RATE_REPUTATION_GAIN,
+     RATE_REPUTATION_LOWLEVEL_KILL,
+diff --git a/src/server/shared/Database/Implementation/LoginDatabase.cpp b/src/server/shared/Database/Implementation/LoginDatabase.cpp
+index 8ef8d3b..3796540 100755
+--- a/src/server/shared/Database/Implementation/LoginDatabase.cpp
++++ b/src/server/shared/Database/Implementation/LoginDatabase.cpp
+@@ -62,4 +62,5 @@ void LoginDatabaseConnection::DoPrepareStatements()
+     PREPARE_STATEMENT(LOGIN_DEL_ACCOUNT_ACCESS, "DELETE FROM account_access WHERE id = ?", CONNECTION_ASYNC);
+     PREPARE_STATEMENT(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM, "DELETE FROM account_access WHERE id = ? AND (RealmID = ? OR RealmID = -1)", CONNECTION_ASYNC);
+     PREPARE_STATEMENT(LOGIN_INS_ACCOUNT_ACCESS, "INSERT INTO account_access (id,gmlevel,RealmID) VALUES (?, ?, ?)", CONNECTION_ASYNC);
++    PREPARE_STATEMENT(LOGIN_UPD_ACCOUNT_PREMIUM, "UPDATE account_premium SET active = 0 WHERE unsetdate<=UNIX_TIMESTAMP() AND unsetdate<>setdate", CONNECTION_ASYNC);
+ }
+diff --git a/src/server/shared/Database/Implementation/LoginDatabase.h b/src/server/shared/Database/Implementation/LoginDatabase.h
+index afb1880..da279ae 100755
+--- a/src/server/shared/Database/Implementation/LoginDatabase.h
++++ b/src/server/shared/Database/Implementation/LoginDatabase.h
+@@ -82,6 +82,7 @@ enum LoginDatabaseStatements
+     LOGIN_DEL_ACCOUNT_ACCESS,
+     LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM,
+     LOGIN_INS_ACCOUNT_ACCESS,
++    LOGIN_UPD_ACCOUNT_PREMIUM,
+ 
+     MAX_LOGINDATABASE_STATEMENTS,
+ };
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index bcc885a..04ccb6c 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -2120,14 +2120,23 @@ Rate.Drop.Item.ReferencedAmount = 1
+ #    Rate.XP.Kill
+ #    Rate.XP.Quest
+ #    Rate.XP.Explore
++#    Rate.XP.Kill.Premium
++#    Rate.XP.Quest.Premium
++#    Rate.XP.Explore.Premium
+ #        Description: Experience rates.
+ #        Default:     1 - (Rate.XP.Kill)
+ #                     1 - (Rate.XP.Quest)
+ #                     1 - (Rate.XP.Explore)
++#                     1 - (Rate.XP.Kill.Premium)
++#                     1 - (Rate.XP.Quest.Premium)
++#                     1 - (Rate.XP.Explore.Premium)
+ 
+ Rate.XP.Kill    = 1
+ Rate.XP.Quest   = 1
+ Rate.XP.Explore = 1
++Rate.XP.Kill.Premium    = 1
++Rate.XP.Quest.Premium   = 1
++Rate.XP.Explore.Premium = 1
+ 
+ #
+ #    Rate.RepairCost
+-- 
+1.7.8.msysgit.0
+

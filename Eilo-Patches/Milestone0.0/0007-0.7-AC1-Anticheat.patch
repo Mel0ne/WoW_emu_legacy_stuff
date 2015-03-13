@@ -1,0 +1,779 @@
+From f590d052c3bc1ffd327c4aa8f52249b591363cbd Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 15 Dec 2011 16:06:42 -0500
+Subject: [PATCH 07/29] 0.7 AC1 Anticheat
+
+---
+ .../reanemu/2011_11_09_100_characters_ac1.sql      |   87 +++++
+ src/server/game/Entities/Player/Player.cpp         |   21 ++
+ src/server/game/Entities/Player/Player.h           |   15 +
+ src/server/game/Handlers/MovementHandler.cpp       |  335 ++++++++++++++++++++
+ src/server/game/Spells/Auras/SpellAuraEffects.cpp  |   17 +
+ src/server/game/Spells/SpellEffects.cpp            |    3 +
+ src/server/game/World/World.cpp                    |   12 +
+ src/server/game/World/World.h                      |   26 ++
+ src/server/scripts/Commands/cs_gm.cpp              |    6 +
+ src/server/worldserver/worldserver.conf.dist       |   63 ++++
+ 10 files changed, 585 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/characters/reanemu/2011_11_09_100_characters_ac1.sql
+
+diff --git a/sql/updates/characters/reanemu/2011_11_09_100_characters_ac1.sql b/sql/updates/characters/reanemu/2011_11_09_100_characters_ac1.sql
+new file mode 100644
+index 0000000..34529cc
+--- /dev/null
++++ b/sql/updates/characters/reanemu/2011_11_09_100_characters_ac1.sql
+@@ -0,0 +1,87 @@
++CREATE TABLE `cheaters` (
++  `entry` bigint(20) NOT NULL AUTO_INCREMENT,
++  `player` varchar(255) NOT NULL,
++  `acctid` int(11) NOT NULL,
++  `reason` varchar(255) NOT NULL DEFAULT 'unknown',
++  `speed` float NOT NULL DEFAULT '0',
++  `Val1` float NOT NULL DEFAULT '0',
++  `Val2` int(10) unsigned NOT NULL DEFAULT '0',
++  `count` int(11) NOT NULL DEFAULT '0',
++  `Map` smallint(5) NOT NULL DEFAULT '-1',
++  `mapEntry` varchar(255) NOT NULL DEFAULT '0',
++  `zone_id` smallint(5) NOT NULL,
++  `zoneEntry` varchar(255) NOT NULL DEFAULT '0',
++  `area_id` smallint(5) NOT NULL,
++  `areaEntry` varchar(255) NOT NULL DEFAULT '0',
++  `Level` mediumint(9) NOT NULL DEFAULT '0',
++  `first_date` datetime NOT NULL,
++  `last_date` datetime NOT NULL,
++  `Op` varchar(255) NOT NULL DEFAULT 'unknown',
++  `startX` float NOT NULL,
++  `startY` float NOT NULL,
++  `startZ` float NOT NULL,
++  `endX` float NOT NULL,
++  `endY` float NOT NULL,
++  `endZ` float NOT NULL,
++  `t_guid` int(11) NOT NULL,
++  `flags` int(11) NOT NULL,
++  `falltime` smallint(5) NOT NULL,
++  PRIMARY KEY (`entry`),
++  KEY `idx_Count` (`count`)
++) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8
++
++ALTER TABLE `cheaters`
++   ADD COLUMN `zone_id` SMALLINT(5) NOT NULL DEFAULT '0' AFTER `Map`,
++   ADD COLUMN `area_id` SMALLINT(5) NOT NULL DEFAULT '0' AFTER `zone_id`,
++   ADD COLUMN `mapEntry` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `Map`,
++   ADD COLUMN `zoneEntry` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `zone_id`,
++   ADD COLUMN `areaEntry` VARCHAR(255) NOT NULL DEFAULT '0' AFTER `area_id`,
++   ADD COLUMN `startX` FLOAT NOT NULL AFTER `Op`,
++   ADD COLUMN `startY` FLOAT NOT NULL AFTER `startX`,
++   ADD COLUMN `startZ` FLOAT NOT NULL AFTER `startY`,
++   ADD COLUMN `endX` FLOAT NOT NULL AFTER `startZ`,
++   ADD COLUMN `endY` FLOAT NOT NULL AFTER `endX`,
++   ADD COLUMN `endZ` FLOAT NOT NULL AFTER `endY`,
++   ADD COLUMN `t_guid` INT(11) NOT NULL DEFAULT '0' AFTER `endZ`,
++   ADD COLUMN `flags` INT(11) NOT NULL DEFAULT '0' AFTER `t_guid`,
++   ADD COLUMN `falltime` SMALLINT(5) NOT NULL DEFAULT '0' AFTER `flags`;
++
++-- Procedure to import pos data to new columns thx to Spp.
++DELIMITER //
++DROP PROCEDURE IF EXISTS ac1Update//
++CREATE PROCEDURE ac1Update()
++BEGIN
++    DECLARE Entry1 varchar(255);
++    DECLARE Pos1 varchar(255);
++    DECLARE done int DEFAULT 0;
++    DECLARE cur1 CURSOR FOR SELECT entry, pos FROM cheaters;
++    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
++
++    OPEN cur1;
++
++    read_loop: LOOP
++        FETCH cur1 INTO Entry1, Pos1;
++        IF done THEN
++            LEAVE read_loop;
++        END IF;
++
++        IF CHAR_LENGTH(Pos1) > 1 THEN
++            SET @StartX   = SUBSTRING_INDEX(SUBSTRING_INDEX(Pos1, ' ', 2), ' ', -1);
++            SET @StartY   = SUBSTRING_INDEX(SUBSTRING_INDEX(Pos1, ' ', 3), ' ', -1);
++            SET @StartZ   = SUBSTRING_INDEX(SUBSTRING_INDEX(Pos1, ' ', 4), ' ', -1);
++            SET @EndX     = SUBSTRING_INDEX(SUBSTRING_INDEX(Pos1, ' ', 6), ' ', -1);
++            SET @EndY     = SUBSTRING_INDEX(SUBSTRING_INDEX(Pos1, ' ', 7), ' ', -1);
++            SET @EndZ     = SUBSTRING_INDEX(SUBSTRING_INDEX(Pos1, ' ', 8), ' ', -1);
++            SET @Flags    = SUBSTRING_INDEX(SUBSTRING_INDEX(Pos1, ' ', 10), ' ', -1);
++            SET @TGuid    = SUBSTRING_INDEX(SUBSTRING_INDEX(Pos1, ' ', 12), ' ', -1);
++            SET @FallTime = SUBSTRING_INDEX(Pos1, ' ', -1);
++            UPDATE cheaters SET startX = @StartX, startY = @StartY, startZ = @StartZ, endX = @EndX, endY = @EndY, endZ = @EndZ, flags = @Flags, falltime = @Falltime WHERE entry = Entry1;
++        END IF;
++    END LOOP;
++    CLOSE cur1;
++END; //
++
++DELIMITER ;
++call ac1Update();
++
++ALTER TABLE `cheaters` DROP COLUMN `Pos`;
+\ No newline at end of file
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index be73004..e306c95 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -769,6 +769,16 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
+     rest_type=REST_TYPE_NO;
+     ////////////////////Rest System/////////////////////
+ 
++    //movement anticheat
++    m_anti_LastLenCheck = getMSTime();
++    m_anti_MovedLen = 0.0f;
++    m_anti_BeginFallZ = INVALID_HEIGHT;
++    m_anti_lastalarmtime = 0;    //last time when alarm generated
++    m_anti_alarmcount = 0;       //alarm counter
++    m_anti_TeleTime = 0;
++    m_CanFly=false;
++    /////////////////////////////////
++
+     m_mailsLoaded = false;
+     m_mailsUpdated = false;
+     unReadMails = 0;
+@@ -2777,6 +2787,8 @@ void Player::SetInWater(bool apply)
+     RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
+ 
+     getHostileRefManager().updateThreatTables();
++    // movement anticheat
++    if (apply) m_anti_BeginFallZ=INVALID_HEIGHT;
+ }
+ 
+ void Player::SetGameMaster(bool on)
+@@ -23859,6 +23871,15 @@ void Player::HandleFall(MovementInfo const& movementInfo)
+     float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
+     //sLog->outDebug("zDiff = %f", z_diff);
+ 
++    float anticheat_z_diff = m_anti_BeginFallZ-movementInfo.pos.GetPositionZ();
++    if (z_diff < anticheat_z_diff)
++    {
++        // sLog->outBasic("z_diff=%f, while anticheat_z_diff=%f ... possible cheat attempt by player %s(%d), account %u ?",
++        //                 z_diff,anticheat_z_diff,GetName(),GetGUIDLow(),GetSession()->GetAccountId());
++        z_diff = anticheat_z_diff;
++    }
++    m_anti_BeginFallZ=INVALID_HEIGHT;
++
+     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
+     // 14.57 can be calculated by resolving damageperc formula below to 0
+     if (z_diff >= 14.57f && !isDead() && !isGameMaster() &&
+diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
+index 0dd0e59..30d7e34 100755
+--- a/src/server/game/Entities/Player/Player.h
++++ b/src/server/game/Entities/Player/Player.h
+@@ -1107,6 +1107,21 @@ class Player : public Unit, public GridObject<Player>
+         explicit Player (WorldSession* session);
+         ~Player ();
+ 
++        //movement anticheat
++        float  m_anti_MovedLen;         //Length of traveled way
++        uint32 m_anti_LastLenCheck;
++        float  m_anti_BeginFallZ;    //alternative falling begin
++        uint32 m_anti_lastalarmtime;    //last time when alarm generated
++        uint32 m_anti_alarmcount;       //alarm counter
++        time_t m_anti_TeleTime;
++        bool m_CanFly;
++        time_t Anti__GetLastTeleTime() const { return m_anti_TeleTime; }
++        void Anti__SetLastTeleTime() { m_anti_TeleTime=time(NULL); m_anti_BeginFallZ=INVALID_HEIGHT; }
++        //bool CanFly() const { return HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); }
++        bool CanFly() const { return m_CanFly; }
++        void SetCanFly(bool CanFly) { m_CanFly=CanFly; }
++        inline bool Anti__CheatOccurred(const char* Reason,float Speed,uint16 Op, float Val1=0.0f,uint32 Val2=0,const MovementInfo* MvInfo=NULL,bool ForceReport=false);
++
+         void CleanupsBeforeDelete(bool finalCleanup = true);
+ 
+         static UpdateMask updateVisualBits;
+diff --git a/src/server/game/Handlers/MovementHandler.cpp b/src/server/game/Handlers/MovementHandler.cpp
+index 7d1233c..e568da9 100755
+--- a/src/server/game/Handlers/MovementHandler.cpp
++++ b/src/server/game/Handlers/MovementHandler.cpp
+@@ -31,6 +31,204 @@
+ #include "InstanceSaveMgr.h"
+ #include "ObjectMgr.h"
+ 
++//#define __ANTI_DEBUG__
++
++#ifdef __ANTI_DEBUG__
++std::string FlagsToStr(const uint32 Flags)
++{
++    std::string Ret="";
++    if(Flags==0)
++    {
++        Ret="None";
++        return Ret;
++    }
++
++    if(Flags & MOVEMENTFLAG_FORWARD)
++    {   Ret+="FW "; }
++    if(Flags & MOVEMENTFLAG_BACKWARD)
++    {   Ret+="BW "; }
++    if(Flags & MOVEMENTFLAG_STRAFE_LEFT)
++    {   Ret+="STL ";    }
++    if(Flags & MOVEMENTFLAG_STRAFE_RIGHT)
++    {   Ret+="STR ";    }
++    if(Flags & MOVEMENTFLAG_LEFT)
++    {   Ret+="LF "; }
++    if(Flags & MOVEMENTFLAG_RIGHT)
++    {   Ret+="RI "; }
++    if(Flags & MOVEMENTFLAG_PITCH_UP)
++    {   Ret+="PTUP ";   }
++    if(Flags & MOVEMENTFLAG_PITCH_DOWN)
++    {   Ret+="PTDW ";   }
++    if(Flags & MOVEMENTFLAG_WALKING)
++    {   Ret+="WALK ";   }
++    if(Flags & MOVEMENTFLAG_ONTRANSPORT)
++    {   Ret+="TRANS ";  }
++    if(Flags & MOVEMENTFLAG_LEVITATING)
++    {   Ret+="LEVI ";   }
++    if(Flags & MOVEMENTFLAG_ROOT)
++    {   Ret+="ROOT ";    }
++    if(Flags & MOVEMENTFLAG_JUMPING)
++    {   Ret+="JUMP ";   }
++    if(Flags & MOVEMENTFLAG_FALLING)
++    {   Ret+="FALL ";   }
++    if(Flags & MOVEMENTFLAG_PENDING_STOP)
++    {   Ret+="PENDING_STOP ";   }
++    if(Flags & MOVEMENTFLAG_PENDING_STRAFE_STOP)
++    {   Ret+="PENDING_STRAFE_STOP ";   }
++    if(Flags & MOVEMENTFLAG_PENDING_FORWARD)
++    {   Ret+="PENDING_FORWARD ";   }
++    if(Flags & MOVEMENTFLAG_PENDING_BACKWARD)
++    {   Ret+="PENDING_BACKWARD ";   }
++    if(Flags & MOVEMENTFLAG_PENDING_STRAFE_LEFT)
++    {   Ret+="PENDING_STRAFE_LEFT ";   }
++    if(Flags & MOVEMENTFLAG_PENDING_STRAFE_RIGHT)
++    {   Ret+="PENDING_STRAFE_RIGHT ";   }
++    if(Flags & MOVEMENTFLAG_PENDING_ROOT)
++    {   Ret+="PENDING_ROOT ";   }
++    if(Flags & MOVEMENTFLAG_SWIMMING)
++    {   Ret+="SWIM ";   }
++    if(Flags & MOVEMENTFLAG_ASCENDING)
++    {   Ret+="ASC ";  }
++    if(Flags & MOVEMENTFLAG_DESCENDING)
++    {   Ret+="DESC ";   }
++    if(Flags & MOVEMENTFLAG_CAN_FLY)
++    {   Ret+="CFLY ";   }
++    if(Flags & MOVEMENTFLAG_FLYING)
++    {   Ret+="FLY ";    }
++    if(Flags & MOVEMENTFLAG_SPLINE_ELEVATION)
++    {   Ret+="SPLINE_ELEVATION ";     }
++    if(Flags & MOVEMENTFLAG_SPLINE_ENABLED)
++    {   Ret+="SPLINE_ENABLED ";    }
++    if(Flags & MOVEMENTFLAG_WATERWALKING)
++    {   Ret+="WTWALK "; }
++    if(Flags & MOVEMENTFLAG_FALLING_SLOW)
++    {   Ret+="FALLING_SLOW ";   }
++    if(Flags & MOVEMENTFLAG_HOVER)
++    {   Ret+="HOVER ";   }
++
++    return Ret;
++}
++#endif // __ANTI_DEBUG__
++
++bool Player::Anti__CheatOccurred(const char* Reason,float Speed,uint16 Op,
++                                float Val1,uint32 Val2,const MovementInfo* MvInfo, bool ForceReport)
++{
++    if(!Reason)
++    {
++        sLog->outError("Anti__ReportCheat: Missing Reason parameter!");
++        return false;
++    }
++
++    const uint32 CurTime=getMSTime();
++    if(getMSTimeDiff(m_anti_lastalarmtime,CurTime) > sWorld->GetMvAnticheatAlarmPeriod())
++        m_anti_alarmcount = 0;
++
++    m_anti_lastalarmtime = CurTime;
++    m_anti_alarmcount = m_anti_alarmcount + 1;
++
++    if (!ForceReport && m_anti_alarmcount <= sWorld->GetMvAnticheatAlarmCount())
++        return false;
++
++    const char* Player = GetName();
++    uint32 Acc = GetSession()->GetAccountId();
++    uint32 Map = GetMapId();
++    uint32 zone_id = GetZoneId();
++    uint32 area_id = GetAreaId();
++    float startX, startY, startZ;
++    float endX = 0.0f, endY = 0.0f, endZ = 0.0f;
++    uint32 fallTime = 0;
++    uint32 t_guid = 0;
++    uint32 flags = 0;
++
++    MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
++    AreaTableEntry const* zoneEntry = GetAreaEntryByAreaID(zone_id);
++    AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(area_id);
++
++    std::string mapName(mapEntry ? mapEntry->name[GetSession()->GetSessionDbcLocale()] : "<unknown>");
++    std::string zoneName(zoneEntry ? zoneEntry->area_name[GetSession()->GetSessionDbcLocale()] : "<unknown>");
++    std::string areaName(areaEntry ? areaEntry->area_name[GetSession()->GetSessionDbcLocale()] : "<unknown>");
++
++    CharacterDatabase.EscapeString(mapName);
++    CharacterDatabase.EscapeString(zoneName);
++    CharacterDatabase.EscapeString(areaName);
++
++    if(!Player)
++    {
++        sLog->outError("Anti__ReportCheat: Player with no name?!?");
++        return false;
++    }
++
++    QueryResult Res=CharacterDatabase.PQuery("SELECT speed,Val1 FROM cheaters WHERE player='%s' AND reason LIKE '%s' AND Map='%u' AND last_date >= NOW()-300",Player,Reason,Map);
++    if(Res)
++    {
++        Field* Fields = Res->Fetch();
++
++        std::stringstream Query;
++        Query << "UPDATE cheaters SET count=count+1,last_date=NOW()";
++        Query.precision(5);
++        if(Speed>0.0f && Speed > Fields[0].GetFloat())
++            Query << ",speed='" << Speed << "'";
++
++        if(Val1>0.0f && Val1 > Fields[1].GetFloat())
++            Query << ",Val1='" << Val1 << "'";
++
++        Query << " WHERE player='" << Player << "' AND reason='" << Reason << "' AND Map='" << Map << "' AND last_date >= NOW()-300 ORDER BY entry DESC LIMIT 1";
++
++        CharacterDatabase.Execute(Query.str().c_str());
++    }
++    else
++    {
++        startX = GetPositionX();
++        startY = GetPositionY();
++        startZ = GetPositionZ();
++
++        if(MvInfo)
++        {
++            fallTime = MvInfo->fallTime;
++            flags = MvInfo->flags;
++            t_guid = GUID_LOPART(MvInfo->t_guid);
++
++            endX = MvInfo->pos.GetPositionX();
++            endY = MvInfo->pos.GetPositionY();
++            endZ = MvInfo->pos.GetPositionZ();
++        }
++
++        CharacterDatabase.PExecute("INSERT INTO cheaters (player,acctid,reason,speed,count,first_date,last_date,Op,Val1,Val2,Map,mapEntry,zone_id,zoneEntry,area_id,areaEntry,Level,startX,startY,startZ,endX,endY,endZ,t_guid,flags,fallTime) "
++                                   "VALUES ('%s','%u','%s','%f','1',NOW(),NOW(),'%s','%f','%u','%u','%s','%u','%s','%u','%s','%u','%f','%f','%f','%f','%f','%f','%u','%u','%u')",
++                                   Player,Acc,Reason,Speed,LookupOpcodeName(Op),Val1,Val2,
++                                   Map,mapName.c_str(),
++                                   zone_id,zoneName.c_str(),
++                                   area_id,areaName.c_str(),
++                                   getLevel(),
++                                   startX,startY,startZ,
++                                   endX,endY,endZ,
++                                   t_guid,flags,fallTime);
++    }
++
++    if(sWorld->GetMvAnticheatKill() && isAlive())
++        DealDamage(this, GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
++
++    if(sWorld->GetMvAnticheatKick())
++        GetSession()->KickPlayer();
++
++    if(sWorld->GetMvAnticheatBan() & 1)
++        sWorld->BanAccount(BAN_CHARACTER,Player,sWorld->GetMvAnticheatBanTime(),"Cheat","Anticheat");
++
++    if(sWorld->GetMvAnticheatBan() & 2)
++    {
++        QueryResult result = LoginDatabase.PQuery("SELECT last_ip FROM account WHERE id=%u", Acc);
++        if(result)
++        {
++
++            Field *fields = result->Fetch();
++            std::string LastIP = fields[0].GetString();
++            if(!LastIP.empty())
++                sWorld->BanAccount(BAN_IP,LastIP,sWorld->GetMvAnticheatBanTime(),"Cheat","Anticheat");
++        }
++    }
++    return true;
++}
++
+ void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket & /*recv_data*/)
+ {
+     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: got MSG_MOVE_WORLDPORT_ACK.");
+@@ -183,6 +381,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
+ 
+     // resummon pet
+     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
++    GetPlayer()->Anti__SetLastTeleTime();
+ 
+     //lets process all delayed operations on successful teleport
+     GetPlayer()->ProcessDelayedOperations();
+@@ -235,6 +434,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
+ 
+     // resummon pet
+     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
++    plMover->Anti__SetLastTeleTime();
+ 
+     //lets process all delayed operations on successful teleport
+     GetPlayer()->ProcessDelayedOperations();
+@@ -338,6 +538,141 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
+     }
+ 
+     /*----------------------*/
++    // ---- anti-cheat features -->>>
++    if (plMover && (plMover->m_transport == 0) && sWorld->GetMvAnticheatEnable() &&
++        GetPlayer()->GetSession()->GetSecurity() <= sWorld->GetMvAnticheatGmLevel() &&
++        GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType()!=FLIGHT_MOTION_TYPE && // POINT_MOTION_TYPE 8 = charge; TARGETED_MOTION_TYPE 5=chase,follow (Mind Control by NPCs?) - better use "IDLE_MOTION_TYPE"
++        (plMover->Anti__GetLastTeleTime() + sWorld->GetMvAnticheatIgnoreAfterTeleport()) < time(NULL) )
++    {
++        /* I really don't care about movement-type yet (todo)
++        UnitMoveType move_type;
++
++        if (movementInfo.flags & MOVEMENTFLAG_FLYING) move_type = MOVE_FLY;
++        else if (movementInfo.flags & MOVEMENTFLAG_SWIMMING) move_type = MOVE_SWIM;
++        else if (movementInfo.flags & MOVEMENTFLAG_WALK_MODE) move_type = MOVE_WALK;
++        else move_type = MOVE_RUN;*/
++
++        float delta_x = GetPlayer()->GetPositionX() - movementInfo.pos.GetPositionX();
++        float delta_y = GetPlayer()->GetPositionY() - movementInfo.pos.GetPositionY();
++        float delta_z = GetPlayer()->GetPositionZ() - movementInfo.pos.GetPositionZ();
++        float delta = sqrt(delta_x * delta_x + delta_y * delta_y); // Len of movement-vector via Pythagoras (a^2+b^2=Len^2)
++        float angle = 0.0f;
++
++        GetPlayer()->m_anti_MovedLen += delta;
++
++        // Tangens of walking angel
++        if (!(movementInfo.flags & (MOVEMENTFLAG_FLYING | MOVEMENTFLAG_SWIMMING)))
++        {
++            angle = ((delta > 0.0f) && (delta_z > 0.0f)) ? (atan(delta_z / delta) * 180.0f / M_PI) : 0.0f;
++        }
++
++        //antiOFF fall-damage, MOVEMENTFLAG_FALLING set by client if player try movement when falling and unset in this case the MOVEMENTFLAG_FALLING flag.
++        if((GetPlayer()->m_anti_BeginFallZ == INVALID_HEIGHT) &&
++           ((movementInfo.flags & (MOVEMENTFLAG_FALLING | MOVEMENTFLAG_PENDING_STOP)) != 0) &&
++           !GetPlayer()->CanFly() && !GetPlayer()->HasAuraType(SPELL_AURA_FEATHER_FALL))
++        {
++            GetPlayer()->m_anti_BeginFallZ=movementInfo.pos.GetPositionZ();
++        }
++
++        const uint32 CurTime=getMSTime(); //TODO use client time
++        if(getMSTimeDiff(GetPlayer()->m_anti_LastLenCheck,CurTime) >= 500)
++        {
++            float delta_xyt=GetPlayer()->m_anti_MovedLen/(float)(getMSTimeDiff(GetPlayer()->m_anti_LastLenCheck,CurTime));
++            GetPlayer()->m_anti_LastLenCheck = CurTime;
++            GetPlayer()->m_anti_MovedLen = 0.0f;
++
++#ifdef __ANTI_DEBUG__
++            SendAreaTriggerMessage("XYT: %f ; Flags: %s",delta_xyt,FlagsToStr(movementInfo.flags).c_str());
++#endif //__ANTI_DEBUG__
++
++            // MOVEMENTFLAG_ONTRANSPORT should already have been removed by the code earlier in this function if player is not on a transport, but maybe it can still be cheated so add zone/area IDs just to be sure
++            // 2257=deep run tram, 3992=The Ancient Lift (HFojrd)-area!!, 2618=Jadefire Run (Felwood) (???)-area + 3988 (The Isle of Spears)-; 4384 - SotA (zone)
++            if(delta_xyt > sWorld->GetMvAnticheatMaxXYT() && delta<=100.0f &&
++                ((movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT) == 0 || (GetPlayer()->GetZoneId() != 2257 && GetPlayer()->GetAreaId() != 3992 && GetPlayer()->GetAreaId() != 3988 && GetPlayer()->GetAreaId() != 2618 && GetPlayer()->GetZoneId() != 4384)) &&
++                (movementInfo.flags & MOVEMENTFLAG_FALLING) == 0 )
++            {
++                GetPlayer()->Anti__CheatOccurred("Speed hack",delta_xyt,opcode,
++                                                GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType(),
++                                                getMSTimeDiff(plMover->m_movementInfo.time,movementInfo.time),&movementInfo);
++            }
++        }
++
++        if(delta > 100.0f &&
++            ((movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT) == 0 || (GetPlayer()->GetZoneId() != 2257 && GetPlayer()->GetAreaId() != 3992 && GetPlayer()->GetAreaId() != 3988 && GetPlayer()->GetAreaId() != 2618 && GetPlayer()->GetZoneId() != 4384)))
++        {
++            GetPlayer()->Anti__CheatOccurred("Tele hack",delta,opcode,
++                GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() /*Val1*/,
++                getMSTimeDiff(plMover->m_movementInfo.time,movementInfo.time) /*Val2*/,
++                &movementInfo /*MvInfo*/, true /*ForceReport*/);
++        }
++
++        // Check for waterwalking
++        if(((movementInfo.flags & MOVEMENTFLAG_WATERWALKING) != 0) &&
++           ((movementInfo.flags ^ MOVEMENTFLAG_WATERWALKING) != 0) && // Client sometimes set waterwalk where it shouldn't do that...
++           ((movementInfo.flags & MOVEMENTFLAG_JUMPING) == 0) &&
++           GetPlayer()->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()-4.0f) &&
++           !(GetPlayer()->HasAuraType(SPELL_AURA_WATER_WALK) || GetPlayer()->HasAuraType(SPELL_AURA_GHOST)))
++        {
++            GetPlayer()->Anti__CheatOccurred("Water walking",0.0f,opcode,GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType(),0,&movementInfo);
++        }
++
++        // Check for walking upwards a mountain while not beeing able to do that
++        /*if (angle > 50.0f &&
++            !GetPlayer()->IsInWater() &&
++            !GetPlayer()->IsFlying() &&
++            !GetPlayer()->IsFalling() &&
++            opcode == MSG_MOVE_HEARTBEAT)
++        {
++            GetPlayer()->Anti__CheatOccurred("Climb hack (test!!)",delta,opcode,angle,delta_z,&movementInfo);
++        }*/
++
++
++        static const float DIFF_OVERGROUND = 10.0f; //too much - aggro distance is 3+0.4+bounding_radius => change to 5
++        float Anti__GroundZ = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),MAX_HEIGHT);
++        float Anti__FloorZ  = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),GetPlayer()->GetPositionZ());
++        //float Anti__FloorZ  = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),GetPlayer()->GetPositionZ(), true, 100.0f); //this is better, but maybe slower?
++        float Anti__MapZ = ((Anti__FloorZ <= (INVALID_HEIGHT+5.0f)) ? Anti__GroundZ : Anti__FloorZ) + DIFF_OVERGROUND;
++
++        if(!GetPlayer()->CanFly() &&
++           !GetPlayer()->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()-4.0f) &&
++           Anti__MapZ < GetPlayer()->GetPositionZ() && Anti__MapZ > (INVALID_HEIGHT+DIFF_OVERGROUND + 5.0f))
++        {
++            // Fly Hack ... alternatively one can check for MSG_MOVE_START_PITCH_UP/MSG_MOVE_START_PITCH_DOWN
++            if((movementInfo.flags & plMover->m_movementInfo.flags & (MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_DESCENDING/* | MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN*/)) != 0)
++            {
++                GetPlayer()->Anti__CheatOccurred("Fly hack",
++                                                GetPlayer()->GetPositionZ()-Anti__MapZ,
++                                                opcode,GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType(),
++                                                ((uint8)(GetPlayer()->HasAuraType(SPELL_AURA_FLY))) + // is included in canfly
++                                                ((uint8)(GetPlayer()->HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))*2)+ // not included in canfly, but should be present only together with spell_aura_fly
++                                                ((uint8)(GetPlayer()->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))*4), // is included in canfly
++                                                &movementInfo);
++            }
++
++     //       static const float DIFF_AIRJUMP=25.0f; // 25 is realy high, but to many false positives...
++            // Air-Jump-Detection definitively needs a better way to be detected...
++            /* Need a better way to do that - currently a lot of fake alarms
++            else if((Anti__MapZ+DIFF_AIRJUMP < GetPlayer()->GetPositionZ() &&
++                     (movementInfo.flags & (MOVEMENTFLAG_FALLING | MOVEMENTFLAG_UNK4))==0) ||
++                    (Anti__MapZ < GetPlayer()->GetPositionZ() &&
++                     opcode==MSG_MOVE_JUMP))
++            {
++                GetPlayer()->Anti__CheatOccurred("Air Jump hack (test)",
++                                    0.0f,opcode,0.0f,movementInfo.flags,&movementInfo);
++            }*/
++        }
++
++
++        if(Anti__FloorZ < -199900.0f && Anti__GroundZ >= -199900.0f &&
++           GetPlayer()->GetPositionZ()+5.0f < Anti__GroundZ &&
++           GetPlayer()->GetPositionZ() == 0.0f && // lame check, but should work ;-)
++           (movementInfo.flags & MOVEMENTFLAG_FALLING) == 0 )
++        {
++            GetPlayer()->Anti__CheatOccurred("Teleport2Plane hack",
++                                             Anti__GroundZ,opcode,GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType(),0,&movementInfo);
++        }
++    }
++    // <<---- anti-cheat features
+ 
+     /* process position-change */
+     WorldPacket data(opcode, recv_data.size());
+diff --git a/src/server/game/Spells/Auras/SpellAuraEffects.cpp b/src/server/game/Spells/Auras/SpellAuraEffects.cpp
+index 1972b62..54b39b3 100755
+--- a/src/server/game/Spells/Auras/SpellAuraEffects.cpp
++++ b/src/server/game/Spells/Auras/SpellAuraEffects.cpp
+@@ -2852,9 +2852,16 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const* aurApp, uint8 mode
+         // allow flying
+         WorldPacket data;
+         if (apply)
++        {
++            static_cast<Player*>(target)->SetCanFly(true);
++            static_cast<Player*>(target)->m_anti_BeginFallZ=INVALID_HEIGHT;
+             data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
++        }
+         else
++        {
+             data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
++            static_cast<Player*>(target)->SetCanFly(false);
++        }
+         data.append(target->GetPackGUID());
+         data << uint32(0);                                      // unk
+         player->SendDirectMessage(&data);
+@@ -2901,7 +2908,11 @@ void AuraEffect::HandleAuraFeatherFall(AuraApplication const* aurApp, uint8 mode
+ 
+     WorldPacket data;
+     if (apply)
++    {
+         data.Initialize(SMSG_MOVE_FEATHER_FALL, 8+4);
++        if (target->GetTypeId() == TYPEID_PLAYER)
++            static_cast<Player*>(target)->m_anti_BeginFallZ=INVALID_HEIGHT;
++    }
+     else
+         data.Initialize(SMSG_MOVE_NORMAL_FALL, 8+4);
+     data.append(target->GetPackGUID());
+@@ -3250,9 +3261,15 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
+             {
+                 WorldPacket data;
+                 if (apply)
++                {
++                    static_cast<Player*>(target)->SetCanFly(true);
+                     data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
++                }
+                 else
++                {
+                     data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
++                    static_cast<Player*>(target)->SetCanFly(false);
++                }
+                 data.append(player->GetPackGUID());
+                 data << uint32(0);                                      // unknown
+                 player->SendDirectMessage(&data);
+diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
+index 0dd8eb6..86c52cd 100755
+--- a/src/server/game/Spells/SpellEffects.cpp
++++ b/src/server/game/Spells/SpellEffects.cpp
+@@ -6212,6 +6212,9 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
+         // not all charge effects used in negative spells
+         if (!m_spellInfo->IsPositive() && m_caster->GetTypeId() == TYPEID_PLAYER)
+             m_caster->Attack(unitTarget, true);
++
++        if (m_caster->GetTypeId() == TYPEID_PLAYER)
++            static_cast<Player*>(m_caster)->m_anti_BeginFallZ=INVALID_HEIGHT;
+     }
+ }
+ 
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 8e25a95..918aa34 100755
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -569,6 +569,18 @@ void World::LoadConfigSettings(bool reload)
+ 
+     m_bool_configs[CONFIG_DURABILITY_LOSS_IN_PVP] = ConfigMgr::GetBoolDefault("DurabilityLoss.InPvP", false);
+ 
++    // movement anticheat
++    m_MvAnticheatEnable                     = ConfigMgr::GetBoolDefault("Anticheat.Movement.Enable",false);
++    m_MvAnticheatKick                       = ConfigMgr::GetBoolDefault("Anticheat.Movement.Kick",false);
++    m_MvAnticheatAlarmCount                 = (uint32)ConfigMgr::GetIntDefault("Anticheat.Movement.AlarmCount", 5);
++    m_MvAnticheatAlarmPeriod                = (uint32)ConfigMgr::GetIntDefault("Anticheat.Movement.AlarmTime", 5000);
++    m_MvAntiCheatBan                        = (unsigned char)ConfigMgr::GetIntDefault("Anticheat.Movement.BanType",0);
++    m_MvAnticheatBanTime                    = ConfigMgr::GetStringDefault("Anticheat.Movement.BanTime","1m");
++    m_MvAnticheatGmLevel                    = (unsigned char)ConfigMgr::GetIntDefault("Anticheat.Movement.GmLevel",0);
++    m_MvAnticheatKill                       = ConfigMgr::GetBoolDefault("Anticheat.Movement.Kill",false);
++    m_MvAnticheatMaxXYT                     = ConfigMgr::GetFloatDefault("Anticheat.Movement.MaxXYT",0.04f);
++    m_MvAnticheatIgnoreAfterTeleport        = (uint16)ConfigMgr::GetIntDefault("Anticheat.Movement.IgnoreSecAfterTeleport",10);
++
+     m_int_configs[CONFIG_COMPRESSION] = ConfigMgr::GetIntDefault("Compression", 1);
+     if (m_int_configs[CONFIG_COMPRESSION] < 1 || m_int_configs[CONFIG_COMPRESSION] > 9)
+     {
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index b641fff..77fe361 100755
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -744,6 +744,19 @@ class World
+         static int32 GetVisibilityNotifyPeriodInInstances() { return m_visibility_notify_periodInInstances;  }
+         static int32 GetVisibilityNotifyPeriodInBGArenas()  { return m_visibility_notify_periodInBGArenas;   }
+ 
++        //movement anticheat enable flag
++        inline bool GetMvAnticheatEnable()             {return m_MvAnticheatEnable;}
++        inline bool GetMvAnticheatKick()               {return m_MvAnticheatKick;}
++        inline uint32 GetMvAnticheatAlarmCount()       {return m_MvAnticheatAlarmCount;}
++        inline uint32 GetMvAnticheatAlarmPeriod()      {return m_MvAnticheatAlarmPeriod;}
++        inline unsigned char GetMvAnticheatBan()       {return m_MvAntiCheatBan;}
++        inline std::string GetMvAnticheatBanTime()     {return m_MvAnticheatBanTime;}
++        inline unsigned char GetMvAnticheatGmLevel()   {return m_MvAnticheatGmLevel;}
++        inline bool GetMvAnticheatKill()               {return m_MvAnticheatKill;}
++        inline float GetMvAnticheatMaxXYT()            {return m_MvAnticheatMaxXYT;}
++        inline uint16 GetMvAnticheatIgnoreAfterTeleport()   {return m_MvAnticheatIgnoreAfterTeleport;}
++
++
+         void ProcessCliCommands();
+         void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
+ 
+@@ -841,6 +854,19 @@ class World
+         static int32 m_visibility_notify_periodInInstances;
+         static int32 m_visibility_notify_periodInBGArenas;
+ 
++        //movement anticheat enable flag
++        bool m_MvAnticheatEnable;
++        bool m_MvAnticheatKick;
++        uint32 m_MvAnticheatAlarmCount;
++        uint32 m_MvAnticheatAlarmPeriod;
++        unsigned char m_MvAntiCheatBan;
++        std::string m_MvAnticheatBanTime;
++        unsigned char m_MvAnticheatGmLevel;
++        bool m_MvAnticheatKill;
++        float m_MvAnticheatMaxXYT;
++        uint16 m_MvAnticheatIgnoreAfterTeleport;
++
++
+         // CLI command holder to be thread safe
+         ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;
+ 
+diff --git a/src/server/scripts/Commands/cs_gm.cpp b/src/server/scripts/Commands/cs_gm.cpp
+index 9b9d1cf..5a157bf 100644
+--- a/src/server/scripts/Commands/cs_gm.cpp
++++ b/src/server/scripts/Commands/cs_gm.cpp
+@@ -98,9 +98,15 @@ public:
+ 
+         WorldPacket data(12);
+         if (strncmp(args, "on", 3) == 0)
++        {
+             data.SetOpcode(SMSG_MOVE_SET_CAN_FLY);
++            static_cast<Player*>((target))->SetCanFly(true);
++        }
+         else if (strncmp(args, "off", 4) == 0)
++        {
+             data.SetOpcode(SMSG_MOVE_UNSET_CAN_FLY);
++            static_cast<Player*>((target))->SetCanFly(false);
++        }
+         else
+         {
+             handler->SendSysMessage(LANG_USE_BOL);
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 1b21baa..f8a2700 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -2955,6 +2955,69 @@ CharDelete.KeepDays = 30
+ ###################################################################################################
+ 
+ ###################################################################################################
++# MOVEMENT ANTICHEAT
++#
++#    Anticheat.Movement.Enable
++#        Enable Movement Anticheat
++#        Default: 0 - off
++#                 1 - on
++#
++#    Anticheat.Movement.AlarmCount
++#        Count alarms. After AlarmCount is exceeded, actions are taken against
++#        the player. (default 5)
++#
++#    Anticheat.Movement.AlarmTime
++#        Reset alarm-count after this milliseconds. (default 5000)
++#
++#    Anticheat.Movement.Kill
++#        Enable Kill cheater
++#        Default: 0 - off
++#                 1 - on
++#
++#    Anticheat.Movement.Kick
++#        Enable Kick cheater
++#        Default: 0 - off
++#                 1 - on
++#
++#    Anticheat.Movement.BanType
++#        Enable Ban cheater
++#        Default: 0 - off
++#                 1 - Ban Account
++#                 2 - Ban IP
++#                 3 - Ban Account + IP
++#
++#    Anticheat.Movement.BanTime
++#        How long the ban should last.
++#        Default: 1 Minute - 1m
++#
++#    Anticheat.Movement.MaxXYT
++#        Max units a player is allowed to travel per millisecond.
++#        Default: 0.04 (This is ~400% Speed, 0.007 is walk-speed,
++#                 310% is 0.0287)
++#
++#    Anticheat.Movement.IgnoreSecAfterTeleport
++#        After being teleported this number of seconds no cheat is reported.
++#        Default: 10 seconds - 10
++#
++#    Anticheat.Movement.GmLevel
++#        Only accounts that are below this gm-level or exact at the same,
++#        are reported for cheating.
++#        Default: Only normal Players - 0
++#
++###################################################################################################
++
++Anticheat.Movement.Enable = 1
++Anticheat.Movement.AlarmCount = 5
++Anticheat.Movement.AlarmTime = 5000
++Anticheat.Movement.Kill = 0
++Anticheat.Movement.Kick = 0
++Anticheat.Movement.BanType = 0
++Anticheat.Movement.BanTime = "1m"
++Anticheat.Movement.MaxXYT = 0.04
++Anticheat.Movement.IgnoreSecAfterTeleport = 10
++Anticheat.Movement.GmLevel = 0
++
++###################################################################################################
+ # CUSTOM SERVER OPTIONS
+ #
+ #    PlayerStart.AllReputation
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,25 @@
+From 2836e920a135e5a3c4d9b6e07d5de71bfd5ca027 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 11:31:00 -0500
+Subject: [PATCH 23/65] 2.2.20 ICC: Putricidio aggrea si se acercan
+
+---
+ .../IcecrownCitadel/boss_professor_putricide.cpp   |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
+index ee7b516..c1c1384 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
+@@ -192,7 +192,7 @@ class boss_professor_putricide : public CreatureScript
+                 summons.DespawnAll();
+                 SetPhase(PHASE_COMBAT_1);
+                 _experimentState = EXPERIMENT_STATE_OOZE;
+-                me->SetReactState(REACT_DEFENSIVE);
++                me->SetReactState(REACT_AGGRESSIVE);
+                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                 if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
+                     me->GetMotionMaster()->MovementExpired();
+-- 
+1.7.8.msysgit.0
+

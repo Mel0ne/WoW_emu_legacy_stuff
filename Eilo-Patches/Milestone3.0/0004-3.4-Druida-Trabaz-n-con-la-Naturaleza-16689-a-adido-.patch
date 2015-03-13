@@ -1,0 +1,30 @@
+From 0d9a930872de9a093b2b2fb9b8504b0b1690ba1b Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sat, 10 Dec 2011 14:49:39 +0100
+Subject: [PATCH 04/22] =?UTF-8?q?3.4=20Druida:=20Trabaz=C3=B3n=20con=20la=20?=
+ =?UTF-8?q?Naturaleza=20(16689)=20a=C3=B1adido=20CD=20interno?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../2011_09_02_100_world_druida_nature_grasp.sql   |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_09_02_100_world_druida_nature_grasp.sql
+
+diff --git a/sql/updates/world/reanemu/2011_09_02_100_world_druida_nature_grasp.sql b/sql/updates/world/reanemu/2011_09_02_100_world_druida_nature_grasp.sql
+new file mode 100644
+index 0000000..56f54f9
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_09_02_100_world_druida_nature_grasp.sql
+@@ -0,0 +1,6 @@
++-- Añadido CD interno a Nature Grasp
++DELETE FROM `spell_proc_event` WHERE `entry` = 16689;
++
++INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`)
++
++VALUES (16689, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2);
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,28 @@
+From 7b197c1a350f59262d92facde40d432672aedfb3 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 29 Dec 2011 13:59:57 -0500
+Subject: [PATCH 42/65] 2.2.39 ICC: Sindragosa ahora no mete en tumba al tank
+
+---
+ .../Northrend/IcecrownCitadel/boss_sindragosa.cpp  |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+index e817082..ee381a3 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+@@ -506,8 +506,11 @@ class boss_sindragosa : public CreatureScript
+                         case EVENT_ICE_TOMB:
+                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_ICE_TOMB_UNTARGETABLE))
+                             {
++                                if(target)
++                                {
+                                 Talk(EMOTE_WARN_FROZEN_ORB, target->GetGUID());
+                                 DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
++                                }
+                             }
+                             events.ScheduleEvent(EVENT_ICE_TOMB, urand(16000, 23000));
+                             break;
+-- 
+1.7.8.msysgit.0
+

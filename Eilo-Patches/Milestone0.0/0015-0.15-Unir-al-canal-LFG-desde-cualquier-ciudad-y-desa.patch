@@ -1,0 +1,28 @@
+From 1785845f1a1b8f0761029e4ec920001f78942bb0 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 15 Dec 2011 21:47:13 -0500
+Subject: [PATCH 15/29] 0.15 Unir al canal LFG desde cualquier ciudad y
+ desactivado avisos de Join/Leave
+
+---
+ src/server/game/Entities/Player/Player.cpp |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index ac20b7d..a0877ab 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -5619,6 +5619,10 @@ void Player::RepopAtGraveyard()
+ 
+ bool Player::CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone)
+ {
++    // Player can join LFG anywhere
++    if (channel->flags & CHANNEL_DBC_FLAG_LFG)
++        return true;
++
+     if (channel->flags & CHANNEL_DBC_FLAG_ZONE_DEP && zone->flags & AREA_FLAG_ARENA_INSTANCE)
+         return false;
+ 
+-- 
+1.7.8.msysgit.0
+

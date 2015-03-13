@@ -1,0 +1,24 @@
+From 4a901bbfeaea3824a72b0151973ec7bc8aa8a9e9 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 18:28:52 -0500
+Subject: [PATCH 15/26] 1.15 Deshabilitadas spells de nefarian que usan para
+ exploit
+
+---
+ ...1_10_15_100_world_disables_exploit_nefarian.sql |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_10_15_100_world_disables_exploit_nefarian.sql
+
+diff --git a/sql/updates/world/reanemu/2011_10_15_100_world_disables_exploit_nefarian.sql b/sql/updates/world/reanemu/2011_10_15_100_world_disables_exploit_nefarian.sql
+new file mode 100644
+index 0000000..9157ecf
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_10_15_100_world_disables_exploit_nefarian.sql
+@@ -0,0 +1,4 @@
++DELETE FROM `disables` WHERE `sourceType` = 0 AND `entry` IN (23397, 23398);
++INSERT INTO `disables` VALUES
++    (0, 23397, 3, '', '', 'CURRENTLY A SOURCE OF BUG ABUSE - Allows Warriors to stack Berserker Stance passive auras indefinitely and for use in all stances'),
++    (0, 23398, 3, '', '', 'CURRENTLY A SOURCE OF BUG ABUSE - Allows Druids to stack Cat Form passive auras indefinitely and for use in all stances');
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,29 @@
+From 47fa8a669b0cc509404ac96e1e8fe0c4ebb4f26c Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 17:47:11 -0500
+Subject: [PATCH 08/26] 1.8 EyeOfStorm: Fix entrega de bandera en
+ FelReaver(AtracadorVil)
+
+---
+ .../game/Battlegrounds/Zones/BattlegroundEY.cpp    |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Battlegrounds/Zones/BattlegroundEY.cpp b/src/server/game/Battlegrounds/Zones/BattlegroundEY.cpp
+index b7994d0..a989385 100755
+--- a/src/server/game/Battlegrounds/Zones/BattlegroundEY.cpp
++++ b/src/server/game/Battlegrounds/Zones/BattlegroundEY.cpp
+@@ -258,6 +258,11 @@ void BattlegroundEY::UpdatePointStatuses()
+                     if (m_PointState[point] == EY_POINT_UNDER_CONTROL && player->GetTeam() != m_PointOwnedByTeam[point])
+                         this->EventTeamLostPoint(player, point);
+                 }
++                // hack fix for Fel Reaver Ruins
++                if (point == FEL_REAVER && m_PointOwnedByTeam[point] == player->GetTeam())
++                    if (m_FlagState && GetFlagPickerGUID() == player->GetGUID())
++                        if (player->GetDistance2d(2044,1730) < 2)
++                            EventPlayerCapturedFlag(player, BG_EY_OBJECT_FLAG_FEL_REAVER);
+             }
+         }
+     }
+-- 
+1.7.8.msysgit.0
+

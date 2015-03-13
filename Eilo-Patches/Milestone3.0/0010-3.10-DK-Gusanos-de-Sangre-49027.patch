@@ -1,0 +1,64 @@
+From f21b088c0b6a94dccc06069e466951352086daf9 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sun, 27 Nov 2011 15:48:07 +0100
+Subject: [PATCH 10/22] 3.10 DK: Gusanos de Sangre (49027)
+
+---
+ .../reanemu/2011_07_08_100_world_bloodworms.sql    |    5 +++++
+ src/server/game/Entities/Pet/Pet.cpp               |    6 ++++++
+ src/server/game/Entities/Unit/StatSystem.cpp       |    2 ++
+ 3 files changed, 13 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_07_08_100_world_bloodworms.sql
+
+diff --git a/sql/updates/world/reanemu/2011_07_08_100_world_bloodworms.sql b/sql/updates/world/reanemu/2011_07_08_100_world_bloodworms.sql
+new file mode 100644
+index 0000000..d761389
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_07_08_100_world_bloodworms.sql
+@@ -0,0 +1,5 @@
++-- Bloodworm AI
++UPDATE `creature_template` SET `AIName` = 'EventAI' WHERE `entry` = 28017;
++DELETE FROM `creature_ai_scripts` WHERE `creature_id` = 28017;
++INSERT INTO `creature_ai_scripts` (`id`, `creature_id`, `event_type`, `event_inverse_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action1_type`, `action1_param1`, `action1_param2`, `action1_param3`, `action2_type`, `action2_param1`, `action2_param2`, `action2_param3`, `action3_type`, `action3_param1`, `action3_param2`, `action3_param3`, `comment`) VALUES
++(2801701, 28017, 4, 0, 100, 0, 0, 0, 0, 0, 11, 50453, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Bloodworm - Health Leech');
+\ No newline at end of file
+diff --git a/src/server/game/Entities/Pet/Pet.cpp b/src/server/game/Entities/Pet/Pet.cpp
+index 6075085..1cedf62 100755
+--- a/src/server/game/Entities/Pet/Pet.cpp
++++ b/src/server/game/Entities/Pet/Pet.cpp
+@@ -980,6 +980,12 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
+                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                     break;
+                 }
++               case 28017: // Bloodworms
++               {
++                   SetCreateHealth(4 * petlevel);
++                   SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)) + m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f);
++                   SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)) + m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f);
++               }
+             }
+             break;
+         }
+diff --git a/src/server/game/Entities/Unit/StatSystem.cpp b/src/server/game/Entities/Unit/StatSystem.cpp
+index 31c6a32..2459892 100755
+--- a/src/server/game/Entities/Unit/StatSystem.cpp
++++ b/src/server/game/Entities/Unit/StatSystem.cpp
+@@ -1066,6 +1066,7 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
+ #define ENTRY_TREANT            1964
+ #define ENTRY_FIRE_ELEMENTAL    15438
+ #define ENTRY_GHOUL             26125
++#define ENTRY_BLOODWORM         28017
+ 
+ bool Guardian::UpdateStats(Stats stat)
+ {
+@@ -1227,6 +1228,7 @@ void Guardian::UpdateMaxHealth()
+         case ENTRY_SUCCUBUS:    multiplicator = 9.1f;   break;
+         case ENTRY_FELHUNTER:   multiplicator = 9.5f;   break;
+         case ENTRY_FELGUARD:    multiplicator = 11.0f;  break;
++        case ENTRY_BLOODWORM:   multiplicator = 1.0f;   break;
+         default:                multiplicator = 10.0f;  break;
+     }
+ 
+-- 
+1.7.8.msysgit.0
+

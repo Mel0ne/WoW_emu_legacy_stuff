@@ -1,0 +1,26 @@
+From d62c7c944fd988ed5e1d65084ba6d3bb73fdbabe Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sun, 11 Dec 2011 22:35:48 +0100
+Subject: [PATCH 05/22] =?UTF-8?q?3.5=20Cazador:=20Trampa=20explosiva=20(1381?=
+ =?UTF-8?q?2)=20corregido=20el=20da=C3=B1o=20peri=C3=B3dico?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ ...011_09_09_100_world_hunter_trampa_explosiva.sql |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_09_09_100_world_hunter_trampa_explosiva.sql
+
+diff --git a/sql/updates/world/reanemu/2011_09_09_100_world_hunter_trampa_explosiva.sql b/sql/updates/world/reanemu/2011_09_09_100_world_hunter_trampa_explosiva.sql
+new file mode 100644
+index 0000000..65d0207
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_09_09_100_world_hunter_trampa_explosiva.sql
+@@ -0,0 +1,2 @@
++-- Fix Spell Explosive Trap (Hunter) daño periódico nulo
++UPDATE `spell_bonus_data` SET `ap_dot_bonus` = '0.1' WHERE `entry` = 13812;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

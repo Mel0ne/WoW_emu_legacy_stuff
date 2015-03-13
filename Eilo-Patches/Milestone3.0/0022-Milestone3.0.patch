@@ -1,0 +1,68 @@
+From d6bf3618a50b63d1d8a20d28baaa2cd1b42b9f5b Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Tue, 3 Jan 2012 11:45:26 -0500
+Subject: [PATCH 22/22] Milestone3.0
+
+---
+ WHAT_IS_INSIDE |   33 +++++++++++++++++++++++++++++++++
+ 1 files changed, 33 insertions(+), 0 deletions(-)
+
+diff --git a/WHAT_IS_INSIDE b/WHAT_IS_INSIDE
+index 0257660..ca1504b 100644
+--- a/WHAT_IS_INSIDE
++++ b/WHAT_IS_INSIDE
+@@ -19,6 +19,8 @@ Milestone1.0: Jugabilidad en general, adecuaciones de codigo vario en mapas
+ Milestone2.0: Mejoras en Instances y dungeons, escencialmente para darles funcionalidad
+               y detalles menores de funcionamiento para tenerlas lo mas cercano
+               a blizzlike, solucion de bugs varios.
++Milestone3.0  Arreglos a Spells, sobre todo para estabilidad del pve y del
++              pvp dentro de los reinos.
+ 
+ 
+ ##################################
+@@ -173,11 +175,42 @@ Milestone2.0: Mejoras en Instances y dungeons, escencialmente para darles funcio
+ #######################
+ # Hechizos y Talentos #
+ #######################
++3.1  - 05/12/2011: Guerrero: Filotormenta (46924) inmunidades y cambiar armas por Kandera
++3.2  - 25/22/2011: Mago: Reflejo Exacto ahora no atacan a objetivos que están bajo los efectos de Polimorfia 
++3.3  - 05/11/2011: Brujo: Mejoras en pet felhunter por Locknes
++3.4  - 02/09/2011: Druida: Trabazon con la naturaleza: añadido CD interno por Retriman
++3.5  - 09/09/2011: Cazador: Trampla explosiva corregido el daño periodico por Retriman
++3.6  - 11/08/2011: Chaman: Escudos de Agua por Jildor
++3.7  - 10/09/2011: Chaman: Maremoto ahora dará el bonus de crítico correspondiente por Retriman
++3.8  - 11/08/2011: Cazador: Golpes de cobra por Jildor
++3.9  - 13/09/2011: Paladin: Bendición de Salvaguardia y Bendición de Reyes no stackean por Retriman
++3.10 - 08/07/2011: DK: Gusanos de Sangre por KarlosHyD
++3.12 - 02/09/2011: Guerrero: Reflejar efecto de Multi-Reflect por Retriman
++3.13 - 08/08/2011: Cazador: Disparo de Quimera y picaduras mejorado por Retriman
++3.14 - 08/08/2011: Cazador: Separación no puede ser usado cuando se está en root por Retriman
++3.15 - 20/08/2011: Paladin: Escudo Sacro añadir cooldown (cd) después de efecto de remover por Odyssey
++3.16 - 28/10/2011: Paladin: Defensa recta por Chaplain
++3.17 - 21/08/2011: Penitencia y Choque Sagrado no se pueden usar en duelos de otros pj por Retriman
++3.18 - 05/11/2011: Cazador: Distraer ahora se interrumpen efectos de comer/beber por Kerhong
++3.19 - 22/09/2011: Cazador: Pet Demosaurio Mordedura monstruosa fix efecto aplicado al target por Retriman
++3.20 - 22/09/2011: Sacerdote: Rezo de Alivio (33076) ahora es afectado por Disciplinas gemelas (47588), Sanación espiritual (87336) y Divina providencia (47567) por Retriman
+ 
+ 
+ #################
+ # Items y Bonus #
+ #################
++3.11 - 07/07/2011: ICC 25 Normal - Nibelungo - Proc Arma de Caster (71845) por Signfinder
++3.11 - 07/07/2011: ICC 25 Heroico- Nibelungo - Proc Arma de Caster (71846) por Signfinder
++3.11 - 07/07/2011: ICC 25 Normal - Trauma - Proc Arma de Healer (71865) por Signfinder
++3.11 - 07/07/2011: ICC 25 Heroico - Trauma - Proc Arma de Healer (71868) por Signfinder
++3.11 - 07/07/2011: ICC 25 Normal - Últimas Palabras - Proc Arma de Tanque (71871) por Signfinder
++3.11 - 07/07/2011: ICC 25 Heroico - Últimas Palabras - Proc Arma de Tanque (71873) por Signfinder
++3.11 - 07/07/2011: ICC 25 Normal - Proc Daga (71883) por Signfinder
++3.11 - 07/07/2011: ICC 25 Heroico - Proc Daga (71888) por Signfinder
++3.21 - 22/09/2011: Efectos de Gemas Meta: reducción de duración de silencio (55366) por Retriman
++3.21 - 22/09/2011: Efectos de Gemas Meta: reducción de duración de snare/root (55378) por Retriman
++3.21 - 22/09/2011: Efectos de Gemas Meta: reducción de duración de miedo (55357) por Retriman
++3.21 - 22/09/2011: Efectos de Gemas Meta: reducción de duración de stun (55358) por Retriman
+ 
+ 
+ ############################
+-- 
+1.7.8.msysgit.0
+

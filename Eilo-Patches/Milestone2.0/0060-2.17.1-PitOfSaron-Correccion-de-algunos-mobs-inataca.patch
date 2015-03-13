@@ -1,0 +1,37 @@
+From 7fb59e5b5a7b7346caae08010fae95a69061311f Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 14:24:06 -0500
+Subject: [PATCH 60/65] 2.17.1 PitOfSaron: Correccion de algunos mobs
+ inatacables
+
+---
+ .../reanemu/2011_12_24_100_world_pit_of_saron.sql  |   16 ++++++++++++++++
+ 1 files changed, 16 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_12_24_100_world_pit_of_saron.sql
+
+diff --git a/sql/updates/world/reanemu/2011_12_24_100_world_pit_of_saron.sql b/sql/updates/world/reanemu/2011_12_24_100_world_pit_of_saron.sql
+new file mode 100644
+index 0000000..d24f09e
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_12_24_100_world_pit_of_saron.sql
+@@ -0,0 +1,16 @@
++-- Querys correcciones Foso de Saron
++-- Eilo (https://github.com/eilo)
++
++-- Querys para encontrar los valores actuales de los npcs, tanto plantilla como spawn
++-- SELECT entry,difficulty_entry_1,`name`,unit_flags,dynamicflags,mechanic_immune_mask,ainame,scriptname FROM creature_template WHERE entry=36830;
++-- SELECT * FROM creature WHERE id IN (36830,37638);
++
++-- Warborn Laborer corregida flag que no hacia que ataquen normalmente y asegurando que el spawn tampoco
++UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~256 WHERE `entry` IN (36830,37638); 
++UPDATE `creature_template` SET `dynamicflags`=`dynamicflags`&~32 WHERE `entry` IN (36830,37638);
++UPDATE `creature` SET `unit_flags`=0,`dynamicflags`=`dynamicflags`&~32 WHERE `id` IN (36830,37638);
++
++-- Ymirjar Deathbringer lo mismo que el anterior
++UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~256 WHERE `entry` IN (36892,37641); 
++UPDATE `creature_template` SET `dynamicflags`=`dynamicflags`&~32 WHERE `entry` IN (36892,37641);
++UPDATE `creature` SET `unit_flags`=0,`dynamicflags`=`dynamicflags`&~32 WHERE `id` IN (36892,37641);
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

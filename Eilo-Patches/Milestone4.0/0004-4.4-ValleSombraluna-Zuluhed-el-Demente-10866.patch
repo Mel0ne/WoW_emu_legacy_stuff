@@ -1,0 +1,23 @@
+From 96ef480a668c1371c2595497fab47c882c78c8ee Mon Sep 17 00:00:00 2001
+From: strolch <sebeche@gmail.com>
+Date: Mon, 6 Feb 2012 21:59:19 -0500
+Subject: [PATCH 4/6] 4.4 ValleSombraluna: Zuluhed el Demente (10866)
+
+---
+ .../2012_01_14_100_world_zuluhed_el_demente.sql    |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2012_01_14_100_world_zuluhed_el_demente.sql
+
+diff --git a/sql/updates/world/reanemu/2012_01_14_100_world_zuluhed_el_demente.sql b/sql/updates/world/reanemu/2012_01_14_100_world_zuluhed_el_demente.sql
+new file mode 100644
+index 0000000..05851d1
+--- /dev/null
++++ b/sql/updates/world/reanemu/2012_01_14_100_world_zuluhed_el_demente.sql
+@@ -0,0 +1,3 @@
++-- Permite liberar a la dragona Kanyraku Fix By Strolx
++
++UPDATE quest_template SET RequiredNpcOrGo1 = -185156 WHERE id = 10866 LIMIT 1;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

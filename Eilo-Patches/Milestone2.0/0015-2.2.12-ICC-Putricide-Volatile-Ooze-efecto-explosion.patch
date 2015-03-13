@@ -1,0 +1,40 @@
+From 2dd811e29611fbd456a29748a621a562a352d544 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 02:24:16 -0500
+Subject: [PATCH 15/65] 2.2.12 ICC: Putricide Volatile Ooze efecto explosion
+
+---
+ .../IcecrownCitadel/boss_professor_putricide.cpp   |   10 +++++++++-
+ 1 files changed, 9 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
+index f3216be..ee7b516 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_professor_putricide.cpp
+@@ -695,7 +695,7 @@ class npc_volatile_ooze : public CreatureScript
+             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+             {
+                 if (!_newTargetSelectTimer && sSpellMgr->GetSpellDifficultyId(spell->Id) == sSpellMgr->GetSpellDifficultyId(SPELL_OOZE_ERUPTION))
+-                    _newTargetSelectTimer = 1000;
++                    _newTargetSelectTimer = 2000;
+             }
+ 
+             void UpdateAI(uint32 const diff)
+@@ -703,6 +703,14 @@ class npc_volatile_ooze : public CreatureScript
+                 if (!UpdateVictim())
+                     return;
+ 
++                Unit* victim = me->getVictim();
++                
++                if (victim && victim->IsWithinDistInMap(me, 1.0f) && victim->HasAura(SPELL_VOLATILE_OOZE_ADHESIVE) && victim->isAlive())
++                {
++                    DoCast(me, SPELL_OOZE_ERUPTION);
++                    victim->RemoveAurasDueToSpell(SPELL_VOLATILE_OOZE_ADHESIVE, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
++                }
++
+                 if (!_newTargetSelectTimer)
+                     return;
+ 
+-- 
+1.7.8.msysgit.0
+

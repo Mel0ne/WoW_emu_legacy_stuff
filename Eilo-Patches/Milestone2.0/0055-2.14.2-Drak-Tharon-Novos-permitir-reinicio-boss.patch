@@ -1,0 +1,26 @@
+From 72777310ad279c7a54d9ba57424c10056d1f0171 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 17 Dec 2011 14:42:52 -0500
+Subject: [PATCH 55/65] 2.14.2 Drak'Tharon: Novos permitir reinicio boss
+
+---
+ .../Northrend/DraktharonKeep/boss_novos.cpp        |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/DraktharonKeep/boss_novos.cpp b/src/server/scripts/Northrend/DraktharonKeep/boss_novos.cpp
+index 5418cf8..de26081 100644
+--- a/src/server/scripts/Northrend/DraktharonKeep/boss_novos.cpp
++++ b/src/server/scripts/Northrend/DraktharonKeep/boss_novos.cpp
+@@ -143,6 +143,9 @@ public:
+ 
+         void UpdateAI(const uint32 diff)
+         {
++            if(!UpdateVictim())
++                return;
++
+             switch (Phase)
+             {
+                 case PHASE_1:
+-- 
+1.7.8.msysgit.0
+

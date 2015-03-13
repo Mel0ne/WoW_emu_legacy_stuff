@@ -1,0 +1,760 @@
+From 8b6d5079051005c95ac29d9b7916f7e2d9fd8c0e Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Tue, 3 Jan 2012 12:26:35 -0500
+Subject: [PATCH 5/6] =?UTF-8?q?6.4=20Custom:=20Boss=20Wachiturros=20y=20coma?=
+ =?UTF-8?q?ndos=20por=20fin=20de=20a=C3=B1o?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../2011_12_30_100_world_boss_wachiturros.sql      |  151 +++++++
+ src/server/game/Scripting/ScriptLoader.cpp         |    4 +
+ src/server/scripts/Custom/CMakeLists.txt           |    2 +
+ src/server/scripts/Custom/boss_wachiturros.cpp     |  413 ++++++++++++++++++++
+ src/server/scripts/Custom/commands.cpp             |  121 ++++++
+ 5 files changed, 691 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/custom/2011_12_30_100_world_boss_wachiturros.sql
+ create mode 100644 src/server/scripts/Custom/boss_wachiturros.cpp
+ create mode 100644 src/server/scripts/Custom/commands.cpp
+
+diff --git a/sql/updates/world/custom/2011_12_30_100_world_boss_wachiturros.sql b/sql/updates/world/custom/2011_12_30_100_world_boss_wachiturros.sql
+new file mode 100644
+index 0000000..f86483f
+--- /dev/null
++++ b/sql/updates/world/custom/2011_12_30_100_world_boss_wachiturros.sql
+@@ -0,0 +1,151 @@
++-- Eilo (https://github.com/eilo)
++-- Boss fin de año custom
++-- --------------
++-- -- TEMPLATE --
++-- --------------
++-- Fin de año (Wachiturros)
++DELETE FROM `creature_template` WHERE `entry` IN (120000,120001,120002,120003,120004,120005,120006,120007);
++INSERT INTO `creature_template` VALUES
++('120000','0','0','0','0','0','25795','0','0','0','Rey Wachiturro','WoWRean',NULL,'0','83','83','0','16','16','0','2.18','1.14286','2','3','509','683','0','805','25','1500','0','1','64','8','0','0','0','0','0','20','30','4','7','0','120000','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1305000','1595000','','0','3','4400','2','1','0','0','0','0','0','0','0','0','1','0','617299803','0','boss_wachiturro_malo','0'),
++('120001','0','0','0','0','0','25795','0','0','0','Tirate','Wachiturros',NULL,'0','40','40','0','16','16','0','2.18','1.14286','2','3','509','683','0','805','25','1500','0','1','64','8','0','0','0','0','0','20','30','4','7','0','120001','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1305000','1595000','','0','3','4800','2','1','0','0','0','0','0','0','0','0','1','0','617299803','0','npc_boss_wachiturro_tirate','0'),
++('120002','0','0','0','0','0','25795','0','0','0','Un','Wachiturros',NULL,'0','60','60','0','16','16','0','2.18','1.14286','2','3','509','683','0','805','25','1500','0','1','64','8','0','0','0','0','0','20','30','4','7','0','120002','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1305000','1595000','','0','3','4100','2','1','0','0','0','0','0','0','0','0','1','0','617299803','0','npc_boss_wachiturro_un','0'),
++('120003','0','0','0','0','0','25795','0','0','0','Paso','Wachiturros',NULL,'0','70','70','0','16','16','0','2.18','1.14286','2','3','509','683','0','805','25','1500','0','1','64','8','0','0','0','0','0','20','30','4','7','0','120003','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1305000','1595000','','0','3','3900','2','1','0','0','0','0','0','0','0','0','1','0','617299803','0','npc_boss_wachiturro_paso','0'),
++('120004','0','0','0','0','0','25795','0','0','0','Rey Wachiturro','WoWRean',NULL,'0','83','83','0','16','16','0','2.18','1.14286','2','3','509','683','0','805','45','1500','0','1','64','8','0','0','0','0','0','20','30','4','7','0','120004','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1305000','1595000','','0','3','8400','2','1','0','0','0','0','0','0','0','0','1','0','617299803','0','boss_wachiturro_malo','0'),
++('120005','0','0','0','0','0','25795','0','0','0','Tirate','Wachiturros',NULL,'0','40','40','0','16','16','0','2.18','1.14286','2','3','509','683','0','805','45','1500','0','1','64','8','0','0','0','0','0','20','30','4','7','0','120005','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1305000','1595000','','0','3','12800','2','1','0','0','0','0','0','0','0','0','1','0','617299803','0','npc_boss_wachiturro_tirate','0'),
++('120006','0','0','0','0','0','25795','0','0','0','Un','Wachiturros',NULL,'0','60','60','0','16','16','0','2.18','1.14286','2','3','509','683','0','805','45','1500','0','1','64','8','0','0','0','0','0','20','30','4','7','0','120006','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1305000','1595000','','0','3','10100','2','1','0','0','0','0','0','0','0','0','1','0','617299803','0','npc_boss_wachiturro_un','0'),
++('120007','0','0','0','0','0','25795','0','0','0','Paso','Wachiturros',NULL,'0','70','70','0','16','16','0','2.18','1.14286','2','3','509','683','0','805','45','1500','0','1','64','8','0','0','0','0','0','20','30','4','7','0','120007','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1305000','1595000','','0','3','9000','2','1','0','0','0','0','0','0','0','0','1','0','617299803','0','npc_boss_wachiturro_paso','0');
++-- ------------
++-- -- QUESTS --
++-- ------------
++-- Quests para las marcas de santificacion
++DELETE FROM `quest_template` WHERE `Id` IN (28000,28001,28002,28003,28004,28005);
++-- MODO 10 - con marcas normales
++-- Dk, Druida, Mago y Picaro
++INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardOrRequiredMoney`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `StartScript`, `CompleteScript`, `WDBVerified`) VALUES
++('28000','2','80','80','80','4613','88','10','0','1192','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','296000','0','0','0','0','0','0','0','0','0','0','32832','0','0','0','0','0','52025','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','Los Wachiturros y el botin', 'Mata al Wachiturro que esta controlando a los demas.$bEsta quest debe ser completada en el modo 10man', '$bLos wachiturros estan siendo controlados por el Rey Wachiturro, estos en su afan de fama han robado el botin de gunship y unas cuantas reliquias que a mas de uno le interesaran, y con su evento han atraido a cientos de personas a su show en Camara de Archavon.$b$bContamos contigo para eliminar a estos molestos wachiturros y sus pegajosas melodias!', 'Gracias por ayudarnos, ten tu recompensa!', 'Marca de santificacion', '', 'Muy bien! lo lograste!','120000','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','10','0','0','0','0','0','0','0','0','0','0','0');
++-- Paladin, Priest, Brujo
++INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardOrRequiredMoney`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `StartScript`, `CompleteScript`, `WDBVerified`) VALUES
++('28001','2','80','80','80','4613','88','10','0','274','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','296000','0','0','0','0','0','0','0','0','0','0','32832','0','0','0','0','0','52027','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','Los Wachiturros y el botin', 'Mata al Wachiturro que esta controlando a los demas.$bEsta quest debe ser completada en el modo 10man', '$bLos wachiturros estan siendo controlados por el Rey Wachiturro, estos en su afan de fama han robado el botin de gunship y unas cuantas reliquias que a mas de uno le interesaran, y con su evento han atraido a cientos de personas a su show en Camara de Archavon.$b$bContamos contigo para eliminar a estos molestos wachiturros y sus pegajosas melodias!', 'Gracias por ayudarnos, ten tu recompensa!', 'Marca de santificacion', '', 'Muy bien! lo lograste!','120000','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','10','0','0','0','0','0','0','0','0','0','0','0');
++-- Cazador, Shaman, Guerrero
++INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardOrRequiredMoney`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `StartScript`, `CompleteScript`, `WDBVerified`) VALUES
++('28002','2','80','80','80','4613','88','10','0','69','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','296000','0','0','0','0','0','0','0','0','0','0','32832','0','0','0','0','0','52026','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','Los Wachiturros y el botin', 'Mata al Wachiturro que esta controlando a los demas.$bEsta quest debe ser completada en el modo 10man', '$bLos wachiturros estan siendo controlados por el Rey Wachiturro, estos en su afan de fama han robado el botin de gunship y unas cuantas reliquias que a mas de uno le interesaran, y con su evento han atraido a cientos de personas a su show en Camara de Archavon.$b$bContamos contigo para eliminar a estos molestos wachiturros y sus pegajosas melodias!', 'Gracias por ayudarnos, ten tu recompensa!', 'Marca de santificacion', '', 'Muy bien! lo lograste!','120000','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','10','0','0','0','0','0','0','0','0','0','0','0');
++-- MODO 25 - con marcas hero
++-- Dk, Druida, Mago y Picaro
++INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardOrRequiredMoney`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `StartScript`, `CompleteScript`, `WDBVerified`) VALUES
++('28003','2','80','80','80','4613','89','10','0','1192','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','296000','0','0','0','0','0','0','0','0','0','0','32832','0','0','0','0','0','52028','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','Los Wachiturros y el botin', 'Mata al Wachiturro que esta controlando a los demas.$bEsta quest debe ser completada en el modo 25man', '$bLos wachiturros estan siendo controlados por el Rey Wachiturro, estos en su afan de fama han robado el botin de gunship y unas cuantas reliquias que a mas de uno le interesaran, y con su evento han atraido a cientos de personas a su show en Camara de Archavon.$b$bContamos contigo para eliminar a estos molestos wachiturros y sus pegajosas melodias!', 'Gracias por ayudarnos, ten tu recompensa!', 'Marca de santificacion mejorada', '', 'Muy bien! lo lograste!','120004','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','10','0','0','0','0','0','0','0','0','0','0','0');
++-- Paladin, Priest, Brujo
++INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardOrRequiredMoney`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `StartScript`, `CompleteScript`, `WDBVerified`) VALUES
++('28004','2','80','80','80','4613','89','10','0','274','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','296000','0','0','0','0','0','0','0','0','0','0','32832','0','0','0','0','0','52030','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','Los Wachiturros y el botin', 'Mata al Wachiturro que esta controlando a los demas.$bEsta quest debe ser completada en el modo 25man', '$bLos wachiturros estan siendo controlados por el Rey Wachiturro, estos en su afan de fama han robado el botin de gunship y unas cuantas reliquias que a mas de uno le interesaran, y con su evento han atraido a cientos de personas a su show en Camara de Archavon.$b$bContamos contigo para eliminar a estos molestos wachiturros y sus pegajosas melodias!', 'Gracias por ayudarnos, ten tu recompensa!', 'Marca de santificacion mejorada', '', 'Muy bien! lo lograste!','120004','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','10','0','0','0','0','0','0','0','0','0','0','0');
++-- Cazador, Shaman, Guerrero
++INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardOrRequiredMoney`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `StartScript`, `CompleteScript`, `WDBVerified`) VALUES
++('28005','2','80','80','80','4613','89','10','0','69','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','296000','0','0','0','0','0','0','0','0','0','0','32832','0','0','0','0','0','52029','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','Los Wachiturros y el botin', 'Mata al Wachiturro que esta controlando a los demas.$bEsta quest debe ser completada en el modo 25man', '$bLos wachiturros estan siendo controlados por el Rey Wachiturro, estos en su afan de fama han robado el botin de gunship y unas cuantas reliquias que a mas de uno le interesaran, y con su evento han atraido a cientos de personas a su show en Camara de Archavon.$b$bContamos contigo para eliminar a estos molestos wachiturros y sus pegajosas melodias!', 'Gracias por ayudarnos, ten tu recompensa!', 'Marca de santificacion mejorada', '', 'Muy bien! lo lograste!','120004','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','10','0','0','0','0','0','0','0','0','0','0','0');
++-- Para que de las quest NPC de Dalaran
++DELETE FROM `creature_questrelation` WHERE `quest` IN (28000,28001,28002,28003,28004,28005);
++INSERT INTO `creature_questrelation` (`Id`, `quest`) VALUES ('31439','28000');
++INSERT INTO `creature_questrelation` (`Id`, `quest`) VALUES ('31439','28001');
++INSERT INTO `creature_questrelation` (`Id`, `quest`) VALUES ('31439','28002');
++INSERT INTO `creature_questrelation` (`Id`, `quest`) VALUES ('31439','28003');
++INSERT INTO `creature_questrelation` (`Id`, `quest`) VALUES ('31439','28004');
++INSERT INTO `creature_questrelation` (`Id`, `quest`) VALUES ('31439','28005');
++DELETE FROM `creature_involvedrelation` WHERE `quest` IN (28000,28001,28002,28003,28004,28005);
++INSERT INTO `creature_involvedrelation` (`Id`, `quest`) VALUES ('31439','28000');
++INSERT INTO `creature_involvedrelation` (`Id`, `quest`) VALUES ('31439','28001');
++INSERT INTO `creature_involvedrelation` (`Id`, `quest`) VALUES ('31439','28002');
++INSERT INTO `creature_involvedrelation` (`Id`, `quest`) VALUES ('31439','28003');
++INSERT INTO `creature_involvedrelation` (`Id`, `quest`) VALUES ('31439','28004');
++INSERT INTO `creature_involvedrelation` (`Id`, `quest`) VALUES ('31439','28005');
++-- ----------
++-- -- LOOT --
++-- ----------
++DELETE FROM `creature_loot_template` WHERE `entry` IN (120000,120001,120002,120003,120004,120005,120006,120007);
++-- ------ 10MAN -------
++-- Emblemas de Escarcha
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','49426','100','1','0','2','2');
++-- Saronita Primordial
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','49908','10','1','0','1','1');
++-- Loot 10n
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50340','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50787','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50788','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50789','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50790','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50791','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50792','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50793','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50794','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50795','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50796','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50797','0','1','2','1','1');
++-- Loot 10h
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','50345','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51906','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51907','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51908','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51909','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51910','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51911','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51912','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51913','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51914','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51915','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','51916','0','1','1','1','1');
++-- Loot adicional por fin de anio
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','46708','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','47840','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','46171','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','37676','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','30609','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','34092','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120000','43516','10','1','1','1','1');
++-- ------ 25MAN --------
++-- Emblemas de Escarcha
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','49426','100','1','0','2','2');
++-- Saronita Primordial
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','49908','10','1','0','1','1');
++-- Shadowfrost Shard
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50274','75','1','0','1','1');
++-- Loot 25n
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','49998','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','49999','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50000','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50001','0','1','3','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50002','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50003','0','1','3','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50005','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50006','0','1','3','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50008','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50009','0','1','3','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50010','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50011','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50352','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50359','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50411','0','1','3','1','1');
++-- Loot 25h
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50349','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50366','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50653','0','1','3','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50654','0','1','3','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50655','0','1','3','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50656','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50657','0','1','3','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50658','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50659','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50660','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50661','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50663','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50664','0','1','2','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50665','0','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','50667','0','1','3','1','1');
++-- Loot adicional por fin de año
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','46708','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','47840','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','46171','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','37676','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','30609','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','34092','10','1','1','1','1');
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES('120004','43516','10','1','1','1','1');
++
++-- Comando apostar y ruleta
++-- (Descomentar si lo vais a usar)
++-- INSERT INTO command(`name`, `security`, `help`) VALUES ('apostar',0, 'Apostar con 50% de probabilidad de ganar el doble o perder todo. La apuesta es en cobres.\nStaff WoWRean');
++-- INSERT INTO command(`name`, `security`, `help`) VALUES ('ruleta',0, 'Girar la ruleta, si tienes suerte ganaras 36 veces la apuesta!. La apuesta es en cobres.\nStaff WoWRean');
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index 47d8d0a..6b15295 100755
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -1238,6 +1238,8 @@ void AddBattlegroundScripts()
+ /* This is where custom scripts' loading functions should be declared. */
+ void AddSC_icc_rep_rings();
+ void AddSC_npc_broma();
++void AddSC_custom_boss_wachiturros();
++void AddSC_custom_gamescript();
+ #endif
+ 
+ void AddCustomScripts()
+@@ -1246,5 +1248,7 @@ void AddCustomScripts()
+     /* This is where custom scripts should be added. */
+ AddSC_icc_rep_rings();
+ AddSC_npc_broma();
++AddSC_custom_boss_wachiturros();
++AddSC_custom_gamescript();
+ #endif
+ }
+diff --git a/src/server/scripts/Custom/CMakeLists.txt b/src/server/scripts/Custom/CMakeLists.txt
+index 7e2b702..93dc323 100644
+--- a/src/server/scripts/Custom/CMakeLists.txt
++++ b/src/server/scripts/Custom/CMakeLists.txt
+@@ -12,6 +12,8 @@ set(scripts_STAT_SRCS
+   ${scripts_STAT_SRCS}
+   Custom/icc_rings_recovery.cpp
+   Custom/npc_broma.cpp
++  Custom/boss_wachiturros.cpp
++  Custom/commands.cpp
+   
+ )
+ 
+diff --git a/src/server/scripts/Custom/boss_wachiturros.cpp b/src/server/scripts/Custom/boss_wachiturros.cpp
+new file mode 100644
+index 0000000..61382c1
+--- /dev/null
++++ b/src/server/scripts/Custom/boss_wachiturros.cpp
+@@ -0,0 +1,413 @@
++/*
++ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
++ * Copyright (C) 2009-2011 Eilo <https://github.com/eilo>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++/* ScriptData
++SDName: Wachiturros los ladrones del botin
++SD%Complete: 95
++SDAutor: Eilo
++SDComment: El boss tendra un respawn de 1 dia y vidas de acuerdo a dificultades, 
++           porque lo spameare en archavon 10 y 25, similares a bosses de icc 
++           10h y 25h y daños similares, se agrega ademas un sql con un game_event
++           para el despawn respectivo del boss y se retocara el cd de archa a 1 dia
++           el loot sera el de gunship battle, 10h y 10n en uno solo y 25h 10n en uno
++           tambien.
++*/
++
++#include "ScriptPCH.h"
++#include "Spell.h"
++#include "WorldPacket.h"
++
++#define SPELL_BERSERK               26662
++
++struct boss_wachiturrosAI : public ScriptedAI
++{
++    boss_wachiturrosAI(Creature *creature) : ScriptedAI(creature){}
++
++    uint32 RespawnTimer;
++    uint32 EnrageTimer;
++    bool _checker;
++
++    virtual void Reset() = 0;
++
++    void ResetWachiturro()
++    {
++        RespawnTimer = 60000;
++        me->ClearUnitState(UNIT_STAT_STUNNED);
++        EnrageTimer = 20*60000;
++        _checker = true;
++    }
++
++    void EnrageWachiturro(uint32 diff)
++    {
++        if (EnrageTimer <= diff)
++        {
++            if (!me->IsNonMeleeSpellCasted(true))
++            {
++                DoCast(me, SPELL_BERSERK);
++                EnrageTimer = 60*60000;
++            } else EnrageTimer = 0;
++        } else EnrageTimer-=diff;
++    }
++
++    Creature* DeadWachiturro(uint32 diff)
++    {
++        std::list<Creature*> lUnitList;
++        me->GetCreatureListWithEntryInGrid(lUnitList, RAID_MODE(120001,120005), 200.0f);
++        me->GetCreatureListWithEntryInGrid(lUnitList, RAID_MODE(120002,120006), 200.0f);
++        me->GetCreatureListWithEntryInGrid(lUnitList, RAID_MODE(120003,120007), 200.0f);
++
++        if (!lUnitList.empty())
++            for (std::list<Creature*>::const_iterator iter = lUnitList.begin(); iter != lUnitList.end(); ++iter)
++            {
++                if (Creature* creature = *iter)
++                {
++                    if (creature->isDead())
++                    {
++                        if (RespawnTimer <= diff)
++                        {
++                            creature->Respawn();
++                            RespawnTimer = 60000;
++                        }
++                        else RespawnTimer -= diff;
++                    }
++                }
++            }
++        return NULL;
++    }
++
++    bool WachiturrosVivos()
++    {
++        std::list<Creature*> lUnitList;
++        me->GetCreatureListWithEntryInGrid(lUnitList, RAID_MODE(120001,120005), 200.0f);
++        me->GetCreatureListWithEntryInGrid(lUnitList, RAID_MODE(120002,120006), 200.0f);
++        me->GetCreatureListWithEntryInGrid(lUnitList, RAID_MODE(120003,120007), 200.0f);
++
++        if (!lUnitList.empty())
++            for (std::list<Creature*>::const_iterator iter = lUnitList.begin(); iter != lUnitList.end(); ++iter)
++            {
++                if (Creature* c = *iter)
++                {
++                    if (c->isDead()) _checker = false;
++                    else _checker =true;
++                }
++            }
++        return _checker;
++    }
++
++    void HandleWachiturro(uint32 diff)
++    {
++        Creature* c = DeadWachiturro(diff);
++    }
++};
++
++enum WachiturroMaloSpells
++{
++    SPELL_SHIELD				= 71463,
++    SPELL_UPPERCUT              = 26007,
++    SPELL_UNBALANCING_STRIKE    = 26613,
++    SPELL_SNOWBALL				= 25677,
++    INVOCATION_VISUAL_ACTIVE    = 70934
++};
++
++// Gritos del Wachiturro malo
++#define SAY_MALO_AGGRO            "Tirate que?? Tirate un paso!! No les dare el botin! Vamos wachiturros!!"
++#define SAY_MALO_MATA             "Uno menos! wa - chi - tu - rros!!"
++#define SAY_MALO_MUERE            "Nooo!!"
++#define SAY_MALO_BAILAR           "A bailar!!"
++
++class boss_wachiturro_malo : public CreatureScript
++{
++public:
++    boss_wachiturro_malo() : CreatureScript("boss_wachiturro_malo") { }
++
++    CreatureAI* GetAI(Creature* creature) const
++    {
++        return new boss_wachiturro_maloAI (creature);
++    }
++
++    struct boss_wachiturro_maloAI : public boss_wachiturrosAI
++    {
++        boss_wachiturro_maloAI(Creature* c) : boss_wachiturrosAI(c) {}
++
++        uint32 UpperCut_Timer;
++        uint32 UnbalancingStrike_Timer;
++        uint32 Snowball_Timer;
++        uint32 Dance_Timer;
++
++        void Reset()
++        {
++            ResetWachiturro();
++            UpperCut_Timer = 14000 + rand()%15000;
++            UnbalancingStrike_Timer = 8000 + rand()%10000;
++            Snowball_Timer = 10000;
++            Dance_Timer = 5000;
++            me->RemoveAurasDueToSpell(SPELL_SHIELD);
++            me->RemoveAurasDueToSpell(INVOCATION_VISUAL_ACTIVE);
++        }
++
++        void EnterCombat(Unit* /*who*/)
++        {
++            me->MonsterSay(SAY_MALO_AGGRO, LANG_UNIVERSAL, 0);
++            DoCast(me, INVOCATION_VISUAL_ACTIVE);
++        }
++
++        void KilledUnit(Unit* victim)
++        {
++            me->MonsterSay(SAY_MALO_MATA, LANG_UNIVERSAL, 0);
++        }
++
++        void JustDied(Unit* /*killer*/)
++        {
++            me->MonsterSay(SAY_MALO_MUERE, LANG_UNIVERSAL, 0);
++        }
++
++        void UpdateAI(const uint32 diff)
++        {
++            if (!UpdateVictim())
++                return;
++
++            //Se bloquea hasta que matas al resto de wachiturros
++            if (HealthBelowPct(20))
++            {
++                DoCast(me, SPELL_SHIELD);
++                me->RemoveAurasDueToSpell(INVOCATION_VISUAL_ACTIVE);
++
++                if(!WachiturrosVivos())
++                {
++                    DoCast(me, INVOCATION_VISUAL_ACTIVE);
++                    me->RemoveAurasDueToSpell(SPELL_SHIELD);
++                }
++            }
++
++            //UnbalancingStrike_Timer
++            if (UnbalancingStrike_Timer <= diff)
++            {
++                DoCast(me->getVictim(), SPELL_UNBALANCING_STRIKE);
++                UnbalancingStrike_Timer = 8000+rand()%12000;
++            } else UnbalancingStrike_Timer -= diff;
++
++            if (UpperCut_Timer <= diff)
++            {
++                Unit* randomMelee = SelectTarget(SELECT_TARGET_RANDOM, 0, NOMINAL_MELEE_RANGE, true);
++                if (randomMelee)
++                {
++                    DoCast(randomMelee, SPELL_UPPERCUT);
++                    randomMelee->HandleEmoteCommand(EMOTE_STATE_DANCE);
++                }
++                UpperCut_Timer = 15000+rand()%15000;
++            } else UpperCut_Timer -= diff;
++
++            if (Snowball_Timer <= diff)
++            {
++                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM,0))
++                {
++                    DoCast(target, SPELL_SNOWBALL);
++                    target->HandleEmoteCommand(EMOTE_STATE_DANCE);
++                }
++                Snowball_Timer = 10000;
++            } else Snowball_Timer -= diff;
++
++            if (Dance_Timer <= diff)
++            {
++                me->MonsterSay(SAY_MALO_BAILAR, LANG_UNIVERSAL, 0);
++                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM,0))
++                    target->HandleEmoteCommand(EMOTE_STATE_DANCE);
++                Dance_Timer = 5000;
++            } else Dance_Timer -= diff;
++
++            HandleWachiturro(diff);
++            EnrageWachiturro(diff);
++            DoMeleeAttackIfReady();
++        }
++    };
++};
++
++enum WachiturrosSpells
++{
++    EARTHQUAKE                                              = 46240,
++    SHOCK_OF_SORROW                                         = 50760,
++    ENTROPIC_AURA                                           = 36784,
++    AURAL_SHOCK                                             = 14538
++};
++
++// Gritos de los Wachiturros
++#define SAY_WACHITURRO_TIRATE       "Va para adelante y tirate un paso!! wa chi tu rros!!"
++#define SAY_WACHITURRO_UN           "Toma toma por wacho atrevido!! wa chi tu rros!!"
++#define SAY_WACHITURRO_PASO         "Latigo latigo!! tirate lo tirate un paso!!"
++
++class npc_boss_wachiturro_tirate : public CreatureScript
++{
++public:
++    npc_boss_wachiturro_tirate() : CreatureScript("npc_boss_wachiturro_tirate") { }
++
++    CreatureAI* GetAI(Creature* creature) const
++    {
++        return new npc_boss_wachiturro_tirateAI (creature);
++    }
++
++    struct npc_boss_wachiturro_tirateAI : public boss_wachiturrosAI
++    {
++        npc_boss_wachiturro_tirateAI(Creature *creature) : boss_wachiturrosAI(creature){}
++
++        uint32 EarthquakeTimer;
++
++        void Reset()
++        {
++            ResetWachiturro();
++            EarthquakeTimer = 8000;
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void EnterCombat(Unit* /*who*/)
++        {
++            DoCast(me, ENTROPIC_AURA);
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void JustDied(Unit* /*killer*/)
++        {
++            me->MonsterSay(SAY_WACHITURRO_UN, LANG_UNIVERSAL, 0);
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void UpdateAI(const uint32 uiDiff)
++        {
++            if (!UpdateVictim())
++                return;
++
++            if (EarthquakeTimer <= uiDiff)
++            {
++                DoCast(EARTHQUAKE);
++                EarthquakeTimer = 20000;
++            } else EarthquakeTimer -= uiDiff;
++
++            DoMeleeAttackIfReady();
++        }
++    };
++};
++
++class npc_boss_wachiturro_un : public CreatureScript
++{
++public:
++    npc_boss_wachiturro_un() : CreatureScript("npc_boss_wachiturro_un") { }
++
++    CreatureAI* GetAI(Creature* creature) const
++    {
++        return new npc_boss_wachiturro_unAI (creature);
++    }
++
++    struct npc_boss_wachiturro_unAI : public boss_wachiturrosAI
++    {
++        npc_boss_wachiturro_unAI(Creature *creature) : boss_wachiturrosAI(creature){}
++
++        uint32 ShockTimer;
++
++        void Reset()
++        {
++            ResetWachiturro();
++            ShockTimer = 20000;
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void EnterCombat(Unit* /*who*/)
++        {
++            DoCast(me, ENTROPIC_AURA);
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void JustDied(Unit* /*killer*/)
++        {
++            me->MonsterSay(SAY_WACHITURRO_TIRATE, LANG_UNIVERSAL, 0);
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void UpdateAI(const uint32 uiDiff)
++        {
++            if (!UpdateVictim())
++                return;
++
++            if (ShockTimer <= uiDiff)
++            {
++                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM,0))
++                    DoCast(target, SHOCK_OF_SORROW);
++                ShockTimer = 60000;
++            } else ShockTimer -= uiDiff;
++
++            DoMeleeAttackIfReady();
++        }
++    };
++};
++
++class npc_boss_wachiturro_paso : public CreatureScript
++{
++public:
++    npc_boss_wachiturro_paso() : CreatureScript("npc_boss_wachiturro_paso") { }
++
++    CreatureAI* GetAI(Creature* creature) const
++    {
++        return new npc_boss_wachiturro_pasoAI (creature);
++    }
++
++    struct npc_boss_wachiturro_pasoAI : public boss_wachiturrosAI
++    {
++        npc_boss_wachiturro_pasoAI(Creature *creature) : boss_wachiturrosAI(creature){}
++
++        uint32 AuralShockTimer;
++
++        void Reset()
++        {
++            ResetWachiturro();
++            AuralShockTimer = 50000;
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void EnterCombat(Unit* /*who*/)
++        {
++            DoCast(me, ENTROPIC_AURA);
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void JustDied(Unit* /*killer*/)
++        {
++            me->MonsterSay(SAY_WACHITURRO_PASO, LANG_UNIVERSAL, 0);
++            me->HandleEmoteCommand(EMOTE_STATE_DANCE);
++        }
++
++        void UpdateAI(const uint32 uiDiff)
++        {
++            if (!UpdateVictim())
++                return;
++
++            if (AuralShockTimer <= uiDiff)
++            {
++                DoCast(AURAL_SHOCK);
++                AuralShockTimer = 40000;
++            } else AuralShockTimer -= uiDiff;
++
++            DoMeleeAttackIfReady();
++        }
++    };
++};
++
++void AddSC_custom_boss_wachiturros()
++{
++    new boss_wachiturro_malo;
++    new npc_boss_wachiturro_tirate;
++    new npc_boss_wachiturro_un;
++    new npc_boss_wachiturro_paso;
++}
+diff --git a/src/server/scripts/Custom/commands.cpp b/src/server/scripts/Custom/commands.cpp
+new file mode 100644
+index 0000000..b7277aa
+--- /dev/null
++++ b/src/server/scripts/Custom/commands.cpp
+@@ -0,0 +1,121 @@
++/*
++ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include "ScriptPCH.h"
++#include "MapManager.h"
++#include "Chat.h"
++#include "ObjectMgr.h"
++#include "AccountMgr.h"
++
++class custom_gamescript : public CommandScript
++{
++public:
++	custom_gamescript() : CommandScript("misc_commandscript") { }
++
++	ChatCommand* GetCommands() const
++	{
++		static ChatCommand commandTable[] =
++		{
++				{ "apostar",         SEC_GAMEMASTER,         false, &HandleApostarCommand,              "", NULL },
++				{ "ruleta",       SEC_GAMEMASTER,         false, &HandleRuletaCommand,            "", NULL },
++				{ NULL,             0,                  false,  NULL,                       "", NULL }
++		};
++		return commandTable;
++	}
++
++	// Allows your players to apostar for fun and prizes
++	static bool HandleApostarCommand(ChatHandler* handler, const char* args)
++	{
++		Player *chr = handler->GetSession()->GetPlayer();
++
++		char* px = strtok((char*)args, " ");
++
++		if (!px)
++			return false;
++		uint32 money = (uint32)atoi(px);
++
++		if (chr->GetMoney() < money)
++		{
++			handler->SendSysMessage("No puedes apostar dinero que no tienes!");
++			return true;
++		}
++
++		else
++		{
++			if (money>0)
++			{
++				if (rand()%100 < 50)
++				{
++					chr->ModifyMoney(money*2);
++					handler->SendSysMessage("Has ganado el doble de la apuesta!");
++				}
++				else
++				{
++					chr->ModifyMoney(-int(money*2));
++					handler->SendSysMessage("Has perdido");
++				}
++			}
++		}
++
++		return true;
++	}
++
++
++
++	static bool HandleRuletaCommand(ChatHandler* handler, const char* args)
++	{
++		Player *chr = handler->GetSession()->GetPlayer();
++
++		char* px = strtok((char*)args, " ");
++
++		if (!px)
++			return false;
++
++		uint32 money = (uint32)atoi(px);
++
++		if (chr->GetMoney() < money)
++		{
++			return true;
++		}
++
++		else
++		{
++			if (money>0)
++			{
++				if (rand()%36 < 1)
++				{
++					chr->ModifyMoney(money*36);
++					handler->SendSysMessage("Has ganado 36 veces lo que apostaste!! Felicidades!");
++				}
++				else
++				{
++					chr->ModifyMoney(-int(money));
++					handler->SendSysMessage("Has perdido");
++				}
++			}
++		}
++
++		return true;
++	}
++
++
++};
++
++void AddSC_custom_gamescript()
++{
++	new custom_gamescript();
++}
+-- 
+1.7.6.msysgit.0
+

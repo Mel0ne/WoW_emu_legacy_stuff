@@ -1,0 +1,60 @@
+From 5baabad9485cf6ab053d10b1cd28dfb8b2f2d716 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 15 Dec 2011 22:08:54 -0500
+Subject: [PATCH 16/29] =?UTF-8?q?0.16=20DoCompleteAchievement=20rea=C3=B1adi?=
+ =?UTF-8?q?da=20al=20nucleo?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Instances/InstanceScript.cpp |   18 ++++++++++++++++++
+ src/server/game/Instances/InstanceScript.h   |    3 +++
+ 2 files changed, 21 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Instances/InstanceScript.cpp b/src/server/game/Instances/InstanceScript.cpp
+index 90fb8ff..274d129 100755
+--- a/src/server/game/Instances/InstanceScript.cpp
++++ b/src/server/game/Instances/InstanceScript.cpp
+@@ -320,6 +320,24 @@ void InstanceScript::DoSendNotifyToInstance(char const* format, ...)
+     }
+ }
+ 
++// Complete Achievement for all players in instance
++void InstanceScript::DoCompleteAchievement(uint32 achievement)
++{
++    AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(achievement);
++    Map::PlayerList const &PlayerList = instance->GetPlayers();
++
++    if (!pAE)
++    {
++        sLog->outError("TSCR: DoCompleteAchievement called for not existing achievement %u", achievement);
++        return;
++    }
++
++    if (!PlayerList.isEmpty())
++        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
++            if (Player *player = i->getSource())
++                player->CompletedAchievement(pAE);
++}
++
+ // Update Achievement Criteria for all players in instance
+ void InstanceScript::DoUpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 /*= 0*/, uint32 miscValue2 /*= 0*/, Unit* unit /*= NULL*/)
+ {
+diff --git a/src/server/game/Instances/InstanceScript.h b/src/server/game/Instances/InstanceScript.h
+index 69f11c2..1e6dc16 100755
+--- a/src/server/game/Instances/InstanceScript.h
++++ b/src/server/game/Instances/InstanceScript.h
+@@ -169,6 +169,9 @@ class InstanceScript : public ZoneScript
+         // Send Notify to all players in instance
+         void DoSendNotifyToInstance(char const* format, ...);
+ 
++        // Complete Achievement for all players in instance
++        void DoCompleteAchievement(uint32 achievement);
++
+         // Update Achievement Criteria for all players in instance
+         void DoUpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 = 0, uint32 miscValue2 = 0, Unit* unit = NULL);
+ 
+-- 
+1.7.8.msysgit.0
+

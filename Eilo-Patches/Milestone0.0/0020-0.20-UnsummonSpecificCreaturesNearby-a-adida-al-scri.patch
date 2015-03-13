@@ -1,0 +1,56 @@
+From 714067d52b26541a5e485578c8fa158846edbf59 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 02:07:21 -0500
+Subject: [PATCH 20/29] =?UTF-8?q?0.20=20UnsummonSpecificCreaturesNearby=20a=C3?=
+ =?UTF-8?q?=B1adida=20al=20script=20de=20icc?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../Northrend/IcecrownCitadel/icecrown_citadel.h   |    2 ++
+ .../IcecrownCitadel/instance_icecrown_citadel.cpp  |   15 +++++++++++++++
+ 2 files changed, 17 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.h b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.h
+index 085aea1..31d2192 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.h
++++ b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.h
+@@ -487,6 +487,8 @@ class spell_trigger_spell_from_caster : public SpellScriptLoader
+         uint32 _triggerId;
+ };
+ 
++void UnsummonSpecificCreaturesNearby(Creature* ref, uint32 entry, float radius);
++
+ template<class AI>
+ CreatureAI* GetIcecrownCitadelAI(Creature* creature)
+ {
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+index 2a61d00..925c7f2 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+@@ -1297,6 +1297,21 @@ class instance_icecrown_citadel : public InstanceMapScript
+         }
+ };
+ 
++void UnsummonSpecificCreaturesNearby(Creature *ref, uint32 entry, float radius)
++{
++    std::list<Creature*> allCreaturesWithEntry;
++    GetCreatureListWithEntryInGrid(allCreaturesWithEntry, ref, entry, radius);
++    for(std::list<Creature*>::iterator itr = allCreaturesWithEntry.begin(); itr != allCreaturesWithEntry.end(); ++itr)
++    {
++        Creature *candidate = *itr;
++
++        if (!candidate)
++            continue;
++        if (TempSummon* summon = candidate->ToTempSummon())
++            summon->DespawnOrUnsummon();
++    }
++}
++
+ void AddSC_instance_icecrown_citadel()
+ {
+     new instance_icecrown_citadel();
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,125 @@
+From 6601d34bb944c40791dda26561adca03f3e086f5 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 23:48:36 -0500
+Subject: [PATCH 59/65] =?UTF-8?q?2.16.2=20HallsOfReflection:=20A=C3=B1adidas?=
+ =?UTF-8?q?=20mejoras=20en=20script=20de=20queldelar?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ ..._30_100_world_camaras_de_eflexion_queldelar.sql |    8 +++
+ .../HallsOfReflection/halls_of_reflection.cpp      |   66 ++++++++++++++++++-
+ 2 files changed, 70 insertions(+), 4 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2012_01_30_100_world_camaras_de_eflexion_queldelar.sql
+
+diff --git a/sql/updates/world/reanemu/2012_01_30_100_world_camaras_de_eflexion_queldelar.sql b/sql/updates/world/reanemu/2012_01_30_100_world_camaras_de_eflexion_queldelar.sql
+new file mode 100644
+index 0000000..a46eaff
+--- /dev/null
++++ b/sql/updates/world/reanemu/2012_01_30_100_world_camaras_de_eflexion_queldelar.sql
+@@ -0,0 +1,8 @@
++DELETE FROM `creature_template` WHERE `entry`=37158;
++INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (37158, 0, 0, 0, 0, 0, 14992, 0, 0, 0, 'Quel\'Delar', '', '', 0, 80, 80, 2, 14, 14, 0, 1, 1.14286, 0.1, 1, 422, 586, 0, 642, 7.5, 0, 0, 1, 0, 8, 0, 0, 0, 0, 0, 345, 509, 103, 10, 0, 37158, 0, 0, 0, 0, 0, 0, 0, 0, 67541, 29426, 16856, 67716, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 17, 5, 1, 0, 50254, 0, 0, 0, 0, 0, 0, 1, 0, 583745531, 0, 'npc_queldelar', 12340);
++
++DELETE FROM `creature_loot_template` WHERE `entry`=37158;
++INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES (37158, 50254, -100, 1, 0, 1, 1);
++
++DELETE FROM `creature` WHERE `id`=37158;
++INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES (37158, 668, 1, 1, 0, 0, 5304.82, 2000.48, 709.341, 0.800565, 300, 0, 0, 214200, 0, 0, 0, 0, 0);
+diff --git a/src/server/scripts/Northrend/FrozenHalls/HallsOfReflection/halls_of_reflection.cpp b/src/server/scripts/Northrend/FrozenHalls/HallsOfReflection/halls_of_reflection.cpp
+index 7089883..0031a22 100644
+--- a/src/server/scripts/Northrend/FrozenHalls/HallsOfReflection/halls_of_reflection.cpp
++++ b/src/server/scripts/Northrend/FrozenHalls/HallsOfReflection/halls_of_reflection.cpp
+@@ -154,6 +154,14 @@ enum Spells
+     SPELL_FROSTMOURNE_SOUNDS           = 70667,
+ };
+ 
++enum queldelarSpells
++{
++    Bladestorm                         = 67541,
++    Heroic_Strike                      = 29426,
++    Mortal_Strike                      = 16856,
++    Whirlind                           = 67716,
++};
++
+ const Position HallsofReflectionLocs[]=
+ {
+     {5283.234863f, 1990.946777f, 707.695679f, 0.929097f},   // 2 Loralen Follows
+@@ -2048,19 +2056,69 @@ public:
+     }
+     struct npc_queldelarAI  : public ScriptedAI
+     {
+-        npc_queldelarAI(Creature *c) : ScriptedAI(c)
++        uint32 Bladestorm;
++        uint32 Heroic_Strike;
++        uint32 Mortal_Strike;
++        uint32 Whirlind;
++        bool summoned;
++
++        void Reset()
+         {
++            Bladestorm = 10000;
++            Heroic_Strike = 5000;
++            Mortal_Strike = 7000;
++            Whirlind = 13000;
++            bool summoned = false;
++            me->SetVisible(false);
++            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+         }
++
++        npc_queldelarAI(Creature *c) : ScriptedAI(c) { }
++
+         void MoveInLineOfSight(Unit* who)
+         {
+             if (!who)
+                 return;
+-            if (me->IsWithinDistInMap(who, 20) && who->HasAura(SPELL_QUELDELAR_AURA))
++
++            if (me->IsWithinDistInMap(who, 20) && who->HasAura(SPELL_QUELDELAR_AURA) && (summoned==false))
+             {
+-                me->SummonCreature(NPC_QUELDELAR, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+-                me->DisappearAndDie();
++                me->SetVisible(true);
++                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
++                summoned==true;
+             }
+         }
++
++        void UpdateAI(const uint32 uiDiff)
++        {
++            if (!UpdateVictim())
++                return;
++
++            if (Bladestorm <= uiDiff)
++            {
++                DoCast(me->getVictim(), Bladestorm);
++                Bladestorm = 10000;
++            } else Bladestorm -= uiDiff;
++
++            if (Heroic_Strike <= uiDiff)
++            {
++                DoCast(me->getVictim(), Heroic_Strike);
++                Heroic_Strike = 5000;
++            } else Heroic_Strike -= uiDiff;
++
++            if (Mortal_Strike <= uiDiff)
++            {
++                DoCast(me->getVictim(), Mortal_Strike);
++                Mortal_Strike = 7000;
++            } else Mortal_Strike -= uiDiff;
++
++            if (Whirlind <= uiDiff)
++            {
++                DoCast(me->getVictim(), Whirlind);
++                Whirlind = 13000;
++            } else Whirlind -= uiDiff;
++
++            DoMeleeAttackIfReady();
++        }
+     };
+ };
+ 
+-- 
+1.7.8.msysgit.0
+

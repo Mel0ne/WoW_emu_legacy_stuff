@@ -1,0 +1,25 @@
+From 6cd72595f6f2bc3f49ed11dab6eb820432863358 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Fri, 6 Jan 2012 23:59:29 +0100
+Subject: [PATCH 2/6] 4.2 Hodir: Un cambio de escenario (12921): Spawn npc
+ Lok'lira (29975)
+
+---
+ .../2012_01_06_100_world_hodir_spawn_lok'lira.sql  |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2012_01_06_100_world_hodir_spawn_lok'lira.sql
+
+diff --git a/sql/updates/world/reanemu/2012_01_06_100_world_hodir_spawn_lok'lira.sql b/sql/updates/world/reanemu/2012_01_06_100_world_hodir_spawn_lok'lira.sql
+new file mode 100644
+index 0000000..bc9138a
+--- /dev/null
++++ b/sql/updates/world/reanemu/2012_01_06_100_world_hodir_spawn_lok'lira.sql
+@@ -0,0 +1,5 @@
++-- Spawn Lok'lira (29975), asignacion de guid mediante auto_increment
++
++INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
++
++(29975, 571, 1, 1, 0, 0, 6917.26, -1541.88, 833.81, 1.11376, 600, 0, 0, 12175, 0, 0, 0, 0, 0);
+-- 
+1.7.8.msysgit.0
+

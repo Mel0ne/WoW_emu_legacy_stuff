@@ -1,0 +1,46 @@
+From 6e48db78a1c03ca462ad8566391189b8712faa87 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 19:06:26 -0500
+Subject: [PATCH 18/26] 1.18 Prevenir error en el calculo de buffs con stacks
+
+---
+ src/server/game/Spells/SpellEffects.cpp |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
+index 22df4ee..c3a52e7 100755
+--- a/src/server/game/Spells/SpellEffects.cpp
++++ b/src/server/game/Spells/SpellEffects.cpp
+@@ -3212,6 +3212,8 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
+     if (dispelMask & (1 << DISPEL_DISEASE) && unitTarget->HasAura(50536))
+         dispelMask &= ~(1 << DISPEL_DISEASE);
+ 
++    int32 totalspells = 0;
++
+     Unit::AuraMap const& auras = unitTarget->GetOwnedAuras();
+     for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+     {
+@@ -3240,13 +3242,20 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
+             bool dispel_charges = aura->GetSpellInfo()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES;
+             uint8 charges = dispel_charges ? aura->GetCharges() : aura->GetStackAmount();
+             if (charges > 0)
++            {
+                 dispel_list.push_back(std::make_pair(aura, charges));
++                totalspells += charges;
++            }
+         }
+     }
+ 
+     if (dispel_list.empty())
+         return;
+ 
++    // don't allow dispeling more times than buff count
++    if (damage > totalspells)
++        damage = totalspells;
++
+     // Ok if exist some buffs for dispel try dispel it
+     uint32 failCount = 0;
+     DispelChargesList success_list;
+-- 
+1.7.8.msysgit.0
+

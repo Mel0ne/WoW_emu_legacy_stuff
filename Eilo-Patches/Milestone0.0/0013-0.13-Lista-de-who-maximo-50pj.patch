@@ -1,0 +1,25 @@
+From 76d4dd41623524b397e2a6f084c8293c5ea4dccb Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 15 Dec 2011 21:22:54 -0500
+Subject: [PATCH 13/29] 0.13 Lista de who maximo 50pj
+
+---
+ src/server/game/Handlers/MiscHandler.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/game/Handlers/MiscHandler.cpp b/src/server/game/Handlers/MiscHandler.cpp
+index 7e85f11..6b5c73a 100755
+--- a/src/server/game/Handlers/MiscHandler.cpp
++++ b/src/server/game/Handlers/MiscHandler.cpp
+@@ -357,7 +357,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
+     }
+ 
+     data.put(0, displaycount);                            // insert right count, count displayed
+-    data.put(4, matchcount);                              // insert right count, count of matches
++    data.put(4, displaycount);                              // insert right count, count of matches
+ 
+     SendPacket(&data);
+     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Send SMSG_WHO Message");
+-- 
+1.7.8.msysgit.0
+

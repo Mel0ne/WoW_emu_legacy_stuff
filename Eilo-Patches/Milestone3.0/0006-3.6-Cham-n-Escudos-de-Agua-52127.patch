@@ -1,0 +1,45 @@
+From 18162577f0ff8e16d4e0897eaeeec219163e7dfc Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sat, 26 Nov 2011 21:28:43 +0100
+Subject: [PATCH 06/22] =?UTF-8?q?3.6=20Cham=C3=A1n:=20Escudos=20de=20Agua=20?=
+ =?UTF-8?q?(52127)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../2011_08_11_100_world_shaman_shields_water.sql  |    1 +
+ src/server/game/Spells/Auras/SpellAuraEffects.cpp  |    7 +++++++
+ 2 files changed, 8 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_08_11_100_world_shaman_shields_water.sql
+
+diff --git a/sql/updates/world/reanemu/2011_08_11_100_world_shaman_shields_water.sql b/sql/updates/world/reanemu/2011_08_11_100_world_shaman_shields_water.sql
+new file mode 100644
+index 0000000..0d3662e
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_08_11_100_world_shaman_shields_water.sql
+@@ -0,0 +1 @@
++UPDATE `spell_bonus_data` SET `direct_bonus` = 0.473 WHERE `entry` = 974;
+\ No newline at end of file
+diff --git a/src/server/game/Spells/Auras/SpellAuraEffects.cpp b/src/server/game/Spells/Auras/SpellAuraEffects.cpp
+index 388a1e2..b87a444 100755
+--- a/src/server/game/Spells/Auras/SpellAuraEffects.cpp
++++ b/src/server/game/Spells/Auras/SpellAuraEffects.cpp
+@@ -592,7 +592,14 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
+                 break;
+             // Earth Shield
+             if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[1] & 0x400)
++            {
++               // return to unmodified by spellmods value
++               amount = m_spellInfo->Effects[m_effIndex].BasePoints;
++               // apply spell healing bonus
+                 amount = caster->SpellHealingBonus(GetBase()->GetUnitOwner(), GetSpellInfo(), amount, SPELL_DIRECT_DAMAGE);
++               // apply spellmods
++               amount = caster->ApplyEffectModifiers(GetSpellInfo(), m_effIndex, float(amount));
++            }
+             break;
+         case SPELL_AURA_PERIODIC_DAMAGE:
+             if (!caster)
+-- 
+1.7.8.msysgit.0
+

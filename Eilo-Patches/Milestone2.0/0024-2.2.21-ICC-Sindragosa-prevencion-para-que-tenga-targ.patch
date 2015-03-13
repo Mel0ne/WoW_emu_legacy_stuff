@@ -1,0 +1,34 @@
+From b8b5a1bebbe12c62e33245be35614369ab456f71 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 11:36:29 -0500
+Subject: [PATCH 24/65] 2.2.21 ICC: Sindragosa prevencion para que tenga
+ target cuando baja
+
+---
+ .../Northrend/IcecrownCitadel/boss_sindragosa.cpp  |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+index 9e33059..6eb8ae4 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+@@ -205,7 +205,6 @@ class boss_sindragosa : public CreatureScript
+                 Cleanup();
+                 summons.DespawnAll();
+                 BossAI::Reset();
+-                me->SetReactState(REACT_DEFENSIVE);
+                 DoCast(me, SPELL_TANK_MARKER, true);
+                 events.ScheduleEvent(EVENT_BERSERK, 600000);
+                 events.ScheduleEvent(EVENT_CLEAVE, 10000, EVENT_GROUP_LAND_PHASE);
+@@ -340,7 +339,7 @@ class boss_sindragosa : public CreatureScript
+                     case POINT_LAND:
+                         me->SetFlying(false);
+                         me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+-                        me->SetReactState(REACT_DEFENSIVE);
++                        me->SetReactState(REACT_AGGRESSIVE);
+                         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
+                             me->GetMotionMaster()->MovementExpired();
+                         DoStartMovement(me->getVictim());
+-- 
+1.7.8.msysgit.0
+

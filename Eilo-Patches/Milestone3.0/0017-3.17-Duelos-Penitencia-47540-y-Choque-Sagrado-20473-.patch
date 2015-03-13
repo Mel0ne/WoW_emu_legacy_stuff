@@ -1,0 +1,43 @@
+From 99559b683ad40992396ed566dd4b66845675f8b6 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sun, 27 Nov 2011 22:12:27 +0100
+Subject: [PATCH 17/22] 3.17 Duelos: Penitencia (47540) y Choque Sagrado
+ (20473) no se pueden usar en duelos de otros pj
+
+---
+ src/server/scripts/Spells/spell_paladin.cpp |    3 +++
+ src/server/scripts/Spells/spell_priest.cpp  |    4 ++++
+ 2 files changed, 7 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Spells/spell_paladin.cpp b/src/server/scripts/Spells/spell_paladin.cpp
+index 80ad8a7..618f5cf 100644
+--- a/src/server/scripts/Spells/spell_paladin.cpp
++++ b/src/server/scripts/Spells/spell_paladin.cpp
+@@ -290,6 +290,9 @@ public:
+             {
+                 Unit* caster = GetCaster();
+ 
++                if (caster->GetGUID() != unitTarget->GetGUID() && caster->IsFriendlyTo(unitTarget) && (unitTarget->ToPlayer() != NULL && unitTarget->ToPlayer()->duel != NULL))
++                    return;
++
+                 uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
+ 
+                 if (caster->IsFriendlyTo(unitTarget))
+diff --git a/src/server/scripts/Spells/spell_priest.cpp b/src/server/scripts/Spells/spell_priest.cpp
+index ee5f6a6..39aa738 100644
+--- a/src/server/scripts/Spells/spell_priest.cpp
++++ b/src/server/scripts/Spells/spell_priest.cpp
+@@ -210,6 +210,10 @@ class spell_pri_penance : public SpellScriptLoader
+ 
+                 Unit* caster = GetCaster();
+ 
++               // Part Dueld Fix 
++               if (caster->GetGUID() != unitTarget->GetGUID() && caster->IsFriendlyTo(unitTarget) && (unitTarget->ToPlayer() != NULL && unitTarget->ToPlayer()->duel != NULL))
++                   return;
++
+                 uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
+ 
+                 if (caster->IsFriendlyTo(unitTarget))
+-- 
+1.7.8.msysgit.0
+

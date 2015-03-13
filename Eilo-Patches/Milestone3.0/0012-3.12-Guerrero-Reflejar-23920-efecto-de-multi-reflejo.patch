@@ -1,0 +1,40 @@
+From df8005aff552c70e9aaed2d0e796c8d415783586 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sun, 27 Nov 2011 19:09:45 +0100
+Subject: [PATCH 12/22] 3.12 Guerrero: Reflejar (23920) efecto de
+ multi-reflejo
+
+---
+ src/server/game/Entities/Unit/Unit.cpp |    2 --
+ src/server/game/Spells/Spell.cpp       |    2 ++
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
+index cdce74b..f03d76a 100755
+--- a/src/server/game/Entities/Unit/Unit.cpp
++++ b/src/server/game/Entities/Unit/Unit.cpp
+@@ -2541,8 +2541,6 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
+                 reflectchance += (*i)->GetAmount();
+         if (reflectchance > 0 && roll_chance_i(reflectchance))
+         {
+-            // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
+-            ProcDamageAndSpell(victim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, spell);
+             return SPELL_MISS_REFLECT;
+         }
+     }
+diff --git a/src/server/game/Spells/Spell.cpp b/src/server/game/Spells/Spell.cpp
+index 68975aa..33cea39 100755
+--- a/src/server/game/Spells/Spell.cpp
++++ b/src/server/game/Spells/Spell.cpp
+@@ -1214,6 +1214,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
+         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
+         {
+             spellHitTarget = m_caster;
++            // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
++            m_caster->ProcDamageAndSpell(unit, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo);
+             if (m_caster->GetTypeId() == TYPEID_UNIT)
+                 m_caster->ToCreature()->LowerPlayerDamageReq(target->damage);
+         }
+-- 
+1.7.8.msysgit.0
+

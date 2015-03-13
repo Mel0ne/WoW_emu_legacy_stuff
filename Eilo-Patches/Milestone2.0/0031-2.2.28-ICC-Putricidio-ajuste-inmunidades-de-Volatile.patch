@@ -1,0 +1,27 @@
+From 91d6e35f1a2aa1a32803a8dc9136b1a194a1af42 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 12:29:16 -0500
+Subject: [PATCH 31/65] 2.2.28 ICC: Putricidio ajuste inmunidades de Volatile
+ Ooze
+
+---
+ .../2011_11_24_100_world_correcciones_icc.sql      |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+index d10f7fa..d1adc90 100644
+--- a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
++++ b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+@@ -19,6 +19,9 @@ UPDATE `creature` SET `position_z` = 42.1 WHERE `guid`=200934;
+ -- Ajuste de velocidades para babosas de putricidio, amenorada la velocidad
+ -- Originalmente speed_walk=2
+ UPDATE `creature_template` SET `speed_walk`=0.68 WHERE `entry` IN (37697,38604,38758,38759);
++-- Inmunidades de las babosas de putricidio
++-- Babosas de putricidio Volatile Ooze(37697)
++UPDATE `creature_template` SET `mechanic_immune_mask` = `mechanic_immune_mask`|1|2|8|16|32|64|128|256|512|1024|2048|4096|8192|65536|131072|524288|4194304|8388608|33554432|536870912 WHERE `entry` IN (37697,38604,38758,38759,37562,38602,38760,38761);
+ 
+ -- Icc triggers de Rotface
+ -- Eliminado algunos Puddle Stalker(37013) que hacen que salga en el aire los charcos
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,24 @@
+From 7bd03ae4c7b3dac0db2aec60f86afafa43b96f74 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 18:06:58 -0500
+Subject: [PATCH 49/65] 2.10.1 Ahn'Kahet: Taldaram combate en invisible
+
+---
+ .../AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp   |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp b/src/server/scripts/Northrend/AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp
+index 0f4b046..65ee569 100644
+--- a/src/server/scripts/Northrend/AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp
++++ b/src/server/scripts/Northrend/AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp
+@@ -226,6 +226,7 @@ public:
+                             {
+                                 DoScriptText(RAND(SAY_VANISH_1, SAY_VANISH_2), me);
+                                 DoCast(me, SPELL_VANISH);
++                                me->SetInCombatWithZone();
+                                 Phase = JUST_VANISHED;
+                                 uiPhaseTimer = 500;
+                                 if (Unit* pEmbraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+-- 
+1.7.8.msysgit.0
+

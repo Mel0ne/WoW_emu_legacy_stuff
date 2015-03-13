@@ -1,0 +1,25 @@
+From 93e2d9378d5044031f20fab5886b93f5637cb92a Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 20:23:42 -0500
+Subject: [PATCH 63/65] 2.24.1 UtgardeKeep: Ingvar permitiendo que se le pueda
+ atacar en el reseteo
+
+---
+ .../UtgardeKeep/boss_ingvar_the_plunderer.cpp      |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/UtgardeKeep/UtgardeKeep/boss_ingvar_the_plunderer.cpp b/src/server/scripts/Northrend/UtgardeKeep/UtgardeKeep/boss_ingvar_the_plunderer.cpp
+index a11f88f..2259b1c 100644
+--- a/src/server/scripts/Northrend/UtgardeKeep/UtgardeKeep/boss_ingvar_the_plunderer.cpp
++++ b/src/server/scripts/Northrend/UtgardeKeep/UtgardeKeep/boss_ingvar_the_plunderer.cpp
+@@ -117,6 +117,7 @@ public:
+             bIsUndead = false;
+             bEventInProgress = false;
+ 
++            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+             me->SetStandState(UNIT_STAND_STATE_STAND);
+ 
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,40 @@
+From 532b4a8c889a12b5e3650209be0d10a6d9b17428 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 02:45:41 -0500
+Subject: [PATCH 22/65] 2.2.19 ICC: Festergut aggrea a 20y
+
+---
+ .../Northrend/IcecrownCitadel/boss_festergut.cpp   |   10 +++++++++-
+ 1 files changed, 9 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_festergut.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_festergut.cpp
+index 8ec3303..85ecfac 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_festergut.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_festergut.cpp
+@@ -92,7 +92,6 @@ class boss_festergut : public CreatureScript
+             void Reset()
+             {
+                 _Reset();
+-                me->SetReactState(REACT_DEFENSIVE);
+                 events.ScheduleEvent(EVENT_BERSERK, 300000);
+                 events.ScheduleEvent(EVENT_INHALE_BLIGHT, urand(25000, 30000));
+                 events.ScheduleEvent(EVENT_GAS_SPORE, urand(20000, 25000));
+@@ -164,6 +163,15 @@ class boss_festergut : public CreatureScript
+                     target->RemoveAurasDueToSpell(INOCULATED_HELPER);
+             }
+ 
++            void MoveInLineOfSight(Unit* who)
++            {
++                if (me->IsWithinDistInMap(who, 20.0f))
++                {
++                    me->SetReactState(REACT_AGGRESSIVE);
++                    me->SetInCombatWithZone();
++                }
++            }
++
+             void UpdateAI(uint32 const diff)
+             {
+                 if (!UpdateVictim() || !CheckInRoom())
+-- 
+1.7.8.msysgit.0
+

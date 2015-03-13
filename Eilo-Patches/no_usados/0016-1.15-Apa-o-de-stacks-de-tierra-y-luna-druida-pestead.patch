@@ -1,0 +1,28 @@
+From 84a7d18b209418abe7b6aa3dc5d764b6dea97b81 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 18:34:19 -0500
+Subject: [PATCH 16/20] =?UTF-8?q?1.16=20Apa=C3=B1o=20de=20stacks=20de=20tier?=
+ =?UTF-8?q?ra=20y=20luna=20(druida),=20pesteador=20de=20ebano=20(dk),=20mald?=
+ =?UTF-8?q?icion=20de=20los=20elementos(brujo)=20a=201?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../2011_10_21_100_world_stackeo_amenorado.sql     |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_10_21_100_world_stackeo_amenorado.sql
+
+diff --git a/sql/updates/world/reanemu/2011_10_21_100_world_stackeo_amenorado.sql b/sql/updates/world/reanemu/2011_10_21_100_world_stackeo_amenorado.sql
+new file mode 100644
+index 0000000..ebb8887
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_10_21_100_world_stackeo_amenorado.sql
+@@ -0,0 +1,3 @@
++DELETE FROM `spell_group_stack_rules` WHERE `group_id` = 1114;
++INSERT INTO `spell_group_stack_rules` (`group_id`, `stack_rule`) VALUES
++(1114,1);
+\ No newline at end of file
+-- 
+1.7.6.msysgit.0
+

@@ -1,0 +1,25 @@
+From 9bcf5897f1150fd47a1d1fe0a2d15623691e5bf2 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 17:31:14 -0500
+Subject: [PATCH 21/26] 1.21 Corrigiendo los vehiculos con spline
+
+---
+ src/server/game/Entities/Unit/Unit.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
+index 0722754..8bfbbcb 100755
+--- a/src/server/game/Entities/Unit/Unit.cpp
++++ b/src/server/game/Entities/Unit/Unit.cpp
+@@ -17049,7 +17049,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
+ 
+     WorldPacket data2;
+     BuildHeartBeatMsg(&data2);
+-    SendMessageToSet(&data2, true);
++    SendMessageToSet(&data2, false);
+ 
+     if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION))
+         if (((Minion*)vehicle->GetBase())->GetOwner() == this)
+-- 
+1.7.8.msysgit.0
+

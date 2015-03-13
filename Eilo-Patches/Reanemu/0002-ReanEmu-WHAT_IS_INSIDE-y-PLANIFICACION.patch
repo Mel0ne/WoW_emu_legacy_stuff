@@ -1,0 +1,259 @@
+From 478963fb9b35dfae9c0121bc601f76c4ac89a08e Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 29 Dec 2011 14:14:50 -0500
+Subject: [PATCH 2/3] --- ReanEmu WHAT_IS_INSIDE y PLANIFICACION ---
+
+---
+ PLANIFICACION  |  161 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ WHAT_IS_INSIDE |   71 +++++++++++++++++++++++++
+ 2 files changed, 232 insertions(+), 0 deletions(-)
+ create mode 100644 PLANIFICACION
+ create mode 100644 WHAT_IS_INSIDE
+
+diff --git a/PLANIFICACION b/PLANIFICACION
+new file mode 100644
+index 0000000..0713a7c
+--- /dev/null
++++ b/PLANIFICACION
+@@ -0,0 +1,161 @@
++== ReanEmu ==
++#####################################################################
++##  Planificacion de repositorios y de Avances del nuevo emulador  ##
++#####################################################################
++La planificacion y organizacion adecuada de la informacion como del
++equipo y repositorios es uno de los aspectos mas importantes para
++lograr el objetivo con este proyecto de manera que:
++
++ -----------
++| Milesones |
++ -----------
++El repositorio no puede ser un desorden por lo que se fijarán metas 
++concretas en 5 MILESTONES:
++
++Milestone0.0 -- Caracteristicas principales y adicionales para el emulador
++                tales como ahbot, wintergrasp, warden, ac1, reset duel, etc.
++Milestone1.0 -- Jugabilidad en general, adecuaciones de codigo vario en mapas
++                comportamiento de bgs, arenas, players-units-pets y mejoras.
++Milestone2.0 -- Principales arreglos a dungeons e instances, sobre todo las
++                raids de ICC, Sagrario Rubi y Ulduar.
++Milestone3.0 -- Arreglos a Spells, sobre todo para estabilidad del pve y del
++                pvp dentro de los reinos.
++Milestone4.0 -- Arreglos en quests, y cadenas de mision, esto incluye scripts
++                en c++ y SmartAI.
++Milestone5.0 -- Traducciones, e inclusion de varios dentro de tablas y strings
++                del emulador, ya sea en c++ o en sqls.
++
++ ---------
++| Commits |
++ ---------
++Cada COMMIT se llevara a cabo con los avances individuales por repositorios 
++personales y se escribiran por cada una de los cambios minimas que hagan 
++referentes al mismo tema y se clasificaran tambien con una estructura para 
++que asemeje a un solo topico en concreto:
++
++Nombre: Descripcion
++------  -----------
++Spell: texto e ID
++Script: texto
++Instance: texto
++Quest: texto script ID y sql
++Reputacion: texto script ID y sql
++SQL: dependiendo e ID
++
++Todos los commits seran en ESPAÑOl, excepto los nombres referentes a cosas 
++del emulador como tal, spells, nombres de las mismas, nombres de archivos, 
++dependencias, etc. Los nombres de archivos que describan los cambios en sql,
++serán en ESPAÑOL sin Ñ y se ajustarán a la cronologia de tc en la carpeta 
++sql/update, ya sea en world, characters o auth de acuerdo a lo que corresponda 
++cada query o grupo en concreto asi:
++
++año-mes-dia-numero mayor a 100_carpeta_texto_explicativo.sql
++--- --- --- ------------------ ---------------------------------------
++2011_09_01_102_world_wintergrasp_torretas.sql
++
++Ojo, siempre mayor a cien, para no pisar cualquier commit de tc. 
++
++ ------------
++| Desarrollo |
++ ------------
++Otra cosa que hay que tomar en cuenta es el hecho de que si algo es de codigo 
++de otra persona o equipo de personas en concreto hay que mencionarlo por los 
++copyrights, y si nosotros hacemos algo que no lo haya hecho nadie, añadir el 
++copyright respectivamente de cada uno individualmente y el de ReanEmu, sobre 
++todo si en una script se le ha hecho mejoras notables y de peso.
++
++* Copyright (C) ReanEmu 2011 <https://github.com/eilo/ReanEmu>
++
++Esto tambien nos servira para añadirlo al What_Is_Inside del repo
++
++ ----------
++| Branches |
++ ----------
++De ahora en adelante hay q tener una estructura ordenada y simple de manera que 
++no solapemos trabajo de otro dev y mucho peor, tratar de unirlas, porque tampoco 
++es necesario unir todas las branches entre si.
++
++La modalidad de branches estara en 3 grupos asi:
++      1                     2                   3
++ -----------    --------------------------    ------
++(tc)&(warden)  (developers)->(experimental)  (master)
++
++De manera general:
++----------------
++--Primer Grupo--
++----------------
++tc:     se actualiza solo con cosas de TC y no se mezcla aqui, nada de lo del resto 
++        de repos, es decir una tc limpia tal cual.
++	    
++		Tag -> (tc)
++
++warden: esta lleva solo lo de warden, nada mezclado aqui, es decir una warden limpia.
++	    
++		Tag -> (warden)
++
++-----------------
++--Segundo Grupo--
++-----------------
++Estas branches seran hechas a partir de experimental en las cuentas personales 
++de git de cada uno, sin embargo los commits finales apareceran sobre el branch 
++experimental del repo.
++
++Cada developer hara un FORK de ReanEmu a su cuenta personal de github e irá pusheando
++los cambios y mejoras con previo aviso y consentimiento de los demas developers en el
++repo de la Organizacion.
++
++Aqui algunos lineamientos para los developers:
++
++1. Siempre se commiteara cada accion con un commit individual por mas pequeño que sea. 
++   Dado que en algun momento se necesita revertir, por que no funcione bien o porque 
++   tc lo arreglase en algun momento. 
++
++2. Se mantendra el codestyling de espacios en blanco con espaciadora, nunca con tabs 
++   en el codigo o el emulador pierde condescendencia y tambien porque tc mantiene estas
++   reglas basicas para coding. 
++   
++3. Siempre se comunicara al resto de devs que es lo que se esta haciendo y se tendra 
++   claro siempre los repos que a cada uno se le ha asignado. Si algun commit tiene 
++   referencia a alguno de los repos de otro dev, es imprescindible comunicarlo. 
++   
++4. Se depreca el cherry pick por razones de conflictos anteriores, y se lo permitirá 
++   unicamente con un commit contemporaneo, es decir que no supere 1 dia atras de la
++   revision punta (head) que tengamos nosotros.
++	   
++5. Se unirá cada cierto tiempo todo el material que consideremos como "funcional" de 
++   cada uno de nuestros avances de manera que aqui se haga las primeras pruebas y se 
++   pueda ver los errores en conjunto. 
++   
++6. Este branch no es para solucionar errores de los commits personales, es decir, si 
++   se equivocaron un typo, lo corrigen en vuestro branch personal y una vez corregido, 
++   lo traen al experimental. No al revés. 
++   
++7. Cada material pasa a ser revisado mediante pull requests, incluido material interno
++   que aun no se haya testeado en ningun reino, de manera que se pueda deliberar sobre
++   el uso que se le dará y condiciones.
++   
++8. Este branch se aplicará primero en el Reino de Pruebas para ir sacando el changelog. 
++   Aqui en este branch se unificaran los What is inside de cada uno de los individuales 
++   y se expondra como un solo archivo.
++   
++9. Cada vez q necesiteis revertir algo, se lo hara en el mismo commit de cada uno y en su 
++   momento debera ser notificado al respectivo developer y su causa. 
++   
++        Tag -> (experimental)
++	  
++----------------			  
++--Tercer Grupo--
++----------------
++master: Aqui se comentará el trabajo final, por fechas, testeado en experimental y que 
++        contenga la característica de estabilidad y funcionalidad con el tag de Milestone#.#. 
++		En master vienen las versiones finales, si ocurre algun fix para la version final, 
++		tiene que pasar el respectivo proceso, por el repo de merge, luego al individual de 
++		todos, y despues al experimental y finalmente al master. De ninguna manera permitido 
++		al reves.
++
++		Tag -> (master) & [automatico]Tag -> (head)
++
++El proceso en general se lograra hacer mas llevadero y sobre todo nos ayudara para alcanzar 
++esta meta inmensa como equipo de desarrollo de ReanEmu.
++
++Saludos
+diff --git a/WHAT_IS_INSIDE b/WHAT_IS_INSIDE
+new file mode 100644
+index 0000000..8362a13
+--- /dev/null
++++ b/WHAT_IS_INSIDE
+@@ -0,0 +1,71 @@
++== ReanEmu ==
++
++What is inside: (que hay dentro)
++
++ReanEmu posee muchos fixes y mejoras a base de algunos repos y autores muy 
++conocidos además de los nuestros propios, este documento detalla los componentes,
++parches y/o código que contiene dentro este emulador de manera resumida:
++
++#########
++#ReanEmu#
++#########
++
++
++##################################
++# Trintitycore hasta esta fecha: #
++##################################
++
++
++###############
++# Adicionales #
++###############
++
++
++###############
++# Jugabilidad #
++###############
++
++
++###############################
++# Dungeons e Instances Varias #
++###############################
++
++
++#################
++# Sagrario Rubí #
++#################
++
++
++#######
++# ICC #
++#######
++
++
++##########
++# Ulduar #
++##########
++
++
++#######################
++# Hechizos y Talentos #
++#######################
++
++
++#################
++# Items y Bonus #
++#################
++
++
++############################
++# Soporte Quests y Eventos #
++############################
++
++
++#################
++# Traducciones: #
++#################
++
++
++##########
++# Custom #
++##########
+-- 
+1.7.6.msysgit.0
+

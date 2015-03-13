@@ -1,0 +1,59 @@
+From 0e009daef4bf3a308878c07bb5379edb7e881fa5 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 30 Dec 2011 17:26:37 -0500
+Subject: [PATCH 22/29] =?UTF-8?q?0.22=20FindNearestPlayer=20y=20GetNearestPl?=
+ =?UTF-8?q?ayersList=20rea=C3=B1adidas?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Entities/Object/Object.cpp |   17 +++++++++++++++++
+ src/server/game/Entities/Object/Object.h   |    3 +++
+ 2 files changed, 20 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Entities/Object/Object.cpp b/src/server/game/Entities/Object/Object.cpp
+index 6baa432..205b691 100755
+--- a/src/server/game/Entities/Object/Object.cpp
++++ b/src/server/game/Entities/Object/Object.cpp
+@@ -2777,6 +2777,23 @@ void WorldObject::UpdateObjectVisibility(bool /*forced*/)
+     VisitNearbyWorldObject(GetVisibilityRange(), notifier);
+ }
+ 
++Player* WorldObject::FindNearestPlayer(float range, bool alive)
++{
++    Player* player = NULL;
++    Trinity::AnyPlayerInObjectRangeCheck checker(this, range, alive);
++    Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, player, checker);
++    VisitNearbyWorldObject(range, searcher);
++    return player;
++}
++
++std::list<Player*> WorldObject::GetNearestPlayersList(float range, bool alive) {
++    std::list<Player*> players;
++    Trinity::AnyPlayerInObjectRangeCheck checker(this, range, alive);
++    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, players, checker);
++    VisitNearbyWorldObject(range, searcher);
++    return players;
++}
++
+ struct WorldObjectChangeAccumulator
+ {
+     UpdateDataMapType& i_updateDatas;
+diff --git a/src/server/game/Entities/Object/Object.h b/src/server/game/Entities/Object/Object.h
+index 4cc298e..7962082 100755
+--- a/src/server/game/Entities/Object/Object.h
++++ b/src/server/game/Entities/Object/Object.h
+@@ -785,6 +785,9 @@ class WorldObject : public Object, public WorldLocation
+         Creature*   FindNearestCreature(uint32 entry, float range, bool alive = true) const;
+         GameObject* FindNearestGameObject(uint32 entry, float range) const;
+ 
++        Player*     FindNearestPlayer(float range, bool alive = true);
++        std::list<Player*>  GetNearestPlayersList(float range, bool alive = true);
++
+         void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
+         void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
+ 
+-- 
+1.7.8.msysgit.0
+

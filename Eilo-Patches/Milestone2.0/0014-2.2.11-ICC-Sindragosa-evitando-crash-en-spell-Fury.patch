@@ -1,0 +1,25 @@
+From 0ba39cfcc79af39d937702d272e781cde01f4bb2 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 02:12:38 -0500
+Subject: [PATCH 14/65] 2.2.11 ICC: Sindragosa evitando crash en spell Fury
+
+---
+ .../Northrend/IcecrownCitadel/boss_sindragosa.cpp  |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+index 005f649..d1bc17d 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+@@ -984,7 +984,7 @@ class spell_sindragosa_s_fury : public SpellScriptLoader
+                 uint32 minResistFactor = uint32((resistance / (resistance + 510.0f))* 10.0f) * 2;
+                 uint32 randomResist = urand(0, (9 - minResistFactor) * 100)/100 + minResistFactor;
+ 
+-                uint32 damage = (uint32(GetEffectValue()/_targetCount) * randomResist) / 10;
++                uint32 damage = (_targetCount > 0) ? ((uint32(GetEffectValue()/_targetCount) * randomResist) / 10) : 0;
+ 
+                 SpellNonMeleeDamage damageInfo(GetCaster(), GetHitUnit(), GetSpellInfo()->Id, GetSpellInfo()->SchoolMask);
+                 damageInfo.damage = damage;
+-- 
+1.7.8.msysgit.0
+

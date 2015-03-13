@@ -1,0 +1,29 @@
+From 601d0c57279b6a3d29218e62db37ac58ec2b9772 Mon Sep 17 00:00:00 2001
+From: strolch <sebeche@gmail.com>
+Date: Mon, 6 Feb 2012 21:49:48 -0500
+Subject: [PATCH 3/6] 4.3 Nagrand: Circulo de Sangre
+ (9962,9967,9970,9972,9973,9977)
+
+---
+ .../2012_01_18_100_world_circulo_de sangre.sql     |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2012_01_18_100_world_circulo_de sangre.sql
+
+diff --git a/sql/updates/world/reanemu/2012_01_18_100_world_circulo_de sangre.sql b/sql/updates/world/reanemu/2012_01_18_100_world_circulo_de sangre.sql
+new file mode 100644
+index 0000000..11c6b1a
+--- /dev/null
++++ b/sql/updates/world/reanemu/2012_01_18_100_world_circulo_de sangre.sql	
+@@ -0,0 +1,9 @@
++-- Se cambia el campo SpecialFlaq para que no se complete mediante un Script sino en el campo Agrega en el campo de RequiredNpcOrGo1 el npc que debia ser matado, antes valor en 0 By Strolx
++
++UPDATE quest_template SET SpecialFlags=0,RequiredNpcOrGo1=18398,RequiredNpcOrGoCount1=1 WHERE Id=9962 LIMIT 1;
++UPDATE quest_template SET SpecialFlags=0,RequiredNpcOrGo1=18399,RequiredNpcOrGoCount1=1 WHERE Id=9967 LIMIT 1;
++UPDATE quest_template SET SpecialFlags=0,RequiredNpcOrGo1=18400,RequiredNpcOrGoCount1=1 WHERE Id=9970 LIMIT 1;
++UPDATE quest_template SET SpecialFlags=0,RequiredNpcOrGo1=18401,RequiredNpcOrGoCount1=1 WHERE Id=9972 LIMIT 1;
++UPDATE quest_template SET SpecialFlags=0,RequiredNpcOrGo1=18402,RequiredNpcOrGoCount1=1 WHERE Id=9973 LIMIT 1;
++UPDATE quest_template SET SpecialFlags=0,RequiredNpcOrGo1=18069,RequiredNpcOrGoCount1=1 WHERE Id=9977 LIMIT 1;
++
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,71 @@
+From 9f4061fd479a30b3a237640d500ad0ce6ef96df4 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 18:14:47 -0500
+Subject: [PATCH 25/65] 2.2.22 ICC: Principes aggrea si se les acercan
+
+---
+ .../IcecrownCitadel/boss_blood_prince_council.cpp  |   10 +++-------
+ 1 files changed, 3 insertions(+), 7 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
+index 6ac6912..6dd8f34 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_blood_prince_council.cpp
+@@ -377,19 +377,17 @@ class boss_prince_keleseth_icc : public CreatureScript
+                 if (!me->isDead())
+                     JustRespawned();
+ 
+-                me->SetReactState(REACT_DEFENSIVE);
++                me->SetReactState(REACT_AGGRESSIVE);
+             }
+ 
+             void Reset()
+             {
+                 events.Reset();
+                 summons.DespawnAll();
+-
+                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                 _isEmpowered = false;
+                 me->SetHealth(_spawnHealth);
+                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
+-                me->SetReactState(REACT_DEFENSIVE);
+             }
+ 
+             void EnterCombat(Unit* /*who*/)
+@@ -603,7 +601,7 @@ class boss_prince_taldaram_icc : public CreatureScript
+                 if (!me->isDead())
+                     JustRespawned();
+ 
+-                me->SetReactState(REACT_DEFENSIVE);
++                me->SetReactState(REACT_AGGRESSIVE);
+             }
+ 
+             void Reset()
+@@ -615,7 +613,6 @@ class boss_prince_taldaram_icc : public CreatureScript
+                 _isEmpowered = false;
+                 me->SetHealth(_spawnHealth);
+                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
+-                me->SetReactState(REACT_DEFENSIVE);
+             }
+ 
+             void MoveInLineOfSight(Unit* /*who*/)
+@@ -828,7 +825,7 @@ class boss_prince_valanar_icc : public CreatureScript
+                 if (!me->isDead())
+                     JustRespawned();
+ 
+-                me->SetReactState(REACT_DEFENSIVE);
++                me->SetReactState(REACT_AGGRESSIVE);
+             }
+ 
+             void Reset()
+@@ -840,7 +837,6 @@ class boss_prince_valanar_icc : public CreatureScript
+                 _isEmpowered = false;
+                 me->SetHealth(me->GetMaxHealth());
+                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
+-                me->SetReactState(REACT_DEFENSIVE);
+             }
+ 
+             void MoveInLineOfSight(Unit* /*who*/)
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,26 @@
+From 192b274d40b7cb4316415e9f8ac90356087ca9a6 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 12:42:11 -0500
+Subject: [PATCH 36/65] 2.2.33 ICC: LichKing Valkyrs ajuste velocidad en
+ script
+
+---
+ .../IcecrownCitadel/boss_the_lich_king.cpp         |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
+index ba22572..d37fb74 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
+@@ -1479,7 +1479,7 @@ class npc_valkyr_shadowguard : public CreatureScript
+                 _events.Reset();
+                 me->SetReactState(REACT_PASSIVE);
+                 DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
+-                me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
++                me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
+             }
+ 
+             void IsSummonedBy(Unit* /*summoner*/)
+-- 
+1.7.8.msysgit.0
+

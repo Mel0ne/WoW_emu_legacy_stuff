@@ -1,0 +1,29 @@
+From 3a378d64e81257dc36b2212b37711de442a53830 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 18:08:43 -0500
+Subject: [PATCH 50/65] =?UTF-8?q?2.10.2=20Ahn'Kahet:=20Taldaram=20da=C3=B1o=20?=
+ =?UTF-8?q?esferas=20ajustado?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp   |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp b/src/server/scripts/Northrend/AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp
+index 65ee569..79c8646 100644
+--- a/src/server/scripts/Northrend/AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp
++++ b/src/server/scripts/Northrend/AzjolNerub/Ahnkahet/boss_prince_taldaram.cpp
+@@ -356,7 +356,7 @@ public:
+             DoCast(me, SPELL_FLAME_SPHERE_VISUAL);
+             DoCast(me, SPELL_FLAME_SPHERE_SPAWN_EFFECT);
+             DoCast(me, SPELL_FLAME_SPHERE_PERIODIC);
+-            uiDespawnTimer = 10*IN_MILLISECONDS;
++            uiDespawnTimer = 1*IN_MILLISECONDS;
+         }
+ 
+         void EnterCombat(Unit* /*who*/) {}
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,63 @@
+From 5b3616213df00177b4b97da13c7f9441c4379836 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 2 Jan 2012 11:53:23 -0500
+Subject: [PATCH 29/29] Milestone0.0
+
+---
+ WHAT_IS_INSIDE |   33 +++++++++++++++++++++++++++++++++
+ 1 files changed, 33 insertions(+), 0 deletions(-)
+
+diff --git a/WHAT_IS_INSIDE b/WHAT_IS_INSIDE
+index 8362a13..9d8a7ee 100644
+--- a/WHAT_IS_INSIDE
++++ b/WHAT_IS_INSIDE
+@@ -9,6 +9,11 @@ parches y/o c
+ #########
+ #ReanEmu#
+ #########
++Milestone0.0: Reiniciando el repo y readaptando cosas varias, inclusion de nuevos
++              developers en git y la inclusion de texto de planeacion para union 
++              eficiente de codigo reestructurando modo de trabajo y organizando 
++              carpetas, branches, etc, adicion de codigo utilitario en general 
++              para complemento del nucleo y funciones de soporte.
+ 
+ 
+ ##################################
+@@ -19,6 +24,34 @@ parches y/o c
+ ###############
+ # Adicionales #
+ ###############
++0.1  - 28/10/2011: Archivo sqlcombinado.BAT para unificar sqls de actualizacion por Eilo
++0.2  - 24/11/2011: Añadido sql TDB11.45
++0.3  - 17/01/2012: Warden Anticheat por Leak
++0.4  - 28/10/2011: Pvp Ranks de Spgm por Snajil adecuaciones varias por Eilo
++0.5  - 13/10/2011: AHBot añadido para subastas por Lockness
++0.6  - 17/11/2011: ResetCD Duelos por Mouse, actualizaciones por Eilo
++0.7  - 09/11/2011: AC1 Anticheat por Aokrommes, adecuaciones por Eilo
++0.8  - 18/10/2011: Wintergrasp por Lockness
++0.9  - 14/10/2011: Cuentas VIP por Locknes
++0.10 - 07/10/2011: DynamicLoS para gameobjects por Odyssey, ajustes por Eilo
++0.11 - 29/11/2011: TrinityJail original de Warhead, añadido por Hispano, ajustes por Eilo
++0.12 - 20/01/2012: Autenticacion con cata 4.2.2 y 4.3.0
++0.13 - 02/12/2011: Lista de who maximo 50 pj por Eilo
++0.14 - 09/10/2011: Desactivado avisos Join/Leave en canales por Odyssey
++0.15 - 05/10/2011: Permitiendo unirse al canal LFG sin estar en ciudad principal por Opcode187
++0.16 - 01/11/2011: DoCompleteAchievement reañadida al nucleo como funcion activa por Eilo
++0.17 - 04/11/2011: DoAttackerAreaInCombat reañadida al nucleo para soporte por Eilo
++0.18 - 17/11/2011: DoAttackerGroupInCombat reañadida al nucleo para soporte por Eilo
++0.19 - 17/11/2011: _DoAggroPulse funcion y inFightAggroCheck_Timer reañadida para soporte por Eilo
++0.20 - 21/11/2011: UnsummonSpecificCreaturesNearby funcion de soporte añadida por Eilo
++0.21 - 30/12/2011: HasAchieved funcion de soporte reañadida por Eilo
++0.22 - 30/12/2011: FindNearestPlayer y GetNearestPlayersList reañadidas por Eilo
++0.23 - 30/12/2011: setRegeneratingHealth funcion de soporte reañadida por Eilo
++0.24 - 30/12/2011: SetImmuneToPushPullEffects funcion de soporte reañadida por Eilo
++0.25 - 04/02/2012: BuildWaitMovePacket funcion de soporte añadida por Eilo
++0.26 - 04/02/2012: AddNPCPassengerInInstance funcion de soporte añadida por Eilo
++0.27 - 04/02/2012: UpdatePlayerPosition funcion de soporte añadida por Eilo
++0.28 - 04/02/2012: LoadTransportForMap, UnloadTransportFromMap, LoadTransportForPlayers y UnloadTransportForPlayers funciones de soporte añadidas por Eilo
+ 
+ 
+ ###############
+-- 
+1.7.8.msysgit.0
+

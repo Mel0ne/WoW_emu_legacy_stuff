@@ -1,0 +1,26 @@
+From 0422e79d90b486c8397d4227ac5d05b4e0d73ca6 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 01:36:40 -0500
+Subject: [PATCH 10/65] 2.2.7 ICC: Lich King, tirion se congela
+
+---
+ .../IcecrownCitadel/boss_the_lich_king.cpp         |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
+index 711703c..118f1b6 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_the_lich_king.cpp
+@@ -899,7 +899,8 @@ class boss_the_lich_king : public CreatureScript
+                             break;
+                         case EVENT_INTRO_CAST_FREEZE:
+                             Talk(SAY_LK_INTRO_3);
+-                            DoCastAOE(SPELL_ICE_LOCK, false);
++                            if (Unit* Tirion = me->GetMap()->GetCreature(instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
++                                DoCast(Tirion, SPELL_ICE_LOCK, false);
+                             events.ScheduleEvent(EVENT_FINISH_INTRO, 1000, 0, PHASE_INTRO);
+                             break;
+                         case EVENT_FINISH_INTRO:
+-- 
+1.7.8.msysgit.0
+

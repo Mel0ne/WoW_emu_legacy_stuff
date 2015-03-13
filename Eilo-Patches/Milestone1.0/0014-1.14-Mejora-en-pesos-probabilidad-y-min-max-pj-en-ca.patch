@@ -1,0 +1,34 @@
+From 06d5c4468724adb990cb4c82f2cb174061d00a01 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 18:25:18 -0500
+Subject: [PATCH 14/26] 1.14 Mejora en pesos(probabilidad) y min-max pj en
+ cada bg
+
+---
+ .../2011_11_03_100_world_mejora_bg_template.sql    |   13 +++++++++++++
+ 1 files changed, 13 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_11_03_100_world_mejora_bg_template.sql
+
+diff --git a/sql/updates/world/reanemu/2011_11_03_100_world_mejora_bg_template.sql b/sql/updates/world/reanemu/2011_11_03_100_world_mejora_bg_template.sql
+new file mode 100644
+index 0000000..6968567
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_11_03_100_world_mejora_bg_template.sql
+@@ -0,0 +1,13 @@
++-- Pesos en bg para mejor jugabilidad y cambio de minimo maximo por faccion
++-- Alterac 10%
++UPDATE battleground_template SET MinPlayersPerTeam=20,MaxPlayersPerTeam=25,Weight=1 WHERE `id`=1;
++-- Grito de Guerra 80%
++UPDATE battleground_template SET MinPlayersPerTeam=8,MaxPlayersPerTeam=10,Weight=8 WHERE `id`=2;
++-- Arathi 60%
++UPDATE battleground_template SET MinPlayersPerTeam=8,MaxPlayersPerTeam=15,Weight=6 WHERE `id`=3;
++-- Ojo de tormenta 70%
++UPDATE battleground_template SET MinPlayersPerTeam=8,MaxPlayersPerTeam=15,Weight=7 WHERE `id`=7;
++-- Playa de ancestros 20%
++UPDATE battleground_template SET MinPlayersPerTeam=7,MaxPlayersPerTeam=15,Weight=2 WHERE `id`=9;
++-- Isla de conquista 30%
++UPDATE battleground_template SET MinPlayersPerTeam=20,MaxPlayersPerTeam=25,Weight=3 WHERE `id`=30;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

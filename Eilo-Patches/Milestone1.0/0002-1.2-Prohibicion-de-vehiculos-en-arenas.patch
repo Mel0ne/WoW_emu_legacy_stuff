@@ -1,0 +1,27 @@
+From 3c02554722fc40e81c0eece969c56c6800fb94ac Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 16:32:40 -0500
+Subject: [PATCH 02/26] 1.2 Prohibicion de vehiculos en arenas
+
+---
+ src/server/game/Entities/Vehicle/Vehicle.cpp |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Entities/Vehicle/Vehicle.cpp b/src/server/game/Entities/Vehicle/Vehicle.cpp
+index 5ba120e..d3d1eb1 100755
+--- a/src/server/game/Entities/Vehicle/Vehicle.cpp
++++ b/src/server/game/Entities/Vehicle/Vehicle.cpp
+@@ -335,6 +335,10 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
+     if (unit->GetVehicle() != this)
+         return false;
+ 
++    // don't allow vehicles in arena
++    if (unit->GetTypeId() == TYPEID_PLAYER && unit->GetMap()->IsBattleArena())
++       return false;
++
+     SeatMap::iterator seat;
+     if (seatId < 0) // no specific seat requirement
+     {
+-- 
+1.7.8.msysgit.0
+

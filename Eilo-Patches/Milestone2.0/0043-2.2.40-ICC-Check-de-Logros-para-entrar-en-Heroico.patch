@@ -1,0 +1,85 @@
+From aa28f170726f1ce1b464809ae659ea65c55723d2 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 21 Jan 2012 00:29:05 -0500
+Subject: [PATCH 43/65] 2.2.40 ICC: Check de Logros para entrar en Heroico
+
+---
+ .../IcecrownCitadel/instance_icecrown_citadel.cpp  |   41 ++++++++++++++++++-
+ 1 files changed, 38 insertions(+), 3 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+index 461c4b8..ebd0973 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+@@ -33,9 +33,16 @@ enum EventIds
+ 
+ enum TimedEvents
+ {
+-    EVENT_UPDATE_EXECUTION_TIME = 1,
+-    EVENT_QUAKE_SHATTER         = 2,
+-    EVENT_REBUILD_PLATFORM      = 3,
++    EVENT_UPDATE_EXECUTION_TIME  = 1,
++    EVENT_QUAKE_SHATTER          = 2,
++    EVENT_REBUILD_PLATFORM       = 3,
++    EVENT_CHECK_HERO_ACHIEVEMENT = 4,
++};
++
++enum RequiredAchievementsForHeroic
++{
++    ACHIEVEMENT_FROZEN_THRONE_10 = 4530,
++    ACHIEVEMENT_FROZEN_THRONE_25 = 4597,
+ };
+ 
+ DoorData const doorData[] =
+@@ -164,6 +171,9 @@ class instance_icecrown_citadel : public InstanceMapScript
+             {
+                 if (!TeamInInstance)
+                     TeamInInstance = player->GetTeam();
++
++                if (instance->IsHeroic())
++                    Events.ScheduleEvent(EVENT_CHECK_HERO_ACHIEVEMENT, 10000);
+             }
+ 
+             void OnCreatureCreate(Creature* creature)
+@@ -1094,6 +1104,21 @@ class instance_icecrown_citadel : public InstanceMapScript
+                 return true;
+             }
+ 
++            bool CheckHeroicAchievement(uint32 mode)
++            {
++                Map::PlayerList const &players = instance->GetPlayers();
++                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
++                {
++                    Player* player = itr->getSource();
++                    if (player->isGameMaster())
++                        continue;
++
++                    if (player->GetAchievementMgr().HasAchieved(mode == 25 ? ACHIEVEMENT_FROZEN_THRONE_25 : ACHIEVEMENT_FROZEN_THRONE_10))
++                        return true;
++                }
++                return false;
++            }
++
+             std::string GetSaveData()
+             {
+                 OUT_SAVE_INST_DATA;
+@@ -1174,6 +1199,16 @@ class instance_icecrown_citadel : public InstanceMapScript
+                 {
+                     switch (eventId)
+                     {
++                        case EVENT_CHECK_HERO_ACHIEVEMENT:
++                            if (!CheckHeroicAchievement(instance->ToInstanceMap()->GetMaxPlayers()))
++                            {
++                                Map::PlayerList const &players = instance->GetPlayers();
++                                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
++                                    if (Player* player = itr->getSource())
++                                        player->RepopAtGraveyard();
++                            }
++                            Events.ScheduleEvent(EVENT_CHECK_HERO_ACHIEVEMENT, 10000);
++                            break;
+                         case EVENT_UPDATE_EXECUTION_TIME:
+                         {
+                             --BloodQuickeningMinutes;
+-- 
+1.7.8.msysgit.0
+

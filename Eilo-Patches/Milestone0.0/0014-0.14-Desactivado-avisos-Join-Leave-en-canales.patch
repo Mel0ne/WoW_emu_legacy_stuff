@@ -1,0 +1,36 @@
+From 36fc02d4bb18fe85863fff043c925fc6b06348f3 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 15 Dec 2011 21:47:13 -0500
+Subject: [PATCH 14/29] 0.14 Desactivado avisos Join/Leave en canales
+
+---
+ src/server/game/Chat/Channels/Channel.cpp |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/server/game/Chat/Channels/Channel.cpp b/src/server/game/Chat/Channels/Channel.cpp
+index b6e9dd3..715433c 100755
+--- a/src/server/game/Chat/Channels/Channel.cpp
++++ b/src/server/game/Chat/Channels/Channel.cpp
+@@ -803,15 +803,15 @@ void Channel::MakeNotifyPacket(WorldPacket* data, uint8 notify_type)
+ // done 0x00
+ void Channel::MakeJoined(WorldPacket* data, uint64 guid)
+ {
+-    MakeNotifyPacket(data, CHAT_JOINED_NOTICE);
+-    *data << uint64(guid);
++    /*MakeNotifyPacket(data, CHAT_JOINED_NOTICE);
++    *data << uint64(guid);*/
+ }
+ 
+ // done 0x01
+ void Channel::MakeLeft(WorldPacket* data, uint64 guid)
+ {
+-    MakeNotifyPacket(data, CHAT_LEFT_NOTICE);
+-    *data << uint64(guid);
++    /*MakeNotifyPacket(data, CHAT_LEFT_NOTICE);
++    *data << uint64(guid);*/
+ }
+ 
+ // done 0x02
+-- 
+1.7.8.msysgit.0
+

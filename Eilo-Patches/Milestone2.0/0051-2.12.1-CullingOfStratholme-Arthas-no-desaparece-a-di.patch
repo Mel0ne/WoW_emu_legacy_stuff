@@ -1,0 +1,26 @@
+From 284a48810cc51ebb27ca871508715893511552c4 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 19:59:43 -0500
+Subject: [PATCH 51/65] 2.12.1 CullingOfStratholme: Arthas no desaparece a
+ distancia
+
+---
+ .../CullingOfStratholme/culling_of_stratholme.cpp  |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Kalimdor/CavernsOfTime/CullingOfStratholme/culling_of_stratholme.cpp b/src/server/scripts/Kalimdor/CavernsOfTime/CullingOfStratholme/culling_of_stratholme.cpp
+index 9518abd..0c026b4 100644
+--- a/src/server/scripts/Kalimdor/CavernsOfTime/CullingOfStratholme/culling_of_stratholme.cpp
++++ b/src/server/scripts/Kalimdor/CavernsOfTime/CullingOfStratholme/culling_of_stratholme.cpp
+@@ -269,7 +269,7 @@ public:
+                 break;
+         }
+         player->CLOSE_GOSSIP_MENU();
+-        ai->SetDespawnAtFar(true);
++        ai->SetDespawnAtFar(false);
+         creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+         return true;
+     }
+-- 
+1.7.8.msysgit.0
+

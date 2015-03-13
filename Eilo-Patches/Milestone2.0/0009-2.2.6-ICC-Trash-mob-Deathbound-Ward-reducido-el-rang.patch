@@ -1,0 +1,26 @@
+From fa9c46cf2978eac902019941f5ffb472a249c450 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 00:47:31 -0500
+Subject: [PATCH 09/65] 2.2.6 ICC: Trash mob Deathbound Ward reducido el rango
+ de aggro
+
+---
+ .../Northrend/IcecrownCitadel/icecrown_citadel.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
+index d02d8f3..d781c5f 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
+@@ -1751,7 +1751,7 @@ class spell_icc_sprit_alarm : public SpellScriptLoader
+                     {
+                         (*itr)->AI()->Talk(SAY_TRAP_ACTIVATE);
+                         (*itr)->RemoveAurasDueToSpell(SPELL_STONEFORM);
+-                        if (Unit* target = (*itr)->SelectNearestTarget(150.0f))
++                        if (Unit* target = (*itr)->SelectNearestTarget(100.0f))
+                             (*itr)->AI()->AttackStart(target);
+                         break;
+                     }
+-- 
+1.7.8.msysgit.0
+

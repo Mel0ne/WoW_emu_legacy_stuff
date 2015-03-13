@@ -1,0 +1,93 @@
+From 205c7cd4706d0939dcfd390cc19989c779eff9da Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 02:23:03 -0500
+Subject: [PATCH 16/65] 2.2.13 ICC: Putricide Stinky spell Plague Stench
+
+---
+ .../reanemu/2011_10_30_100_world_plague_stench.sql |    8 +++
+ .../Northrend/IcecrownCitadel/boss_festergut.cpp   |   49 ++++++++++++++++++++
+ 2 files changed, 57 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_10_30_100_world_plague_stench.sql
+
+diff --git a/sql/updates/world/reanemu/2011_10_30_100_world_plague_stench.sql b/sql/updates/world/reanemu/2011_10_30_100_world_plague_stench.sql
+new file mode 100644
+index 0000000..4f72417
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_10_30_100_world_plague_stench.sql
+@@ -0,0 +1,8 @@
++-- ICC
++
++-- BOSS FESTERGUT
++-- Fix spell http://www.wowhead.com/spell=71160
++DELETE FROM `spell_script_names` WHERE `spell_id` IN (71160,71161);
++INSERT INTO `spell_script_names` VALUES 
++(71160,'spell_stinky_plague_stench'),
++(71161,'spell_stinky_plague_stench');
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_festergut.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_festergut.cpp
+index 32fb757..8ec3303 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_festergut.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_festergut.cpp
+@@ -474,6 +474,54 @@ class achievement_flu_shot_shortage : public AchievementCriteriaScript
+         }
+ };
+ 
++class PlagueStenchTargetSelector
++{
++    public:
++        PlagueStenchTargetSelector(Unit* caster) : _caster(caster) { }
++
++        bool operator()(Unit* unit)
++        {
++            return !unit->IsWithinLOSInMap(_caster);
++        }
++    private:
++        Unit* _caster;
++};
++
++class spell_stinky_plague_stench : public SpellScriptLoader
++{
++    public:
++        spell_stinky_plague_stench() : SpellScriptLoader("spell_stinky_plague_stench") { }
++
++        class spell_stinky_plague_stench_SpellScript : public SpellScript
++        {
++            PrepareSpellScript(spell_stinky_plague_stench_SpellScript);
++
++            bool Validate(SpellEntry const* spellEntry)
++            {
++                if (!sSpellStore.LookupEntry(71160))
++                    return false;
++                if (!sSpellStore.LookupEntry(71161))
++                    return false;
++                return true;
++            }
++
++            void FilterTargets(std::list<Unit*>& unitList)
++            {
++                unitList.remove_if(PlagueStenchTargetSelector(GetCaster()));
++            }
++
++            void Register()
++            {
++                 OnUnitTargetSelect += SpellUnitTargetFn(spell_stinky_plague_stench_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
++            }
++        };
++
++        SpellScript* GetSpellScript() const
++        {
++            return new spell_stinky_plague_stench_SpellScript();
++        }
++};
++
+ void AddSC_boss_festergut()
+ {
+     new boss_festergut();
+@@ -482,4 +530,5 @@ void AddSC_boss_festergut()
+     new spell_festergut_gastric_bloat();
+     new spell_festergut_blighted_spores();
+     new achievement_flu_shot_shortage();
++    new spell_stinky_plague_stench();
+ }
+-- 
+1.7.8.msysgit.0
+

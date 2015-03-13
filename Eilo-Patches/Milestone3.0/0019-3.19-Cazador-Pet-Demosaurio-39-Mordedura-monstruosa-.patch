@@ -1,0 +1,34 @@
+From 9ae5ee0b7e4d46524fe2607dbaedd1e9c1fc9731 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sun, 1 Jan 2012 23:47:09 +0100
+Subject: [PATCH 19/22] =?UTF-8?q?3.19=20Cazador:=20Pet=20Demosaurio=20(39)=20?=
+ =?UTF-8?q?Mordedura=20monstruosa=20(54680)=20correcci=C3=B3n=20del=20efecto?=
+ =?UTF-8?q?=20aplicado=20al=20target?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Spells/SpellMgr.cpp |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Spells/SpellMgr.cpp b/src/server/game/Spells/SpellMgr.cpp
+index 3e6d752..7853906 100755
+--- a/src/server/game/Spells/SpellMgr.cpp
++++ b/src/server/game/Spells/SpellMgr.cpp
+@@ -3582,6 +3582,12 @@ void SpellMgr::LoadDbcDataCorrections()
+ 
+         switch (spellInfo->SpellFamilyName)
+         {
++            case SPELLFAMILY_HUNTER: // Monstrous Bite Error target spell 
++                if (spellInfo->SpellIconID == 599)
++                    spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
++                else
++                    break;
++                break;
+             case SPELLFAMILY_DRUID:
+                 // Starfall Target Selection
+                 if (spellInfo->SpellFamilyFlags[2] & 0x100)
+-- 
+1.7.8.msysgit.0
+

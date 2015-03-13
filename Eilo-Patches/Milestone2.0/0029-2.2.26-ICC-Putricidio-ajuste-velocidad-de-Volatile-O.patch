@@ -1,0 +1,29 @@
+From 12e8bd7ee6eff4cab88fb6a67922fe2a12d41748 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 17:52:58 -0500
+Subject: [PATCH 29/65] 2.2.26 ICC: Putricidio ajuste velocidad de Volatile
+ Ooze
+
+---
+ .../2011_11_24_100_world_correcciones_icc.sql      |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+diff --git a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+index 9bf67cc..711b991 100644
+--- a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
++++ b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+@@ -13,4 +13,9 @@ UPDATE `creature` SET `position_z` = 44.57 WHERE `guid`=200956;
+ 
+ -- Las dos siguientes, llegando a marrowgar
+ UPDATE `creature` SET `position_z` = 42.1 WHERE `guid`=200912;
+-UPDATE `creature` SET `position_z` = 42.1 WHERE `guid`=200934;
+\ No newline at end of file
++UPDATE `creature` SET `position_z` = 42.1 WHERE `guid`=200934;
++
++-- Icc adds putricidio
++-- Ajuste de velocidades para babosas de putricidio, amenorada la velocidad
++-- Originalmente speed_walk=2
++UPDATE `creature_template` SET `speed_walk`=0.68 WHERE `entry` IN (37697,38604,38758,38759);
+-- 
+1.7.8.msysgit.0
+

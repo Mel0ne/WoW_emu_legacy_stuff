@@ -1,0 +1,278 @@
+From cc8e1a49cfcc0e08c4a10eb7cc85babfc4d751fd Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 14:13:11 -0500
+Subject: [PATCH 10/29] 0.10 DynLoS en Gameobjects
+
+---
+ src/server/game/Entities/Object/Object.cpp |   11 ++-
+ src/server/game/Maps/Map.cpp               |  153 ++++++++++++++++++++++++++++
+ src/server/game/Maps/Map.h                 |   39 +++++++
+ 3 files changed, 201 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/game/Entities/Object/Object.cpp b/src/server/game/Entities/Object/Object.cpp
+index 1a8eb8f..6baa432 100755
+--- a/src/server/game/Entities/Object/Object.cpp
++++ b/src/server/game/Entities/Object/Object.cpp
+@@ -1300,7 +1300,7 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
+ 
+     float ox, oy, oz;
+     obj->GetPosition(ox, oy, oz);
+-    return(IsWithinLOS(ox, oy, oz));
++    return (IsWithinLOS(ox, oy, oz) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));
+ }
+ 
+ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
+@@ -1308,7 +1308,7 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
+     float x, y, z;
+     GetPosition(x, y, z);
+     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+-    return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);
++    return (vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));
+ }
+ 
+ bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D /* = true */) const
+@@ -2671,6 +2671,13 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float
+ 
+     bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
+ 
++    while (!GetMap()->IsInDynLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ, destx, desty, destz))
++    {
++        destx -= 2.0f * cos(angle);
++        desty -= 2.0f * sin(angle);
++        col = true;
++    }
++
+     // collision occured
+     if (col)
+     {
+diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
+index df5ec54..b01db4c 100755
+--- a/src/server/game/Maps/Map.cpp
++++ b/src/server/game/Maps/Map.cpp
+@@ -220,9 +220,14 @@ i_scriptLock(false)
+         }
+     }
+ 
++    for (std::map<uint32, DynamicLOSObject*>::iterator i = m_dynamicLOSObjects.begin(); i != m_dynamicLOSObjects.end(); ++i)
++        delete i->second;
++
+     //lets initialize visibility distance for map
+     Map::InitVisibilityDistance();
+ 
++    m_dynamicLOSCounter = 0;
++
+     sScriptMgr->OnCreateMap(this);
+ }
+ 
+@@ -2650,3 +2655,151 @@ void Map::UpdateIteratorBack(Player* player)
+     if (m_mapRefIter == player->GetMapRef())
+         m_mapRefIter = m_mapRefIter->nocheck_prev();
+ }
++
++/*
++ * ****************** *
++ * DYNAMIC LOS SYSTEM *
++ * ****************** *
++ */
++uint32 Map::AddDynLOSObject(float x, float y, float radius)
++{
++    DynamicLOSObject* obj = new DynamicLOSObject();
++    obj->SetCoordinates(x, y);
++    obj->SetRadius(radius);
++
++    // Add the dynamic object to the map
++    m_dynamicLOSObjects[++m_dynamicLOSCounter] = obj;
++
++    return m_dynamicLOSCounter;
++}
++
++uint32 Map::AddDynLOSObject(float x, float y, float z, float radius, float height)
++{
++    DynamicLOSObject* obj = new DynamicLOSObject();
++    obj->SetCoordinates(x, y);
++    obj->SetZ(z);
++    obj->SetHeight(height);
++    obj->SetRadius(radius);
++
++    // Add the dynamic object to the map
++    m_dynamicLOSObjects[++m_dynamicLOSCounter] = obj;
++
++    return m_dynamicLOSCounter;
++}
++
++void Map::SetDynLOSObjectState(uint32 id, bool state)
++{
++    std::map<uint32, DynamicLOSObject*>::iterator iter = m_dynamicLOSObjects.find(id);
++    if (iter != m_dynamicLOSObjects.end())
++        iter->second->SetActiveState(state);
++}
++
++bool Map::GetDynLOSObjectState(uint32 id)
++{
++    std::map<uint32, DynamicLOSObject*>::iterator iter = m_dynamicLOSObjects.find(id);
++    if (iter != m_dynamicLOSObjects.end())
++        return (iter->second->IsActive());
++    return false;
++}
++
++bool Map::IsInDynLOS(float x, float y, float z, float x2, float y2, float z2)
++{
++    if (!m_dynamicLOSCounter)
++        return true;
++
++    for (std::map<uint32, DynamicLOSObject*>::iterator iter = m_dynamicLOSObjects.begin(); iter != m_dynamicLOSObjects.end(); ++iter)
++        if (iter->second->IsActive() && iter->second->IsBetween(x, y, z, x2, y2, z2))
++            return false;
++
++    return true;
++}
++
++DynamicLOSObject::DynamicLOSObject()
++{
++    _x = 0.0f;
++    _y = 0.0f;
++    _z = 0.0f;
++    _height = 0.0f;
++    _radius = 0.0f;
++    _active = false;
++}
++
++bool DynamicLOSObject::IsBetween(float x, float y, float z, float x2, float y2, float z2)
++{
++    if (IsInside(x, y) || IsInside(x2, y2))
++    {
++        if(HasHeightInfo() && IsOverOrUnder(z2))
++            return false;
++
++        return true;
++    }
++
++    // For a real handling of Z coord is necessary to do some research from this point
++    // i.e. A player over a huge round plattaform, placed near the edge; and other player placed  down the plattaform at the oposing extreme just next to the edge;
++    // both may be able to attack each other, even when the plattaform height should prevent that.
++    if ((std::max(x, x2) < (_x - _radius))
++        || (std::min(x, x2) > (_x + _radius))
++        || (std::max(y, y2) < (_y - _radius))
++        || (std::min(y, y2) > (_y + _radius)))
++        return false;
++
++
++    float angleToMe = atan2(_x - x, _y - y);
++    angleToMe = (angleToMe >= 0) ? angleToMe : 2 * M_PI + angleToMe;
++
++    float angleToDest = atan2(x2 - x, y2 - y);
++    angleToDest = (angleToDest >= 0) ? angleToDest : 2 * M_PI + angleToDest;
++
++    return (fabs(sin(angleToMe - angleToDest)) * GetDistance(x, y) < _radius);
++}
++
++bool DynamicLOSObject::IsInside(float x, float y)
++{
++    return (((x-_x)*(x-_x)+(y-_y)*(y-_y))<(_radius*_radius));
++}
++
++bool DynamicLOSObject::IsOverOrUnder(float z)
++{
++    return ((z < _z+_height) && (z > _z));
++}
++
++float DynamicLOSObject::GetDistance(float x, float y)
++{
++    return sqrtf((x-_x)*(x-_x)+(y-_y)*(y-_y));
++}
++
++bool DynamicLOSObject::IsActive()
++{
++    return _active;
++}
++
++void DynamicLOSObject::SetActiveState(bool state)
++{
++    _active = state;
++}
++
++void DynamicLOSObject::SetCoordinates(float x, float y)
++{
++    _x = x;
++    _y = y;
++}
++
++void DynamicLOSObject::SetRadius(float r)
++{
++    _radius = r;
++}
++
++void DynamicLOSObject::SetZ(float z)
++{
++    _z = z;
++}
++
++void DynamicLOSObject::SetHeight(float h)
++{
++    _height = h;
++}
++
++bool DynamicLOSObject::HasHeightInfo()
++{
++    return (_z != 0 || _height != 0);
++}
+diff --git a/src/server/game/Maps/Map.h b/src/server/game/Maps/Map.h
+index f3b45bd..97201d9 100755
+--- a/src/server/game/Maps/Map.h
++++ b/src/server/game/Maps/Map.h
+@@ -200,6 +200,30 @@ public:
+ #pragma pack(push, 1)
+ #endif
+ 
++class DynamicLOSObject
++{
++    public:
++        DynamicLOSObject();
++        bool IsBetween(float x, float y, float z, float x2, float y2, float z2);
++        bool IsInside(float x, float y);
++        bool IsOverOrUnder(float z);
++        float GetDistance(float x, float y);
++        bool IsActive();
++        void SetActiveState(bool state);
++        void SetCoordinates(float x, float y);
++        void SetZ(float z);
++        void SetRadius(float r);
++        void SetHeight(float h);
++        bool HasHeightInfo();
++    private:
++        float _x;
++        float _y;
++        float _z;
++        float _height;
++        float _radius;
++        bool _active;
++};
++
+ struct InstanceTemplate
+ {
+     uint32 Parent;
+@@ -426,6 +450,21 @@ class Map : public GridRefManager<NGridType>
+         const InstanceMap* ToInstanceMap() const { if (IsDungeon())  return (const InstanceMap*)((InstanceMap*)this); else return NULL;  }
+         float GetWaterOrGroundLevel(float x, float y, float z, float* ground = NULL, bool swim = false) const;
+ 
++    /*
++     **********************
++     * DYNAMIC LOS SYSTEM *
++     **********************
++    */
++    public:
++        uint32 AddDynLOSObject(float x, float y, float radius);
++        uint32 AddDynLOSObject(float x, float y, float z, float radius, float height);
++        void SetDynLOSObjectState(uint32 id, bool state);
++        bool GetDynLOSObjectState(uint32 id);
++        bool IsInDynLOS(float x, float y, float z, float x2, float y2, float z2);
++    private:
++        std::map<uint32, DynamicLOSObject*> m_dynamicLOSObjects;
++        uint32 m_dynamicLOSCounter;
++    /* END */
+     private:
+         void LoadMapAndVMap(int gx, int gy);
+         void LoadVMap(int gx, int gy);
+-- 
+1.7.8.msysgit.0
+

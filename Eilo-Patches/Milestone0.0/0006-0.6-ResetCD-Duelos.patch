@@ -1,0 +1,31 @@
+From 70aba54c6d081579a85de5ca3bf934147c988f54 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 15 Dec 2011 13:49:09 -0500
+Subject: [PATCH 06/29] 0.6 ResetCD Duelos
+
+---
+ src/server/game/Handlers/DuelHandler.cpp |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Handlers/DuelHandler.cpp b/src/server/game/Handlers/DuelHandler.cpp
+index 8afd9f3..cac5457 100755
+--- a/src/server/game/Handlers/DuelHandler.cpp
++++ b/src/server/game/Handlers/DuelHandler.cpp
+@@ -51,6 +51,14 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
+ 
+     player->SendDuelCountdown(3000);
+     plTarget->SendDuelCountdown(3000);
++
++    // Reset CoolDown before DUEL
++    player->RemoveAllSpellCooldown();
++    plTarget->RemoveAllSpellCooldown();
++    player->SetHealth(player->GetMaxHealth());
++    player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
++    plTarget->SetHealth(plTarget->GetMaxHealth());
++    plTarget->SetPower(POWER_MANA,  plTarget->GetMaxPower(POWER_MANA));
+ }
+ 
+ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
+-- 
+1.7.8.msysgit.0
+

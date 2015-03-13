@@ -1,0 +1,98 @@
+From 8a9eae3dff4525b73a39c36ad5153e2f8c9005d9 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 20:40:57 -0500
+Subject: [PATCH 15/22] =?UTF-8?q?3.15=20Paladin:=20Escudo=20sacro=20(70491)=20?=
+ =?UTF-8?q?a=C3=B1dir=20cooldown=20despues=20de=20efecto=20de=20remover?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../reanemu/2011_08_20_100_world_sacred_shield.sql |    3 ++
+ src/server/scripts/Spells/spell_paladin.cpp        |   39 ++++++++++++++++++++
+ 2 files changed, 42 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_08_20_100_world_sacred_shield.sql
+
+diff --git a/sql/updates/world/reanemu/2011_08_20_100_world_sacred_shield.sql b/sql/updates/world/reanemu/2011_08_20_100_world_sacred_shield.sql
+new file mode 100644
+index 0000000..6325f29
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_08_20_100_world_sacred_shield.sql
+@@ -0,0 +1,3 @@
++DELETE FROM `spell_script_names` WHERE `spell_id` = 58597;
++INSERT INTO `spell_script_names` VALUES
++(58597, 'spell_pal_sacred_shield');
+\ No newline at end of file
+diff --git a/src/server/scripts/Spells/spell_paladin.cpp b/src/server/scripts/Spells/spell_paladin.cpp
+index 9d5e5a9..f58c975 100644
+--- a/src/server/scripts/Spells/spell_paladin.cpp
++++ b/src/server/scripts/Spells/spell_paladin.cpp
+@@ -35,6 +35,8 @@ enum PaladinSpells
+     PALADIN_SPELL_HOLY_SHOCK_R1_DAMAGE           = 25912,
+     PALADIN_SPELL_HOLY_SHOCK_R1_HEALING          = 25914,
+ 
++    PALADIN_SPELL_SACRED_SHIELD_EFFECT           = 58597,
++
+     SPELL_BLESSING_OF_LOWER_CITY_DRUID           = 37878,
+     SPELL_BLESSING_OF_LOWER_CITY_PALADIN         = 37879,
+     SPELL_BLESSING_OF_LOWER_CITY_PRIEST          = 37880,
+@@ -335,6 +337,41 @@ public:
+     }
+ };
+ 
++// 58597 Sacred shield add cooldown
++class spell_pal_sacred_shield : public SpellScriptLoader
++{
++public:
++   spell_pal_sacred_shield() : SpellScriptLoader("spell_pal_sacred_shield") { }
++
++   class spell_pal_sacred_shield_AuraScript : public AuraScript
++   {
++       PrepareAuraScript(spell_pal_sacred_shield_AuraScript)
++       bool Validate(SpellInfo const* /*entry*/)
++       {
++           if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_SACRED_SHIELD_EFFECT))
++               return false;
++           return true;
++       }
++
++       void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
++       {
++           if (Unit* caster = GetCaster())
++               if (caster->ToPlayer())
++                   caster->ToPlayer()->AddSpellCooldown(PALADIN_SPELL_SACRED_SHIELD_EFFECT, 0, time(NULL) + 6);
++       }
++
++       void Register()
++       {
++           AfterEffectRemove += AuraEffectRemoveFn(spell_pal_sacred_shield_AuraScript::HandleEffectRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
++       }
++   };
++
++   AuraScript *GetAuraScript() const
++   {
++       return new spell_pal_sacred_shield_AuraScript();
++   }
++};
++
+ class spell_pal_divine_storm : public SpellScriptLoader
+ {
+ public:
+@@ -369,6 +406,7 @@ public:
+     }
+ };
+ 
++
+ void AddSC_paladin_spell_scripts()
+ {
+     new spell_pal_ardent_defender();
+@@ -377,5 +415,6 @@ void AddSC_paladin_spell_scripts()
+     new spell_pal_guarded_by_the_light();
+     new spell_pal_holy_shock();
+     new spell_pal_judgement_of_command();
++    new spell_pal_sacred_shield();
+     new spell_pal_divine_storm();
+ }
+-- 
+1.7.8.msysgit.0
+

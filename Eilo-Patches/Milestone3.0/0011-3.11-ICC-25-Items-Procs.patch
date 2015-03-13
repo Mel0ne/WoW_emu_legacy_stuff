@@ -1,0 +1,131 @@
+From 8cd99aa9c92798664764260945adc0123e8f44b0 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Sun, 27 Nov 2011 18:48:01 +0100
+Subject: [PATCH 11/22] 3.11 ICC 25 Items Procs
+
+Arma de Caster Normal y Heroico (71845) y (71846)
+Arma de Healer Normal y Heroico (71865) y (71868)
+Arma de Tanque Normal y Heroico (71871) y (71873)
+Daga Normal y Heroico (71883) y (71888)
+---
+ .../2011_07_07_100_world_icc_weapons_proc.sql      |   19 +++++++++
+ src/server/game/Entities/Unit/Unit.cpp             |   42 ++++++++++++++++++++
+ src/server/game/Spells/SpellEffects.cpp            |   11 +++++
+ 3 files changed, 72 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_07_07_100_world_icc_weapons_proc.sql
+
+diff --git a/sql/updates/world/reanemu/2011_07_07_100_world_icc_weapons_proc.sql b/sql/updates/world/reanemu/2011_07_07_100_world_icc_weapons_proc.sql
+new file mode 100644
+index 0000000..c401e5f
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_07_07_100_world_icc_weapons_proc.sql
+@@ -0,0 +1,19 @@
++-- ICC weapons procs
++-- (71845) Item - Icecrown 25 Normal Caster Weapon Proc
++DELETE FROM `spell_proc_event` WHERE `entry` IN (71845);
++INSERT INTO `spell_proc_event` VALUES (71845, 0x01, 0x00, 0x00000000, 0x00000000, 0x00000000, 0x00010000, 0x00000000, 0, 2, 40);
++-- (71846) Item - Icecrown 25 Normal Caster Weapon Proc
++DELETE FROM `spell_proc_event` WHERE `entry` IN (71845);
++INSERT INTO `spell_proc_event` VALUES (71845, 0x01, 0x00, 0x00000000, 0x00000000, 0x00000000, 0x00010000, 0x00000000, 0, 2, 45);
++-- (71865) Item - Icecrown 25 Normal Healer Weapon Proc
++DELETE FROM `spell_proc_event` WHERE `entry` IN (71865);
++INSERT INTO `spell_proc_event` VALUES (71865, 0x01, 0x0A, 0x00000000, 0x00000000, 0x00000000, 0x00044000, 0x00000018, 0, 1, 0);
++-- (71868) Item - Icecrown 25 Heroic Healer Weapon Proc
++DELETE FROM `spell_proc_event` WHERE `entry` IN (71868);
++INSERT INTO `spell_proc_event` VALUES (71868, 0x01, 0x0A, 0x00000000, 0x00000000, 0x00000000, 0x00044000, 0x00000018, 0, 1, 0);
++-- (71871) Item - Icecrown 25 Normal Tank Weapon Proc
++DELETE FROM `spell_proc_event` WHERE `entry` IN (71871);
++INSERT INTO `spell_proc_event` VALUES (71871, 0x01, 0x0A, 0x00000000, 0x00000000, 0x00000000, 0x00000014, 0x00000018, 0, 37, 30);
++-- (71873) Item - Icecrown 25 Heroic Tank Weapon Proc
++DELETE FROM `spell_proc_event` WHERE `entry` IN (71873);
++INSERT INTO `spell_proc_event` VALUES (71873, 0x01, 0x00, 0x00000000, 0x00000000, 0x00000000, 0x00000014, 0x00000018, 0, 37, 35);
+\ No newline at end of file
+diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
+index 9bdf2a2..cdce74b 100755
+--- a/src/server/game/Entities/Unit/Unit.cpp
++++ b/src/server/game/Entities/Unit/Unit.cpp
+@@ -5133,10 +5133,38 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
+                     triggered_spell_id = 33494;
+                     break;
+                 }
++                //Item - Icecrown 25 Normal Tank Weapon Proc
++                case 71871:
++                {
++                   triggered_spell_id = 71870;
++                   target = this;
++                   break;
++                }
++               //Item - Icecrown 25 Heroic Tank Weapon Proc
++               case 71873:
++               {
++                   triggered_spell_id = 71872;
++                   target = this;
++                   break;
++               }
+                 // Twisted Reflection (boss spell)
+                 case 21063:
+                     triggered_spell_id = 21064;
+                     break;
++                //Item - Icecrown 25 Normal Caster Weapon Proc
++                case 71845:
++                {
++                   triggered_spell_id = 71843;
++                   target = this;
++                   break;
++                }
++               //Item - Icecrown 25 Heroic Caster Weapon Proc
++               case 71846:
++               {
++                   triggered_spell_id = 71844;
++                   target = this;
++                   break;
++               }
+                 // Vampiric Aura (boss spell)
+                 case 38196:
+                 {
+@@ -8445,6 +8473,20 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
+                         target = victim;
+                         break;
+                     }
++                   //Item - Icecrown 25 Normal Healer Weapon Proc
++                   case 71865:
++                   {
++                       trigger_spell_id = 71864;
++                       target = this;
++                       break;
++                   }
++                   //Item - Icecrown 25 Heroic Healer Weapon Proc
++                   case 71868:
++                   {
++                       trigger_spell_id = 71866;
++                       target = this;
++                       break;
++                    }
+                     default:
+                         // Illumination
+                         if (auraSpellInfo->SpellIconID == 241)
+diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
+index 79a9b0b..2e189a4 100755
+--- a/src/server/game/Spells/SpellEffects.cpp
++++ b/src/server/game/Spells/SpellEffects.cpp
+@@ -710,6 +710,17 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
+                     damage += CalculatePctN(block_value, m_spellInfo->Effects[EFFECT_1].CalcValue());
+                     break;
+                 }
++               //Item - Icecrown 25 Normal Dagger Proc
++               if (m_spellInfo->Id == 71887 || m_spellInfo->Id == 71881)
++                   if (Aura * aur = m_caster->GetAura(71880))
++                       if (roll_chance_i(25))
++                       m_caster->CastSpell(m_caster, 71883, true);
++               break;
++               //Item - Icecrown 25 Heroic Dagger Proc
++               if (m_spellInfo->Id == 71886 || m_spellInfo->Id == 71882)
++                   if (Aura * aur = m_caster->GetAura(71892))
++                       if (roll_chance_i(35))
++                       m_caster->CastSpell(m_caster, 71888, true);
+                 break;
+             }
+             case SPELLFAMILY_DEATHKNIGHT:
+-- 
+1.7.8.msysgit.0
+

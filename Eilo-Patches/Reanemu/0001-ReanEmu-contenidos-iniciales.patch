@@ -1,0 +1,436 @@
+From 55cba72cc90d19cbe8eb708e032156bd731ce25e Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 29 Dec 2011 14:13:49 -0500
+Subject: [PATCH 1/3] --- ReanEmu contenidos iniciales ---
+
+---
+ CMakeLists.txt                                     |    2 +-
+ README                                             |   37 +++++++++++++++++++-
+ cmake/showoptions.cmake                            |    6 +-
+ src/server/authserver/Main.cpp                     |   29 ++++++++++----
+ src/server/authserver/Realms/RealmList.cpp         |    4 +-
+ src/server/authserver/authserver.conf.dist         |    6 +-
+ src/server/authserver/authserver.rc                |    4 +-
+ src/server/shared/SystemConfig.h                   |    2 +-
+ src/server/worldserver/CommandLine/CliRunnable.cpp |   10 ++--
+ src/server/worldserver/Main.cpp                    |   10 ++--
+ src/server/worldserver/Master.cpp                  |   38 ++++++++++--------
+ src/server/worldserver/worldserver.conf.dist       |    2 +-
+ src/server/worldserver/worldserver.rc              |    4 +-
+ 13 files changed, 103 insertions(+), 51 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index dfa6488..0e70a77 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,7 +9,7 @@
+ # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
+ # Set projectname (must be done AFTER setting configurationtypes)
+-project(TrinityCore)
++project(ReanEmu)
+ 
+ # CMake policies (can not be handled elsewhere)
+ cmake_minimum_required(VERSION 2.6)
+diff --git a/README b/README
+index f2ae18f..60f2df7 100644
+--- a/README
++++ b/README
+@@ -1,6 +1,41 @@
+-= TrinityCore -- General information =
++== ReanEmu ==
++
++ReanEmu es un emulador creado con la unión de varios repositorios reconocidos y 
++código nuestro con el afán de complementarlos y completarlos a todos en 
++un único emulador que pueda brindar codigo util, actualizado y estable. Mira 
++nuestro archivo WHAT_IS_INSIDE para mayor detalle de lo que el emulador contiene.
++
++Hemos generado una metodología y planificación interna la cual nos permite estar 
++al día en las actualizaciones y mejoras de trinitycore, parches propios y de
++repositorios conocidos, puedes leerla en el archivo PLANIFICACION, si alguna 
++sugerencia y/o aporte que quieras darnos tienes la mayor bienvenida en el equipo 
++de los programadores de este repositorio basado en trinitycore.
++
++Actualizaciones y novedades en twitter: http://twitter.com/ReanEmu 
++
++Gracias a quienes hacen este proyecto posible y su respectivo crédito a:
+ 
+ Copyright (C) TrinityCore (http://www.trinitycore.org)
++Copyright (C) Eilo (https://github.com/eilo)
++Copyright (C) Hispano (https://github.com/Hispano)
++Copyright (C) Ws (https://github.com/wsrean)
++Copyright (C) Andron (https://github.com/Andron-Juanka)
++Copyright (C) Muzashi (https://github.com/Muzashi)
++Copyright (C) Eilo-Patches (https://github.com/eilo/Eilo-Patches)
++Copyright (C) ReanEmu (https://github.com/ComunidadRean/ReanEmu)
++Copyright (C) WoWReAn Emu (https://github.com/eilo/wowrean-emu)
++Copyright (C) Leak (https://github.com/leak/TrinityCore)
++Copyright (C) ChaosCore (https://github.com/Locknes/ChaosCore)
++Copyright (C) Darkman (https://github.com/darkman1983/TrinityCore)
++Copyright (C) Retriman (https://github.com/Retriman/TrinityCore)
++Copyright (C) HachasyDados (https://github.com/HachasyDados/HD-TCore)
++Copyright (C) Warpten (https://github.com/Warpten/TrinityCore.git)
++Copyright (C) ZoneLimit (https://github.com/Jildor/ZoneLimit)
++Copyright (C) Shadez (https://github.com/Shadez/wowarmory)
++Copyright (C) Venugh (https://github.com/Venugh/TrinityCore)
++Copyright (C) FaceCore (https://github.com/SignFinder/FaceCore)
++Copyright (C) TcRc (https://github.com/TrinityCoreRu)
++Copyright (C) Mouse (https://github.com/Mouse/tc2-patches)
+ 
+   Trinity Core is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+diff --git a/cmake/showoptions.cmake b/cmake/showoptions.cmake
+index 31e1b41..4fbd0dd 100644
+--- a/cmake/showoptions.cmake
++++ b/cmake/showoptions.cmake
+@@ -1,9 +1,9 @@
+ # output generic information about the core and buildtype chosen
+ message("")
+-message("* TrinityCore rev. hash  : ${rev_hash}")
+-message("* TrinityCore rev. date  : ${rev_date}")
++message("* ReanEmu rev. hash  : ${rev_hash}")
++message("* ReanEmu rev. date  : ${rev_date}")
+ if( UNIX )
+-  message("* TrinityCore buildtype  : ${CMAKE_BUILD_TYPE}")
++  message("* ReanEmu buildtype  : ${CMAKE_BUILD_TYPE}")
+ endif()
+ message("")
+ 
+diff --git a/src/server/authserver/Main.cpp b/src/server/authserver/Main.cpp
+index 8226868..5c40f0f 100755
+--- a/src/server/authserver/Main.cpp
++++ b/src/server/authserver/Main.cpp
+@@ -100,10 +100,23 @@ extern int main(int argc, char **argv)
+     sLog->Initialize();
+ 
+     sLog->outString("%s (authserver)", _FULLVERSION);
+-    sLog->outString("<Ctrl-C> to stop.\n");
+-    sLog->outString("Using configuration file %s.", cfg_file);
+-
+-    sLog->outDetail("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
++    sLog->outString("Presione <Ctrl-C> para detenerlo.\n");
++    sLog->outString("El archivo de configuration usado es %s.", cfg_file);
++
++    sLog->outString( "   _______       __ " );
++    sLog->outString( "  /\\  ____\\   __/\\ \\      ________" );
++    sLog->outString( "  \\ \\ \\___/  /\\_\\ \\ \\    /\\  ____ \\" );
++    sLog->outString( "   \\ \\ \\____ \\/_/_ \\ \\   \\ \\ \\__/\\ \\" );
++    sLog->outString( "    \\ \\  ___\\  /\\ \\ \\ \\   \\ \\ \\ \\ \\ \\" );
++    sLog->outString( "     \\ \\ \\__/  \\ \\ \\ \\ \\   \\ \\ \\___\\ \\" );
++    sLog->outString( "      \\ \\ \\_____\\ \\ \\ \\ \\___\\ \\_______\\" );
++    sLog->outString( "       \\ \\_______\\/_/\\ \\_____\\/_______/" );
++    sLog->outString( "        \\/_______/    \\/_____/       Auth" );
++    sLog->outString( "" );
++    sLog->outString( "   * Basado en TrinityCore *" );
++    sLog->outString( "       Comunidad WoWRean       " );
++
++    sLog->outDetail("%s (Libreria: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+ 
+ #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
+     ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
+@@ -184,7 +197,7 @@ extern int main(int argc, char **argv)
+                 if (!curAff)
+                     sLog->outError("Processors marked in UseProcessors bitmask (hex) %x not accessible for authserver. Accessible processors bitmask (hex): %x", Aff, appAff);
+                 else if (SetProcessAffinityMask(hProcess, curAff))
+-                    sLog->outString("Using processors (bitmask, hex): %x", curAff);
++                    sLog->outString("Usando mascara de procesadores (bitmask, hex): %x", curAff);
+                 else
+                     sLog->outError("Can't set used processors (hex): %x", curAff);
+             }
+@@ -196,7 +209,7 @@ extern int main(int argc, char **argv)
+         if (Prio)
+         {
+             if (SetPriorityClass(hProcess, HIGH_PRIORITY_CLASS))
+-                sLog->outString("The auth server process priority class has been set to HIGH");
++                sLog->outString("Servidor de autenticacion ha sido habilitado a prioridad ALTA");
+             else
+                 sLog->outError("Can't set auth server process priority class.");
+             sLog->outString();
+@@ -231,7 +244,7 @@ extern int main(int argc, char **argv)
+         if ((++loopCounter) == numLoops)
+         {
+             loopCounter = 0;
+-            sLog->outDetail("Ping MySQL to keep connection alive");
++            sLog->outDetail("Ping MySQL para mantener las conexiones activas");
+             LoginDatabase.KeepAlive();
+         }
+     }
+@@ -239,7 +252,7 @@ extern int main(int argc, char **argv)
+     // Close the Database Pool and library
+     StopDB();
+ 
+-    sLog->outString("Halting process...");
++    sLog->outString("Deteniendo proceso...");
+     return 0;
+ }
+ 
+diff --git a/src/server/authserver/Realms/RealmList.cpp b/src/server/authserver/Realms/RealmList.cpp
+index c81af80..918cacc 100755
+--- a/src/server/authserver/Realms/RealmList.cpp
++++ b/src/server/authserver/Realms/RealmList.cpp
+@@ -68,7 +68,7 @@ void RealmList::UpdateIfNeed()
+ 
+ void RealmList::UpdateRealms(bool init)
+ {
+-    sLog->outDetail("Updating Realm List...");
++    sLog->outDetail("Actualizando Lista de Reinos..");
+ 
+     PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_REALMLIST);
+     PreparedQueryResult result = LoginDatabase.Query(stmt);
+@@ -93,7 +93,7 @@ void RealmList::UpdateRealms(bool init)
+             UpdateRealm(realmId, name, address, port, icon, color, timezone, (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR), pop, build);
+ 
+             if (init)
+-                sLog->outString("Added realm \"%s\".", fields[1].GetCString());
++                sLog->outString("Añadido el Reino \"%s\".", fields[1].GetCString());
+         }
+         while (result->NextRow());
+     }
+diff --git a/src/server/authserver/authserver.conf.dist b/src/server/authserver/authserver.conf.dist
+index 86423d5..6db18b4 100644
+--- a/src/server/authserver/authserver.conf.dist
++++ b/src/server/authserver/authserver.conf.dist
+@@ -1,6 +1,6 @@
+-###############################################
+-# Trinity Core Auth Server configuration file #
+-###############################################
++##########################################
++# ReanEmu Auth Server configuration file #
++##########################################
+ [authserver]
+ 
+ ###################################################################################################
+diff --git a/src/server/authserver/authserver.rc b/src/server/authserver/authserver.rc
+index 850fa60..7a02d99 100755
+--- a/src/server/authserver/authserver.rc
++++ b/src/server/authserver/authserver.rc
+@@ -76,12 +76,12 @@ BEGIN
+         BLOCK "080004b0"
+         BEGIN
+             VALUE "CompanyName",        VER_COMPANYNAME_STR
+-            VALUE "FileDescription",    "TrinityCore Authentication Server Daemon"
++            VALUE "FileDescription",    "ReanEmu Authentication Server Daemon"
+             VALUE "FileVersion",        VER_FILEVERSION_STR
+             VALUE "InternalName",       "authserver"
+             VALUE "LegalCopyright",     VER_LEGALCOPYRIGHT_STR
+             VALUE "OriginalFilename",   "authserver.exe"
+-            VALUE "ProductName",        "TrinityCore Authentication Server"
++            VALUE "ProductName",        "ReanEmu Authentication Server"
+             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
+         END
+     END
+diff --git a/src/server/shared/SystemConfig.h b/src/server/shared/SystemConfig.h
+index 18acc73..b3308fb 100755
+--- a/src/server/shared/SystemConfig.h
++++ b/src/server/shared/SystemConfig.h
+@@ -24,7 +24,7 @@
+ #include "Define.h"
+ #include "revision.h"
+ 
+-#define _PACKAGENAME "TrinityCore"
++#define _PACKAGENAME "ReanEmu"
+ 
+ #if TRINITY_ENDIAN == TRINITY_BIGENDIAN
+ # define _ENDIAN_STRING "big-endian"
+diff --git a/src/server/worldserver/CommandLine/CliRunnable.cpp b/src/server/worldserver/CommandLine/CliRunnable.cpp
+index 6135252..4fea858 100755
+--- a/src/server/worldserver/CommandLine/CliRunnable.cpp
++++ b/src/server/worldserver/CommandLine/CliRunnable.cpp
+@@ -112,7 +112,7 @@ void utf8print(void* /*arg*/, const char* str)
+ 
+ void commandFinished(void*, bool /*success*/)
+ {
+-    printf("TC> ");
++    printf("ReanEmu> ");
+     fflush(stdout);
+ }
+ 
+@@ -573,7 +573,7 @@ void CliRunnable::run()
+ 
+     // print this here the first time
+     // later it will be printed after command queue updates
+-    printf("TC>");
++    printf("ReanEmu>");
+ 
+     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
+     while (!World::IsStopped())
+@@ -586,7 +586,7 @@ void CliRunnable::run()
+         char commandbuf[256];
+         command_str = fgets(commandbuf, sizeof(commandbuf), stdin);
+ #else
+-        command_str = readline("TC>");
++        command_str = readline("ReanEmu>");
+         rl_bind_key('\t', rl_complete);
+ #endif
+ 
+@@ -602,7 +602,7 @@ void CliRunnable::run()
+             if (!*command_str)
+             {
+ #if PLATFORM == PLATFORM_WINDOWS
+-                printf("TC>");
++                printf("ReanEmu>");
+ #endif
+                 continue;
+             }
+@@ -611,7 +611,7 @@ void CliRunnable::run()
+             if (!consoleToUtf8(command_str, command))         // convert from console encoding to utf8
+             {
+ #if PLATFORM == PLATFORM_WINDOWS
+-                printf("TC>");
++                printf("ReanEmu>");
+ #endif
+                 continue;
+             }
+diff --git a/src/server/worldserver/Main.cpp b/src/server/worldserver/Main.cpp
+index 1ce247d..e85d05c 100755
+--- a/src/server/worldserver/Main.cpp
++++ b/src/server/worldserver/Main.cpp
+@@ -38,8 +38,8 @@
+ #ifdef _WIN32
+ #include "ServiceWin32.h"
+ char serviceName[] = "worldserver";
+-char serviceLongName[] = "TrinityCore world service";
+-char serviceDescription[] = "TrinityCore World of Warcraft emulator world service";
++char serviceLongName[] = "ReanEmu world service";
++char serviceDescription[] = "ReanEmu World of Warcraft emulator world service";
+ /*
+  * -1 - not in service mode
+  *  0 - stopped
+@@ -135,10 +135,10 @@ extern int main(int argc, char **argv)
+         sLog->outError("Verify that the file exists and has \'[worldserver]' written in the top of the file!");
+         return 1;
+     }
+-    sLog->outString("Using configuration file %s.", cfg_file);
++    sLog->outString("Usando el archivo de configuracion %s.", cfg_file);
+ 
+-    sLog->outDetail("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+-    sLog->outDetail("Using ACE: %s", ACE_VERSION);
++    sLog->outDetail("%s (Libreria: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
++    sLog->outDetail("Usando version de ACE: %s", ACE_VERSION);
+ 
+     ///- and run the 'Master'
+     /// \todo Why do we need this 'Master'? Can't all of this be in the Main as for Realmd?
+diff --git a/src/server/worldserver/Master.cpp b/src/server/worldserver/Master.cpp
+index 42d72aa..8c7320c 100755
+--- a/src/server/worldserver/Master.cpp
++++ b/src/server/worldserver/Master.cpp
+@@ -124,17 +124,21 @@ int Master::Run()
+     seed1.SetRand(16 * 8);
+ 
+     sLog->outString("%s (worldserver-daemon)", _FULLVERSION);
+-    sLog->outString("<Ctrl-C> to stop.\n");
+-
+-    sLog->outString(" ______                       __");
+-    sLog->outString("/\\__  _\\       __          __/\\ \\__");
+-    sLog->outString("\\/_/\\ \\/ _ __ /\\_\\    ___ /\\_\\ \\, _\\  __  __");
+-    sLog->outString("   \\ \\ \\/\\`'__\\/\\ \\ /' _ `\\/\\ \\ \\ \\/ /\\ \\/\\ \\");
+-    sLog->outString("    \\ \\ \\ \\ \\/ \\ \\ \\/\\ \\/\\ \\ \\ \\ \\ \\_\\ \\ \\_\\ \\");
+-    sLog->outString("     \\ \\_\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_\\ \\__\\\\/`____ \\");
+-    sLog->outString("      \\/_/\\/_/   \\/_/\\/_/\\/_/\\/_/\\/__/ `/___/> \\");
+-    sLog->outString("                                 C O R E  /\\___/");
+-    sLog->outString("http://TrinityCore.org                    \\/__/\n");
++    sLog->outString("Presione <Ctrl-C> para detenerlo.\n");
++
++    sLog->outString( "   _______       __ " );
++    sLog->outString( "  /\\  ____\\   __/\\ \\      ________" );
++    sLog->outString( "  \\ \\ \\___/  /\\_\\ \\ \\    /\\  ____ \\" );
++    sLog->outString( "   \\ \\ \\____ \\/_/_ \\ \\   \\ \\ \\__/\\ \\" );
++    sLog->outString( "    \\ \\  ___\\  /\\ \\ \\ \\   \\ \\ \\ \\ \\ \\" );
++    sLog->outString( "     \\ \\ \\__/  \\ \\ \\ \\ \\   \\ \\ \\___\\ \\" );
++    sLog->outString( "      \\ \\ \\_____\\ \\ \\ \\ \\___\\ \\_______\\" );
++    sLog->outString( "       \\ \\_______\\/_/\\ \\_____\\/_______/" );
++    sLog->outString( "        \\/_______/    \\/_____/       World" );
++    sLog->outString( "" );
++    sLog->outString( "   * Basado en TrinityCore *" );
++    sLog->outString( "       Comunidad WoWRean       " );
++
+ 
+ #ifdef USE_SFMT_FOR_RNG
+     sLog->outString("\n");
+@@ -221,7 +225,7 @@ int Master::Run()
+                 else
+                 {
+                     if (SetProcessAffinityMask(hProcess, curAff))
+-                        sLog->outString("Using processors (bitmask, hex): %x", curAff);
++                        sLog->outString("Usando mascara de procesadores (bitmask, hex): %x", curAff);
+                     else
+                         sLog->outError("Can't set used processors (hex): %x", curAff);
+                 }
+@@ -235,7 +239,7 @@ int Master::Run()
+         if (Prio)
+         {
+             if (SetPriorityClass(hProcess, HIGH_PRIORITY_CLASS))
+-                sLog->outString("worldserver process priority class set to HIGH");
++                sLog->outString("Servidor de Mundo ha sido habilitada con prioridad ALTA");
+             else
+                 sLog->outError("Can't set worldserver process priority class.");
+             sLog->outString("");
+@@ -275,7 +279,7 @@ int Master::Run()
+     // set server online (allow connecting now)
+     LoginDatabase.DirectPExecute("UPDATE realmlist SET color = color & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_INVALID, realmID);
+ 
+-    sLog->outString("%s (worldserver-daemon) ready...", _FULLVERSION);
++    sLog->outString("%s (worldserver-daemon) listo...", _FULLVERSION);
+     sWorldSocketMgr->Wait();
+ 
+     if (soap_thread)
+@@ -298,7 +302,7 @@ int Master::Run()
+ 
+     _StopDB();
+ 
+-    sLog->outString("Halting process...");
++    sLog->outString("Deteniendo proceso...");
+ 
+     if (cliThread)
+     {
+@@ -446,7 +450,7 @@ bool Master::_StartDB()
+         sLog->outError("Realm ID not defined in configuration file");
+         return false;
+     }
+-    sLog->outString("Realm running as realm ID %d", realmID);
++    sLog->outString("Reino ID actualmente corriendo: %d", realmID);
+ 
+     ///- Initialize the DB logging system
+     sLog->SetLogDBLater(ConfigMgr::GetBoolDefault("EnableLogDB", false)); // set var to enable DB logging once startup finished.
+@@ -461,7 +465,7 @@ bool Master::_StartDB()
+ 
+     sWorld->LoadDBVersion();
+ 
+-    sLog->outString("Using World DB: %s", sWorld->GetDBVersion());
++    sLog->outString("DB usada para Mundo: %s", sWorld->GetDBVersion());
+     return true;
+ }
+ 
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 1e37f50..93f6793 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -1,5 +1,5 @@
+ ################################################
+-# Trinity Core World Server configuration file #
++# ReanEmu World Server configuration file #
+ ################################################
+ [worldserver]
+ 
+diff --git a/src/server/worldserver/worldserver.rc b/src/server/worldserver/worldserver.rc
+index 7712a50..055429e 100755
+--- a/src/server/worldserver/worldserver.rc
++++ b/src/server/worldserver/worldserver.rc
+@@ -76,12 +76,12 @@ BEGIN
+         BLOCK "080004b0"
+         BEGIN
+             VALUE "CompanyName",        VER_COMPANYNAME_STR
+-            VALUE "FileDescription",    "TrinityCore World Server Daemon"
++            VALUE "FileDescription",    "ReanEmu World Server Daemon"
+             VALUE "FileVersion",        VER_FILEVERSION_STR
+             VALUE "InternalName",       "worldserver"
+             VALUE "LegalCopyright",     VER_LEGALCOPYRIGHT_STR
+             VALUE "OriginalFilename",   "worldserver.exe"
+-            VALUE "ProductName",        "TrinityCore World Server"
++            VALUE "ProductName",        "ReanEmu World Server"
+             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
+         END
+     END
+-- 
+1.7.6.msysgit.0
+

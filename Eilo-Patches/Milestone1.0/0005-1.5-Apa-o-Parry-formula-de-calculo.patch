@@ -1,0 +1,44 @@
+From 0bfafd161c96e3d8bb31fab465f8b9684f269e20 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 16:46:35 -0500
+Subject: [PATCH 05/26] =?UTF-8?q?1.5=20Apa=C3=B1o=20Parry=20formula=20de=20c?=
+ =?UTF-8?q?alculo?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Entities/Unit/StatSystem.cpp |   16 +++++++---------
+ 1 files changed, 7 insertions(+), 9 deletions(-)
+
+diff --git a/src/server/game/Entities/Unit/StatSystem.cpp b/src/server/game/Entities/Unit/StatSystem.cpp
+index c0bd5cb..b55faad 100755
+--- a/src/server/game/Entities/Unit/StatSystem.cpp
++++ b/src/server/game/Entities/Unit/StatSystem.cpp
+@@ -688,16 +688,14 @@ void Player::UpdateParryPercentage()
+     uint32 pclass = getClass()-1;
+     if (CanParry() && parry_cap[pclass] > 0.0f)
+     {
+-        float nondiminishing  = 5.0f;
+-        // Parry from rating
+-        float diminishing = GetRatingBonusValue(CR_PARRY);
+-        // Modify value from defense skill (only bonus from defense rating diminishes)
+-        nondiminishing += (GetSkillValue(SKILL_DEFENSE) - GetMaxSkillValueForLevel()) * 0.04f;
+-        diminishing += (int32(GetRatingBonusValue(CR_DEFENSE_SKILL))) * 0.04f;
++        // Base parry
++        value  = 5.0f;
++        // Modify value from defense skill
++        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+         // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
+-        nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
+-        // apply diminishing formula to diminishing parry chance
+-        value = nondiminishing + diminishing * parry_cap[pclass] / (diminishing + parry_cap[pclass] * m_diminishing_k[pclass]);
++        value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
++        // Parry from rating
++        value += GetRatingBonusValue(CR_PARRY);
+         value = value < 0.0f ? 0.0f : value;
+     }
+     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,28 @@
+From 637c03777c227360d9b9809e2c4dfcd31249623d Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 02:33:24 -0500
+Subject: [PATCH 18/65] 2.2.15 ICC: Marrowgar aggrea a 25y
+
+---
+ .../IcecrownCitadel/boss_lord_marrowgar.cpp        |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_lord_marrowgar.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_lord_marrowgar.cpp
+index 71b014e..6ecef77 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_lord_marrowgar.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_lord_marrowgar.cpp
+@@ -147,6 +147,11 @@ class boss_lord_marrowgar : public CreatureScript
+                     Talk(SAY_ENTER_ZONE);
+                     _introDone = true;
+                 }
++                else if (me->IsWithinDistInMap(who, 20.0f))
++                {
++                    me->SetReactState(REACT_AGGRESSIVE);
++                    me->SetInCombatWithZone();
++                }
+             }
+ 
+             void UpdateAI(uint32 const diff)
+-- 
+1.7.8.msysgit.0
+

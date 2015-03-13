@@ -1,0 +1,25 @@
+From 1b2dab754cff4c4a90591ceda32c9bf5f6ceb7a6 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Tue, 3 Jan 2012 12:08:03 -0500
+Subject: [PATCH] Milestone4.0
+
+---
+ WHAT_IS_INSIDE |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/WHAT_IS_INSIDE b/WHAT_IS_INSIDE
+index 96fb5d1..f25a878 100644
+--- a/WHAT_IS_INSIDE
++++ b/WHAT_IS_INSIDE
+@@ -21,6 +21,8 @@ Milestone2.0: Mejoras en Instances y dungeons, escencialmente para darles funcio
+ 			  a blizzlike, solucion de bugs varios.
+ Milestone3.0  Arreglos a Spells, sobre todo para estabilidad del pve y del
+               pvp dentro de los reinos.
++Milestone4.0  Arreglos en quests, y cadenas de mision, esto incluye scripts
++              en c++ y SmartAI.
+ 
+ 
+ ##################################
+-- 
+1.7.6.msysgit.0
+

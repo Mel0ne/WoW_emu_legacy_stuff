@@ -1,0 +1,137 @@
+From 9e841d83fe8d28f4180288b02ba2071fa454f0e1 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Wed, 28 Dec 2011 14:32:59 -0500
+Subject: [PATCH 4/6] 6.3 Custom: Npc broma, dia de inocentes
+
+---
+ .../custom/2011_12_28_100_world_npc_broma.sql      |   15 +++++
+ src/server/game/Scripting/ScriptLoader.cpp         |    2 +
+ src/server/scripts/Custom/CMakeLists.txt           |    1 +
+ src/server/scripts/Custom/npc_broma.cpp            |   62 ++++++++++++++++++++
+ 4 files changed, 80 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/custom/2011_12_28_100_world_npc_broma.sql
+ create mode 100644 src/server/scripts/Custom/npc_broma.cpp
+
+diff --git a/sql/updates/world/custom/2011_12_28_100_world_npc_broma.sql b/sql/updates/world/custom/2011_12_28_100_world_npc_broma.sql
+new file mode 100644
+index 0000000..67c85a9
+--- /dev/null
++++ b/sql/updates/world/custom/2011_12_28_100_world_npc_broma.sql
+@@ -0,0 +1,15 @@
++delete from `creature_template` where entry=6000000;
++insert into `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`,
++ `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, 
++ `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, 
++ `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, 
++ `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, 
++ `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`,
++ `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`,
++ `maxgold`, `AIName`, `MovementType`, `InhabitType`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, 
++ `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, 
++ `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) values
++ ('6000000','0','0','0','0','0','13350','0','0','0','Primo de Arthas','Canjea tu t10',NULL,'0','30','30','0','35','35','1',
++ '1.08','1.14286','1','0','42','56','0','102','1','2000','0','1','4608','8','0','0','0','0','0','29','42','9','7','0','0','0','0','0',
++ '0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0','3','1.05','1','1','0','0','0','0','0','0','0','0','1','0',
++ '0','2','npc_broma','12340');
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index 1834f80..47d8d0a 100755
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -1237,6 +1237,7 @@ void AddBattlegroundScripts()
+ #ifdef SCRIPTS
+ /* This is where custom scripts' loading functions should be declared. */
+ void AddSC_icc_rep_rings();
++void AddSC_npc_broma();
+ #endif
+ 
+ void AddCustomScripts()
+@@ -1244,5 +1245,6 @@ void AddCustomScripts()
+ #ifdef SCRIPTS
+     /* This is where custom scripts should be added. */
+ AddSC_icc_rep_rings();
++AddSC_npc_broma();
+ #endif
+ }
+diff --git a/src/server/scripts/Custom/CMakeLists.txt b/src/server/scripts/Custom/CMakeLists.txt
+index edc48f2..7e2b702 100644
+--- a/src/server/scripts/Custom/CMakeLists.txt
++++ b/src/server/scripts/Custom/CMakeLists.txt
+@@ -11,6 +11,7 @@
+ set(scripts_STAT_SRCS
+   ${scripts_STAT_SRCS}
+   Custom/icc_rings_recovery.cpp
++  Custom/npc_broma.cpp
+   
+ )
+ 
+diff --git a/src/server/scripts/Custom/npc_broma.cpp b/src/server/scripts/Custom/npc_broma.cpp
+new file mode 100644
+index 0000000..4df8c77
+--- /dev/null
++++ b/src/server/scripts/Custom/npc_broma.cpp
+@@ -0,0 +1,62 @@
++/*
++ * Copyright (C) 2008 - 2011 Trinity <http://www.trinitycore.org/>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++ 
++ 
++ /*
++ * Script de npc broma por Eilo (https://github.com/eilo)
++ * WowRean Script www.wowrean.com
++ *
++ * Este script coje los players en rango y cuando uno se le acerca le convierte
++ * en cerdito, si le tocas para preguntarle te mata.
++ */
++
++#include "ScriptPCH.h"
++
++enum Datos
++{
++    DISPLAY_CERDO           = 16358,
++    ITEM_ARTIFICIALES       = 41427,
++    ITEM_CARAMELO           = 17344,
++};
++
++class npc_broma : public CreatureScript
++{
++public:
++    npc_broma() : CreatureScript("npc_broma") { }
++
++    bool OnGossipHello(Player* player, Creature* creature)
++    {
++        if (urand(0, 1))
++        {
++            creature->Kill(player);
++            player->AddItem(ITEM_CARAMELO,1);
++            creature->MonsterWhisper("Intenta nuevamente :)", player->GetGUID());
++        }
++        else
++        {
++            player->SetDisplayId(DISPLAY_CERDO);
++			player->AddItem(ITEM_ARTIFICIALES,1);
++            creature->MonsterWhisper("Si creias que en WowRean lo has visto todo, error.... Inocente!!", player->GetGUID());
++        }
++        return true;
++    }
++};
++
++void AddSC_npc_broma()
++{
++    new npc_broma();
++}
+-- 
+1.7.6.msysgit.0
+

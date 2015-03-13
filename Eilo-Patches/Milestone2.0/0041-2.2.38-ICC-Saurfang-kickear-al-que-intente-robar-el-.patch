@@ -1,0 +1,39 @@
+From c9fb5c0c589ddf5c4305d2e869117bb18cbe7af9 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 13:57:11 -0500
+Subject: [PATCH 41/65] 2.2.38 ICC: Saurfang kickear al que intente robar el
+ loot dejando la raid
+
+---
+ .../IcecrownCitadel/instance_icecrown_citadel.cpp  |   15 +++++++++++++++
+ 1 files changed, 15 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+index 5e9c933..461c4b8 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+@@ -1150,6 +1150,21 @@ class instance_icecrown_citadel : public InstanceMapScript
+ 
+             void Update(uint32 diff)
+             {
++                if (GetBossState(DATA_DEATHBRINGER_SAURFANG) == DONE)
++                {
++                    if (GameObject* go = instance->GetGameObject(DeathbringersCacheGUID))
++                    {
++                        if (go->isSpawned())
++                        {
++                            Map::PlayerList const &players = instance->GetPlayers();
++                            for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
++                            if (Player* player = it->getSource())
++                                if(!player->GetGroup() && !player->IsBeingTeleportedFar() && player->isGameMaster())
++                                    player->TeleportTo(571, 6447.39f, 2060.72f, 564.027f, 2.37f);
++                        }
++                    }
++                }
++
+                 if (BloodQuickeningState != IN_PROGRESS && GetBossState(DATA_THE_LICH_KING) != IN_PROGRESS)
+                     return;
+ 
+-- 
+1.7.8.msysgit.0
+

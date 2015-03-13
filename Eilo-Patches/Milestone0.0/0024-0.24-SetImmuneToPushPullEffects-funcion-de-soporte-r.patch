@@ -1,0 +1,58 @@
+From 577e3d3b6ce513e6e223607a56395f7ef67e2da8 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 30 Dec 2011 17:33:30 -0500
+Subject: [PATCH 24/29] =?UTF-8?q?0.24=20SetImmuneToPushPullEffects=20funcion?=
+ =?UTF-8?q?=20de=20soporte=20rea=C3=B1adida?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/AI/ScriptedAI/ScriptedCreature.cpp |    1 +
+ src/server/game/AI/ScriptedAI/ScriptedCreature.h   |   11 ++++++++++-
+ 2 files changed, 11 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/game/AI/ScriptedAI/ScriptedCreature.cpp b/src/server/game/AI/ScriptedAI/ScriptedCreature.cpp
+index 9a15029..8dae11d 100644
+--- a/src/server/game/AI/ScriptedAI/ScriptedCreature.cpp
++++ b/src/server/game/AI/ScriptedAI/ScriptedCreature.cpp
+@@ -475,6 +475,7 @@ BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
+     _boundary(instance ? instance->GetBossBoundary(bossId) : NULL),
+     _bossId(bossId)
+ {
++    SetImmuneToPushPullEffects(true);
+ }
+ 
+ void BossAI::_Reset()
+diff --git a/src/server/game/AI/ScriptedAI/ScriptedCreature.h b/src/server/game/AI/ScriptedAI/ScriptedCreature.h
+index c6f61a9..ba1cf44 100644
+--- a/src/server/game/AI/ScriptedAI/ScriptedCreature.h
++++ b/src/server/game/AI/ScriptedAI/ScriptedCreature.h
+@@ -234,6 +234,12 @@ struct ScriptedAI : public CreatureAI
+         return heroic25;
+     }
+ 
++    void SetImmuneToPushPullEffects(bool set)
++    {
++        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, set);
++        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, set);
++    }
++
+     private:
+         Difficulty _difficulty;
+         uint32 _evadeCheckCooldown;
+@@ -243,7 +249,10 @@ struct ScriptedAI : public CreatureAI
+ 
+ struct Scripted_NoMovementAI : public ScriptedAI
+ {
+-    Scripted_NoMovementAI(Creature* creature) : ScriptedAI(creature) {}
++    Scripted_NoMovementAI(Creature* creature) : ScriptedAI(creature)
++    {
++        SetImmuneToPushPullEffects(true);
++    }
+     virtual ~Scripted_NoMovementAI() {}
+ 
+     //Called at each attack of me by any victim
+-- 
+1.7.8.msysgit.0
+

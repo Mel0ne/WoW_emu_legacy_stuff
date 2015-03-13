@@ -1,0 +1,25 @@
+From ffd88ec3132512bc76fbf3e8c505c6eac71563bc Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 00:40:26 -0500
+Subject: [PATCH 12/29] 0.12 Autenticacion con cata 4.0.6a, 4.2.2 y 4.3.2
+
+---
+ src/server/authserver/Authentication/AuthCodes.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/authserver/Authentication/AuthCodes.h b/src/server/authserver/Authentication/AuthCodes.h
+index f940d45..fa76f17 100755
+--- a/src/server/authserver/Authentication/AuthCodes.h
++++ b/src/server/authserver/Authentication/AuthCodes.h
+@@ -65,7 +65,7 @@ enum LoginResult
+     LOGIN_LOCKED_ENFORCED                        = 0x10,
+ };
+ 
+-#define POST_BC_ACCEPTED_CLIENT_BUILD            {12340, 11723, 11403, 11159, 10571, 10505, 10146, 9947, 8606, 0}
++#define POST_BC_ACCEPTED_CLIENT_BUILD            {15211, 14545, 13623, 12340, 11723, 11403, 11159, 10571, 10505, 10146, 9947, 8606, 0}
+ #define PRE_BC_ACCEPTED_CLIENT_BUILD             {5875, 6005, 0}
+ 
+ enum ExpansionFlags
+-- 
+1.7.8.msysgit.0
+

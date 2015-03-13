@@ -1,0 +1,31 @@
+From c50eb6a51adffeef8f673b3bf9365b3b1508286e Mon Sep 17 00:00:00 2001
+From: strolch <sebeche@gmail.com>
+Date: Tue, 7 Feb 2012 00:09:00 -0500
+Subject: [PATCH 22/26] 1.22 Loot de sangres de icc solo sera repartido por el
+ Master Looter
+
+---
+ .../2012_01_06_100_world_icc_loot_sangres.sql      |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2012_01_06_100_world_icc_loot_sangres.sql
+
+diff --git a/sql/updates/world/reanemu/2012_01_06_100_world_icc_loot_sangres.sql b/sql/updates/world/reanemu/2012_01_06_100_world_icc_loot_sangres.sql
+new file mode 100644
+index 0000000..4f4d6b3
+--- /dev/null
++++ b/sql/updates/world/reanemu/2012_01_06_100_world_icc_loot_sangres.sql
+@@ -0,0 +1,10 @@
++-- Fix para que las sangres de caraputrea y panzachacro sean loteadas 
++-- por el lootmaster by Strolx
++
++-- Sangre ácida de Carapútrea
++UPDATE creature_loot_template SET ChanceOrQuestChance=100 WHERE item=50231;
++UPDATE creature_loot_template SET ChanceOrQuestChance=100 WHERE item=50231;
++
++-- Sangre ácida de Panzachancro
++UPDATE creature_loot_template SET ChanceOrQuestChance=100 WHERE item=50226;
++UPDATE creature_loot_template SET ChanceOrQuestChance=100 WHERE item=50226;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

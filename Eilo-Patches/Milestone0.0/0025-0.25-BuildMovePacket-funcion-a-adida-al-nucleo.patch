@@ -1,0 +1,55 @@
+From 7c63e42383937897e69e06739af9d7677c48b474 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 16:08:34 -0500
+Subject: [PATCH 25/29] =?UTF-8?q?0.25=20BuildMovePacket=20funcion=20a=C3=B1a?=
+ =?UTF-8?q?dida=20al=20nucleo?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Entities/Transport/Transport.cpp |    8 ++++++++
+ src/server/game/Entities/Transport/Transport.h   |    1 +
+ 2 files changed, 9 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Entities/Transport/Transport.cpp b/src/server/game/Entities/Transport/Transport.cpp
+index 67d1636..4009089 100755
+--- a/src/server/game/Entities/Transport/Transport.cpp
++++ b/src/server/game/Entities/Transport/Transport.cpp
+@@ -26,6 +26,7 @@
+ #include "DBCStores.h"
+ #include "World.h"
+ #include "GameObjectAI.h"
++#include "Vehicle.h"
+ 
+ void MapManager::LoadTransports()
+ {
+@@ -623,6 +624,13 @@ void Transport::BuildStartMovePacket(Map const* targetMap)
+     UpdateForMap(targetMap);
+ }
+ 
++void Transport::BuildWaitMovePacket(Map const* targetMap)
++{
++    m_WayPoints.clear();
++    SetGoState(GO_STATE_READY);
++    UpdateForMap(targetMap);
++}
++
+ void Transport::BuildStopMovePacket(Map const* targetMap)
+ {
+     RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+diff --git a/src/server/game/Entities/Transport/Transport.h b/src/server/game/Entities/Transport/Transport.h
+index 518dcf6..dc7806d 100755
+--- a/src/server/game/Entities/Transport/Transport.h
++++ b/src/server/game/Entities/Transport/Transport.h
+@@ -48,6 +48,7 @@ class Transport : public GameObject
+         void UpdatePosition(MovementInfo* mi);
+         void UpdateNPCPositions();
+         void BuildStartMovePacket(Map const* targetMap);
++        void BuildWaitMovePacket(Map const* targetMap);
+         void BuildStopMovePacket(Map const* targetMap);
+         uint32 GetScriptId() const { return ScriptId; }
+     private:
+-- 
+1.7.8.msysgit.0
+

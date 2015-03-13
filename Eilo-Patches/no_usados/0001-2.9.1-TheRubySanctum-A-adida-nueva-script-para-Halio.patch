@@ -1,0 +1,2085 @@
+From a667d7cd60f2037afac3ee67af720ae3aa1da58d Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 26 Dec 2011 21:55:53 -0500
+Subject: [PATCH] =?UTF-8?q?2.9.1=20TheRubySanctum:=20A=C3=B1adida=20nueva=20?=
+ =?UTF-8?q?script=20para=20Halion=20y=20retoques=20varios?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../reanemu/2011_12_26_100_world_ruby_sanctum.sql  |  163 +++
+ src/server/game/Entities/Player/Player.cpp         |   11 +
+ src/server/game/Scripting/ScriptLoader.cpp         |    2 +
+ src/server/scripts/Northrend/CMakeLists.txt        |    1 +
+ .../RubySanctum/boss_baltharus_the_warborn.cpp     |    4 +-
+ .../RubySanctum/boss_general_zarithrian.cpp        |   10 +-
+ .../ChamberOfAspects/RubySanctum/boss_halion.cpp   | 1505 ++++++++++++++++++++
+ .../RubySanctum/instance_ruby_sanctum.cpp          |   86 +-
+ .../ChamberOfAspects/RubySanctum/ruby_sanctum.h    |   39 +-
+ 9 files changed, 1779 insertions(+), 42 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_12_26_100_world_ruby_sanctum.sql
+ create mode 100644 src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_halion.cpp
+
+diff --git a/sql/updates/world/reanemu/2011_12_26_100_world_ruby_sanctum.sql b/sql/updates/world/reanemu/2011_12_26_100_world_ruby_sanctum.sql
+new file mode 100644
+index 0000000..1966b33
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_12_26_100_world_ruby_sanctum.sql
+@@ -0,0 +1,163 @@
++-- Missing spell
++DELETE FROM `spell_dbc` WHERE `id`=70507;
++INSERT INTO `spell_dbc` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`CastingTimeIndex`,`ProcChance`,`DurationIndex`,`RangeIndex`,`StackAmount`,`Effect1`,`EffectBasePoints1`,`EffectImplicitTargetA1`,`EffectApplyAuraName1`,`DmgMultiplier1`,`Comment`) VALUES
++(70507,0x00000100,0x00000400,0x0,1,101,21,1,99,6,10,1,61,1, 'Halion - Combustion & Consumption Scale Aura');
++
++-- Bosses respawn time
++UPDATE `creature` SET `spawntimesecs`=604800 WHERE `id` IN (39751,39746,39747);
++-- Trash mobs respawn time
++UPDATE `creature` SET `spawntimesecs`=1209600 WHERE `map`=724 AND `id` NOT IN (39751,39746,39747);
++
++-- Twilight Flame Ring
++SET @OGUID = 90000; -- Need 1 (Set by TDB team)
++INSERT INTO `gameobject` (`guid`,`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
++(@OGUID,203624,724,15,0x20,3154.99,535.637,72.887,3.14159,0,0,0,0,120,0,0); -- GO_TWILIGHT_FLAME_RING
++
++-- Creature Templates updates
++UPDATE `creature_template` SET `scale`=1,`flags_extra`=130,`exp`=2,`baseattacktime`=2000,`unit_flags`=33554432,`ScriptName`= 'npc_consumption' WHERE `entry`=40135; -- Consumption
++UPDATE `creature_template` SET `scale`=1,`flags_extra`=130,`unit_flags`=33554432 ,`ScriptName`= 'npc_combustion' WHERE `entry`=40001; -- Combustion
++UPDATE `creature_template` SET `scale`=1,`flags_extra`=130,`unit_flags`=33554688 WHERE `entry`=40091; -- Orb Rotation Focus
++UPDATE `creature_model_info` SET `bounding_radius`=3.8,`combat_reach`=7.6,`gender`=2 WHERE `modelid`=16946;
++UPDATE `creature_template` SET `ScriptName`= 'boss_halion',`flags_extra`=`flags_extra`|0x1,`exp`=2 WHERE `entry`=39863; -- Halion
++UPDATE `creature_template` SET `ScriptName`= 'boss_twilight_halion',`exp`=2 WHERE `entry`=40142; -- Twilight Halion
++UPDATE `creature_template` SET `flags_extra`=130,`ScriptName`= 'npc_halion_controller', `faction_A`=35,`faction_H`=35,`exp`=2 WHERE `entry`=40146; -- Halion Controller
++UPDATE `creature_template` SET `flags_extra`=2,`unit_flags`=33554432,`baseattacktime`=2000,`speed_walk`=2.4,`speed_run`=0.85714,`faction_A`=14,`faction_H`=14,`exp`=2,`maxlevel`=80,`minlevel`=80, `ScriptName`= '' WHERE `entry` IN (40083, 40100, 40469, 40468);
++UPDATE `creature_template` SET `ScriptName`= 'npc_meteor_strike_initial',`flags_extra`=130 WHERE `entry`=40029; -- Meteor Strike Initial
++UPDATE `creature_template` SET `ScriptName`= 'npc_meteor_strike',`flags_extra`=130 WHERE `entry` IN (40041,40042,40043,40044); -- Meteor Strike
++UPDATE `creature_template` SET `flags_extra`=130 WHERE `entry`=40055; -- Meteor Strike
++UPDATE `creature_template` SET `difficulty_entry_1`=40143,`difficulty_entry_2`=40144,`difficulty_entry_3`=40145 WHERE `entry`=40142;
++UPDATE `creature_template` SET `difficulty_entry_1`=40470,`difficulty_entry_2`=40471,`difficulty_entry_3`=40472 WHERE `entry`=40081;
++UPDATE `creature_template` SET `mindmg`=509,`maxdmg`=683,`attackpower`=805,`dmg_multiplier`=35,`faction_A`=14,`faction_H`=14 WHERE `entry` IN (39863,39864,39944,39945,40142,40143,40144,40145); -- Halion & Twilight Halion
++UPDATE `creature_template` SET `mindmg`=422,`maxdmg`=586,`attackpower`=642,`dmg_multiplier`=7.5 WHERE `entry` IN (40417,40418,4049,40420,40421,40422,40423,40424); -- Trash mobs
++UPDATE `creature_template` SET `mindmg`=509,`maxdmg`=683,`attackpower`=805,`dmg_multiplier`=35 WHERE `entry` IN (39751,39920,39747,39823,39746,39805); -- Miniboss
++UPDATE `creature_template` SET `faction_A`=14, `faction_H`=14, `exp`=2 WHERE `entry` IN (40143,40144,40145);
++UPDATE `creature_template` SET `VehicleId`=718,`unit_flags`=33554688,`ScriptName`= 'npc_orb_carrier' WHERE `entry` IN (40081,40470);
++UPDATE `creature_template` SET `VehicleId`=746 WHERE `entry` IN (40471,40472);
++
++DELETE FROM `creature_template_addon` WHERE `entry` IN (39863, 40142);
++INSERT INTO `creature_template_addon` (`entry`,`path_id`,`mount`,`bytes1`,`bytes2`,`emote`,`auras`) VALUES
++(40142,0,0,0,0,0, '75476 78243'), -- Twilight Halion: Twilight precision + Dusk Shroud
++(39863,0,0,0,0,0, '78243'); -- Halion: Twilight Precision
++
++-- This is INCORRECT and BREAKS TC STANDARDS by editing WDB field data10
++-- Best would be to create the sniffed spell in the spell_dbc table.
++UPDATE `gameobject_template` SET `data10`=74807,`flags`=`flags`|32 WHERE `entry` IN (202794, 202795);
++UPDATE `gameobject_template` SET `ScriptName`="go_exit_twilight_realm",`flags`=`flags`|32 WHERE `entry`=202796;
++
++-- Spell scripts
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_meteor_strike_marker';
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_fiery_combustion';
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_soul_consumption';
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_mark_of_combustion';
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_mark_of_consumption';
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_combustion_consumption_summon';
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_leave_twilight_realm';
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_enter_twilight_realm';
++DELETE FROM `spell_script_names` WHERE `ScriptName`= 'spell_halion_twilight_cutter';
++INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
++(74641, 'spell_halion_meteor_strike_marker'),
++(74562, 'spell_halion_fiery_combustion'),
++(74792, 'spell_halion_soul_consumption'),
++(74567, 'spell_halion_mark_of_combustion'),
++(74795, 'spell_halion_mark_of_consumption'),
++(74610, 'spell_halion_combustion_consumption_summon'),
++(74800, 'spell_halion_combustion_consumption_summon'),
++(74812, 'spell_halion_leave_twilight_realm'),
++(74807, 'spell_halion_enter_twilight_realm'),
++(74769, 'spell_halion_twilight_cutter'),
++(77844, 'spell_halion_twilight_cutter'),
++(77845, 'spell_halion_twilight_cutter'),
++(77846, 'spell_halion_twilight_cutter');
++
++-- Texts
++DELETE FROM `creature` WHERE `id`=40146;
++DELETE FROM `creature_text` WHERE `entry`=39863;
++DELETE FROM `creature_text` WHERE `entry`=40142;
++DELETE FROM `creature_text` WHERE `entry`=40146;
++INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES 
++(39863,0,0, 'Meddlesome insects! You are too late. The Ruby Sanctum is lost!',14,0,100,1,0,17499, 'Halion'),
++(39863,1,0, 'Your world teeters on the brink of annihilation. You will ALL bear witness to the coming of a new age of DESTRUCTION!',14,0,100,0,0,17500, 'Halion'),
++(39863,2,0, 'The heavens burn!',14,0,100,0,0,17505, 'Halion'),
++(39863,3,0, 'You will find only suffering within the realm of twilight! Enter if you dare!',14,0,100,0,0,17507, 'Halion'),
++(39863,4,0, 'Relish this victory, mortals, for it will be your last! This world will burn with the master''s return!',14,0,100,0,0,17503, 'Halion'),
++(39863,5,0, 'Another "hero" falls.',14,0,100,0,0,17501, 'Halion'),
++(39863,6,0, 'Not good enough.',14,0,100,0,0,17504, 'Halion'),
++
++(40142,0,0, 'Beware the shadow!',14,0,100,0,0,17506, 'Halion'),
++(40142,1,0, 'I am the light and the darkness! Cower, mortals, before the herald of Deathwing!',14,0,100,0,0,17508, 'Halion'),
++
++(40146,0,0, 'Your companion''s efforts have forced Halion further out of the Physical realm!',42,0,100,0,0,0, 'Halion'),
++(40146,1,0, 'Your efforts have forced Halion further into the Physical realm!',42,0,100,0,0,0, 'Halion'),
++(40146,2,0, 'Your companion''s efforts have forced Halion further out of the Twilight realm!',42,0,100,0,0,0, 'Halion'),
++(40146,3,0, 'Your efforts have forced Halion further into the Twilight realm!',42,0,100,0,0,0, 'Halion'),
++(40146,4,0, 'Without pressure in both realms, Halion begins to regenerate.',42,0,100,0,0,0, 'Halion'),
++(40146,5,0, 'The orbiting spheres pulse with dark energy!',42,0,100,0,0,0, 'Halion');
++
++-- Conditions
++DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry`=75509;
++INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
++(13,0,75509,0,18,1,39863,0,0, '', 'Spell Twilight Mending only target Halion'),
++(13,0,75509,0,18,1,40142,0,0, '', 'Spell Twilight Mending only target Twilight Halion');
++
++-- Spawns
++SET @GUID = 211073; -- Set by TDB team (Need 2)
++DELETE FROM `creature` WHERE `id` IN (40081, 40091);
++INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
++(@GUID,40091,724,1,20,0,0,3113.711,533.5382,72.96869,1.936719,300,0,0,1,0,0,0,0,0), -- Orb Rotation Focus
++(@GUID+1,40081,724,1,20,0,0,3153.75,533.1875,72.97205,0,300,0,0,1,0,0,0,0,0); -- Orb Carrier
++
++-- Pathing for Orb Rotation Focus Entry: 40091
++SET @PATH = @GUID * 10;
++UPDATE `creature` SET `spawndist`=0,`MovementType`=2 WHERE `guid`=@GUID;
++DELETE FROM `creature_addon` WHERE `guid`=@GUID;
++INSERT INTO `creature_addon` (`guid`,`path_id`,`bytes2`,`mount`,`auras`) VALUES (@GUID,@PATH,1,0, '');
++DELETE FROM `waypoint_data` WHERE `id`=@PATH;
++INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
++(@PATH,1,3117.59,547.7952,72.96869,0,0,0,0,100,0),
++(@PATH,2,3127.461,558.7396,72.96869,0,0,0,0,100,0),
++(@PATH,3,3138.042,567.9514,72.98305,0,0,0,0,100,0),
++(@PATH,4,3154.09,574.9636,72.98305,0,0,0,0,100,0),
++(@PATH,5,3172.565,567.493,72.86058,0,0,0,0,100,0),
++(@PATH,6,3181.981,555.8889,72.9127,0,0,0,0,100,0),
++(@PATH,7,3189.923,533.3542,73.0377,0,0,0,0,100,0),
++(@PATH,8,3182.315,513.4202,72.9771,0,0,0,0,100,0),
++(@PATH,9,3177.168,504.3802,72.7271,0,0,0,0,100,0),
++(@PATH,10,3167.878,496.8368,72.50312,0,0,0,0,100,0),
++(@PATH,11,3152.238,490.4705,72.62009,0,0,0,0,100,0),
++(@PATH,12,3138.174,499.3056,72.87009,0,0,0,0,100,0),
++(@PATH,13,3126.83,506.0799,72.95515,0,0,0,0,100,0),
++(@PATH,14,3120.68,515.3524,72.95515,0,0,0,0,100,0),
++(@PATH,15,3113.711,533.5382,72.96869,0,0,0,0,100,0);
++
++-- Vehicle accessory for Orb Carrier
++DELETE FROM `vehicle_template_accessory` WHERE `entry`=40081;
++INSERT INTO `vehicle_template_accessory` (`entry`,`accessory_entry`,`seat_id`,`minion`,`description`,`summontype`,`summontimer`) VALUES
++(40081,40083,0,1, 'Orb Carrier',6,30000),
++(40081,40100,1,1, 'Orb Carrier',6,30000),
++
++(40470,40083,0,1, 'Orb Carrier',6,30000),
++(40470,40100,1,1, 'Orb Carrier',6,30000),
++
++(40471,40083,0,1, 'Orb Carrier',6,30000),
++(40471,40100,1,1, 'Orb Carrier',6,30000),
++(40471,40468,2,1, 'Orb Carrier',6,30000),
++(40471,40469,3,1, 'Orb Carrier',6,30000),
++
++(40472,40083,0,1, 'Orb Carrier',6,30000),
++(40472,40100,1,1, 'Orb Carrier',6,30000),
++(40472,40468,2,1, 'Orb Carrier',6,30000),
++(40472,40469,3,1, 'Orb Carrier',6,30000);
++
++UPDATE `creature_template` SET `modelid1`=11686,`modelid2`=169 WHERE `entry` IN (40081,40470,40471,40472,40091);
++UPDATE `creature_template` SET `InhabitType`=7 WHERE `entry` IN (40083,40081,40100);
++
++DELETE FROM `npc_spellclick_spells` WHERE `npc_entry`=40081;
++INSERT INTO `npc_spellclick_spells` (`npc_entry`,`spell_id`,`quest_start`,`cast_flags`) VALUES
++(40081,46598,0,1),
++(40470,46598,0,1),
++(40471,46598,0,1),
++(40472,46598,0,1);
++
++DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry`=74758;
++INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceEntry`,`ConditionTypeOrReference`,`ConditionValue1`,`ConditionValue2`,`Comment`) VALUES
++(13,74758,18,1,40091, 'Track Rotation can only target Orb Rotation Focus');
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index 542da04..81a08fb 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -9754,6 +9754,17 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
+                 data << uint32(3932) << uint32(0);              // 13 WORLDSTATE_TIME_GUARDIAN_SHOW
+             }
+             break;
++        // The Ruby Sanctum
++        case 4987:
++            if (instance && mapid == 724)
++                instance->FillInitialWorldStates(data);
++            else
++            {
++                data << uint32(5049) << uint32(50);            // 9  WORLDSTATE_CORPOREALITY_MATERIAL
++                data << uint32(5050) << uint32(50);            // 10 WORLDSTATE_CORPOREALITY_TWILIGHT
++                data << uint32(5051) << uint32(0);             // 11 WORLDSTATE_CORPOREALITY_TOGGLE
++            }
++            break;
+         default:
+             data << uint32(0x914) << uint32(0x0);           // 7
+             data << uint32(0x913) << uint32(0x0);           // 8
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index cfc7343..6c3ffb8 100755
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -491,6 +491,7 @@ void AddSC_ruby_sanctum();
+ void AddSC_boss_baltharus_the_warborn();
+ void AddSC_boss_saviana_ragefire();
+ void AddSC_boss_general_zarithrian();
++void AddSC_boss_halion();
+ 
+ void AddSC_dalaran();
+ void AddSC_borean_tundra();
+@@ -1198,6 +1199,7 @@ void AddNorthrendScripts()
+     AddSC_boss_baltharus_the_warborn();
+     AddSC_boss_saviana_ragefire();
+     AddSC_boss_general_zarithrian();
++    AddSC_boss_halion();
+ 
+     AddSC_dalaran();
+     AddSC_borean_tundra();
+diff --git a/src/server/scripts/Northrend/CMakeLists.txt b/src/server/scripts/Northrend/CMakeLists.txt
+index 680a9d6..d0bfd56 100644
+--- a/src/server/scripts/Northrend/CMakeLists.txt
++++ b/src/server/scripts/Northrend/CMakeLists.txt
+@@ -52,6 +52,7 @@ set(scripts_STAT_SRCS
+   Northrend/ChamberOfAspects/RubySanctum/boss_baltharus_the_warborn.cpp
+   Northrend/ChamberOfAspects/RubySanctum/boss_saviana_ragefire.cpp
+   Northrend/ChamberOfAspects/RubySanctum/boss_general_zarithrian.cpp
++  Northrend/ChamberOfAspects/RubySanctum/boss_halion.cpp
+   Northrend/FrozenHalls/HallsOfReflection/halls_of_reflection.h
+   Northrend/FrozenHalls/HallsOfReflection/boss_falric.cpp
+   Northrend/FrozenHalls/HallsOfReflection/instance_halls_of_reflection.cpp
+diff --git a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_baltharus_the_warborn.cpp b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_baltharus_the_warborn.cpp
+index f602f41..d169a80 100644
+--- a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_baltharus_the_warborn.cpp
++++ b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_baltharus_the_warborn.cpp
+@@ -154,9 +154,7 @@ class boss_baltharus_the_warborn : public CreatureScript
+                 }
+                 else
+                 {
+-                    if (me->HealthBelowPctDamaged(66, damage) && _cloneCount == 2)
+-                        DoAction(ACTION_CLONE);
+-                    else if (me->HealthBelowPctDamaged(33, damage) && _cloneCount == 1)
++                    if ((me->HealthBelowPctDamaged(66, damage) && _cloneCount == 2) || (me->HealthBelowPctDamaged(33, damage) && _cloneCount == 1))
+                         DoAction(ACTION_CLONE);
+                 }
+ 
+diff --git a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_general_zarithrian.cpp b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_general_zarithrian.cpp
+index 107aed7..cd489c1 100644
+--- a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_general_zarithrian.cpp
++++ b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_general_zarithrian.cpp
+@@ -43,7 +43,7 @@ enum Events
+ {
+     // General Zarithrian
+     EVENT_CLEAVE                    = 1,
+-    EVENT_INTIDMDATING_ROAR         = 2,
++    EVENT_INTIMIDATING_ROAR         = 2,
+     EVENT_SUMMON_ADDS               = 3,
+     // Onyx Flamecaller
+     EVENT_BLAST_NOVA                = 4,
+@@ -52,7 +52,7 @@ enum Events
+ 
+ uint32 const MAX_PATH_FLAMECALLER_WAYPOINTS = 12;
+ 
+-Position const FlamecallerWaypoints[MAX_PATH_FLAMECALLER_WAYPOINTS*2] =
++Position const FlamecallerWaypoints[MAX_PATH_FLAMECALLER_WAYPOINTS * 2] =
+ {
+     // East
+     {3042.971f, 419.8809f, 86.94320f, 0.0f},
+@@ -106,7 +106,7 @@ class boss_general_zarithrian : public CreatureScript
+                 Talk(SAY_AGGRO);
+                 events.Reset();
+                 events.ScheduleEvent(EVENT_CLEAVE, 15000);
+-                events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 42000);
++                events.ScheduleEvent(EVENT_INTIMIDATING_ROAR, 42000);
+                 events.ScheduleEvent(EVENT_SUMMON_ADDS, 40000);
+             }
+ 
+@@ -165,9 +165,9 @@ class boss_general_zarithrian : public CreatureScript
+                             events.ScheduleEvent(EVENT_SUMMON_ADDS, 42000);
+                             break;
+                         }
+-                        case EVENT_INTIDMDATING_ROAR:
++                        case EVENT_INTIMIDATING_ROAR:
+                             DoCast(me, SPELL_INTIMIDATING_ROAR, true);
+-                            events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 42000);
++                            events.ScheduleEvent(EVENT_INTIMIDATING_ROAR, 42000);
+                         case EVENT_CLEAVE:
+                             DoCastVictim(SPELL_CLEAVE_ARMOR);
+                             events.ScheduleEvent(EVENT_CLEAVE, 15000);
+diff --git a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_halion.cpp b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_halion.cpp
+new file mode 100644
+index 0000000..d02b831
+--- /dev/null
++++ b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/boss_halion.cpp
+@@ -0,0 +1,1505 @@
++﻿/*
++ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2 of the License, or (at your
++ * option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program. If not, see <http://www.gnu.org/licenses/>.
++ */
++
++/*
++ * [18:24] <Kaelima> 40081 is spawned at X: 3153.75  Y: 533.1875  Z: 72.97205  O: 0
++ * [18:25] <Kaelima> 40091 is spawned at X: 3113.711 Y: 533.5382  Z: 72.96869  O: 1.936719
++ */
++
++#include "ScriptPCH.h"
++#include "ScriptedEscortAI.h"
++#include "Vehicle.h"
++#include "MapManager.h"
++#include "ruby_sanctum.h"
++
++enum Texts
++{
++    SAY_INTRO                        = 0, // Meddlesome insects! You are too late. The Ruby Sanctum is lost!
++    SAY_AGGRO                        = 1, // Your world teeters on the brink of annihilation. You will ALL bear witness to the coming of a new age of DESTRUCTION!
++    SAY_METEOR_STRIKE                = 2, // The heavens burn!
++    SAY_PHASE_TWO                    = 3, // You will find only suffering within the realm of twilight! Enter if you dare!
++    SAY_DEATH                        = 4, // Relish this victory, mortals, for it will be your last! This world will burn with the master's return!
++    SAY_KILL                         = 5, // Another "hero" falls.
++    SAY_BERSERK                      = 6, // Not good enough.
++
++    SAY_SPHERE_PULSE                 = 0, // Beware the shadow!
++    SAY_PHASE_THREE                  = 1, // I am the light and the darkness! Cower, mortals, before the herald of Deathwing!
++
++    EMOTE_TWILIGHT_OUT_TWILIGHT      = 0, // Your companion's efforts have forced Halion further out of the Twilight realm!
++    EMOTE_TWILIGHT_IN_TWILIGHT       = 1, // Your efforts have forced Halion further into the Twilight realm!
++    EMOTE_PHYSICAL_OUT_PHYSICAL      = 2, // Your companion's efforts have forced Halion further out of the Physical realm!
++    EMOTE_PHYSICAL_IN_PHYSICAL       = 3, // Your efforts have forced Halion further into the Physical realm!
++    EMOTE_REGENERATE                 = 4, // Without pressure in both realms, Halion begins to regenerate.
++    EMOTE_WARN_LASER                 = 5, // The orbiting spheres pulse with dark energy!
++};
++
++enum Spells
++{
++    // Halion
++    SPELL_FLAME_BREATH                  = 74525,
++    SPELL_CLEAVE                        = 74524,
++    SPELL_METEOR_STRIKE                 = 74637,
++    SPELL_TAIL_LASH                     = 74531,
++
++    SPELL_FIERY_COMBUSTION              = 74562,
++    SPELL_MARK_OF_COMBUSTION            = 74567,
++    SPELL_FIERY_COMBUSTION_EXPLOSION    = 74607,
++    SPELL_FIERY_COMBUSTION_SUMMON       = 74610,
++    SPELL_COMBUSTION_DAMAGE_AURA        = 74629,
++
++    SPELL_SCALE_AURA                    = 70507, // Aura created in spell_dbc.
++
++    // Twilight Halion
++    SPELL_DARK_BREATH                   = 74806,
++
++    SPELL_MARK_OF_CONSUMPTION           = 74795,
++    SPELL_SOUL_CONSUMPTION              = 74792,
++    SPELL_SOUL_CONSUMPTION_EXPLOSION    = 74799,
++    SPELL_SOUL_CONSUMPTION_SUMMON       = 74800,
++    SPELL_CONSUMPTION_DAMAGE_AURA       = 74803,
++
++    // Misc
++    SPELL_TWILIGHT_DIVISION             = 75063,    // Phase spell from phase 2 to phase 3
++    SPELL_LEAVE_TWILIGHT_REALM          = 74812,
++    SPELL_TWILIGHT_PHASING              = 74808,    // Phase spell from phase 1 to phase 2
++    SPELL_SUMMON_TWILIGHT_PORTAL        = 74809,    // Summons go 202794
++    SPELL_TWILIGHT_MENDING              = 75509,
++
++    // Living Inferno
++    SPELL_BLAZING_AURA                  = 75885,
++
++    // Halion Controller
++    SPELL_COSMETIC_FIRE_PILLAR          = 76006,
++    SPELL_FIERY_EXPLOSION               = 76010,
++
++    // Meteor Strike
++    SPELL_METEOR_STRIKE_COUNTDOWN       = 74641,
++    SPELL_METEOR_STRIKE_AOE_DAMAGE      = 74648,
++    SPELL_METEOR_STRIKE_FIRE_AURA_1     = 74713,
++    SPELL_METEOR_STRIKE_FIRE_AURA_2     = 74718,
++    SPELL_BIRTH_NO_VISUAL               = 40031,
++
++    // Shadow Orb
++    SPELL_TWILIGHT_CUTTER               = 74768, // Unknown dummy effect (EFFECT_0)
++    SPELL_TWILIGHT_CUTTER_TRIGGERED     = 74769,
++    SPELL_TWILIGHT_PULSE_PERIODIC       = 78861,
++    SPELL_TRACK_ROTATION                = 74758, // NPC_ORB_CARRIER -> NPC_ORB_ROTATION_FOCUS
++};
++
++enum Events
++{
++    // Halion
++    EVENT_ACTIVATE_FIREWALL     = 1,
++    EVENT_CLEAVE                = 2, // Used by Twilight Halion too
++    EVENT_FLAME_BREATH          = 3,
++    EVENT_METEOR_STRIKE         = 4,
++    EVENT_FIERY_COMBUSTION      = 5,
++    EVENT_BERSERK               = 6,
++    EVENT_TAIL_LASH             = 7,
++
++    // Halion Controller
++    EVENT_START_INTRO           = 8,
++    EVENT_INTRO_PROGRESS_1      = 9,
++    EVENT_INTRO_PROGRESS_2      = 10,
++    EVENT_INTRO_PROGRESS_3      = 11,
++    EVENT_CHECK_CORPOREALITY    = 12,
++    EVENT_SHADOW_PULSARS_SHOOT  = 13,
++    EVENT_WARN_LASERS           = 14,
++
++    // Meteor Strike
++    EVENT_SPAWN_METEOR_FLAME    = 15,
++
++    // Twilight Halion
++    EVENT_DARK_BREATH           = 16,
++    EVENT_SOUL_CONSUMPTION      = 17,
++};
++
++enum Actions
++{
++    ACTION_METEOR_STRIKE_BURN   = 1, // Meteor Strike
++    ACTION_METEOR_STRIKE_AOE    = 2,
++
++    ACTION_PHASE_TWO            = 3, // Halion Controller
++    ACTION_PHASE_THREE          = 4,
++    ACTION_DESPAWN_ADDS         = 5,
++    ACTION_BERSERK              = 6,
++    ACTION_REMOVE_EXIT_PORTALS  = 7,
++
++    ACTION_BEGIN_ROTATION       = 8, // Orb Rotation Focus
++
++    ACTION_SHOOT                = 9, // Orb Carrier
++};
++
++enum Phases
++{
++    PHASE_ALL           = 0,
++    PHASE_ONE           = 1,
++    PHASE_TWO           = 2,
++    PHASE_THREE         = 3,
++
++    PHASE_ONE_MASK      = 1 << PHASE_ONE,
++    PHASE_TWO_MASK      = 1 << PHASE_TWO,
++    PHASE_THREE_MASK    = 1 << PHASE_THREE,
++};
++
++enum Misc
++{
++    DATA_TWILIGHT_DAMAGE_TAKEN   = 1,
++    DATA_MATERIAL_DAMAGE_TAKEN   = 2,
++};
++
++enum OrbCarrierSeats
++{
++    SEAT_NORTH            = 0,
++    SEAT_SOUTH            = 1,
++    SEAT_EAST             = 2, // Heroic - Guess
++    SEAT_WEST             = 3, // Heroic - Guess
++};
++
++Position const HalionSpawnPos   = {3156.67f,  533.8108f, 72.98822f, 3.159046f};
++
++/*Position const PortalsSpawnPos[2] =
++{
++    {3156.67f, 503.8108f, 72.98822f, 3.159046f},
++    {3156.67f, 563.8108f, 72.98822f, 3.159046f},
++};*/
++
++struct CorporealityData
++{
++    uint8 physicalPercentage;
++    uint32 physicalRealmSpellId;
++    uint32 twilightRealmSpellId;
++    uint8 twilightPercentage;
++};
++
++uint32 const MAX_CORPOREALITY_STATE = 12;
++
++CorporealityData const corporealityReference[MAX_CORPOREALITY_STATE] =
++{
++    {  0, 74836, 74831, 100},
++    { 10, 74835, 74830,  90},
++    { 20, 74834, 74829,  80},
++    { 30, 74833, 74828,  70},
++    { 40, 74832, 74827,  60},
++    { 50, 74826, 74826,  50},
++    { 60, 74827, 74832,  40},
++    { 70, 74828, 74833,  30},
++    { 80, 74829, 74834,  20},
++    { 90, 74830, 74835,  10},
++    {100, 74831, 74836,   0},
++};
++
++class boss_halion : public CreatureScript
++{
++    public:
++        boss_halion() : CreatureScript("boss_halion") { }
++
++        struct boss_halionAI : public BossAI
++        {
++            boss_halionAI(Creature* creature) : BossAI(creature, DATA_HALION) { }
++
++            void EnterCombat(Unit* /*who*/)
++            {
++                _EnterCombat();
++                Talk(SAY_AGGRO);
++                instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
++                instance->SetBossState(DATA_HALION, IN_PROGRESS);
++
++                events.Reset();
++                events.SetPhase(PHASE_ONE);
++
++                // Schedule events without taking care of phases, since EventMap will not be updated under phase 2.
++                events.ScheduleEvent(EVENT_ACTIVATE_FIREWALL, 10000);
++                events.ScheduleEvent(EVENT_CLEAVE, urand(8000, 10000));
++                events.ScheduleEvent(EVENT_FLAME_BREATH, urand(10000, 12000));
++                events.ScheduleEvent(EVENT_METEOR_STRIKE, urand(20000, 25000));
++                events.ScheduleEvent(EVENT_FIERY_COMBUSTION, urand(15000, 18000));
++                events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
++                events.ScheduleEvent(EVENT_BERSERK, 8 * MINUTE * IN_MILLISECONDS);
++            }
++
++            void Reset()
++            {
++                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
++                instance->SetData(DATA_HALION_SHARED_HEALTH, me->GetMaxHealth());
++            }
++
++            // This is triggered by the TwilightHalionAI::JustDied, but can of course be triggered on its own.
++            void JustDied(Unit* killer)
++            {
++                _JustDied();
++                Talk(SAY_DEATH);
++                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
++                instance->SetBossState(DATA_HALION, DONE);
++
++                instance->DoCastSpellOnPlayers(SPELL_LEAVE_TWILIGHT_REALM);
++                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FIERY_COMBUSTION);
++                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SOUL_CONSUMPTION);
++
++                if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
++                {
++                    controller->AI()->DoAction(ACTION_DESPAWN_ADDS);
++                    controller->AI()->DoAction(ACTION_REMOVE_EXIT_PORTALS);
++                }
++
++                if (Creature* twilightHalion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TWILIGHT_HALION)))
++                    if (twilightHalion->isAlive())
++                        twilightHalion->Kill(twilightHalion);
++            }
++
++            void JustReachedHome()
++            {
++                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
++                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
++                instance->SetBossState(DATA_HALION, FAIL);
++                instance->DoCastSpellOnPlayers(SPELL_LEAVE_TWILIGHT_REALM);
++
++                if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
++                {
++                    controller->AI()->DoAction(ACTION_DESPAWN_ADDS);
++                    controller->AI()->DoAction(ACTION_REMOVE_EXIT_PORTALS);
++                }
++
++                if (Creature* halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TWILIGHT_HALION)))
++                    halion->DespawnOrUnsummon();
++            }
++
++            Position const* GetMeteorStrikePosition() const { return &_meteorStrikePos; }
++
++            void DamageTaken(Unit* /*attacker*/, uint32& damage)
++            {
++                if ((me->GetHealth() - damage) > 0 && (events.GetPhaseMask() & (PHASE_ONE_MASK | PHASE_THREE_MASK)))
++                    instance->SetData(DATA_HALION_SHARED_HEALTH, (me->GetHealth() - damage));
++
++                if (me->HealthBelowPctDamaged(75, damage) && (events.GetPhaseMask() & PHASE_ONE_MASK))
++                {
++                    events.SetPhase(PHASE_TWO);
++                    events.DelayEvents(2600); // 2.5 sec + 0.1 sec lag
++
++                    Talk(SAY_PHASE_TWO);
++
++                    me->CastStop();
++                    DoCast(me, SPELL_TWILIGHT_PHASING);
++                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
++
++                    if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
++                        controller->AI()->DoAction(ACTION_PHASE_TWO);
++                }
++
++                if (events.GetPhaseMask() & PHASE_THREE_MASK)
++                    if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
++                        controller->AI()->SetData(DATA_MATERIAL_DAMAGE_TAKEN, damage);
++            }
++
++            void UpdateAI(uint32 const diff)
++            {
++                if (!(events.GetPhaseMask() & PHASE_ONE_MASK))
++                    me->SetHealth(instance->GetData(DATA_HALION_SHARED_HEALTH));
++
++                if ((!UpdateVictim() && (events.GetPhaseMask() & (PHASE_ONE_MASK | PHASE_THREE_MASK))) || me->HasUnitState(UNIT_STAT_CASTING))
++                    return;
++
++                // Events won't be updated under phase two.
++                if (!(events.GetPhaseMask() & PHASE_TWO_MASK))
++                    events.Update(diff);
++
++                while (uint32 eventId = events.ExecuteEvent())
++                {
++                    switch (eventId)
++                    {
++                        case EVENT_ACTIVATE_FIREWALL:
++                            // Firewall is activated 10 seconds after starting encounter, DOOR_TYPE_ROOM is only instant.
++                            if (GameObject* firewall = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
++                                instance->HandleGameObject(instance->GetData64(DATA_FLAME_RING), false, firewall);
++                            if (GameObject* firewall = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_TWILIGHT_FLAME_RING)))
++                                instance->HandleGameObject(instance->GetData64(DATA_TWILIGHT_FLAME_RING), false, firewall);
++                            break;
++                        case EVENT_FLAME_BREATH:
++                            DoCast(me, SPELL_FLAME_BREATH);
++                            events.ScheduleEvent(EVENT_FLAME_BREATH, 25000);
++                            break;
++                        case EVENT_CLEAVE:
++                            DoCastVictim(SPELL_CLEAVE);
++                            events.ScheduleEvent(EVENT_CLEAVE, urand(8000, 10000));
++                            break;
++                        case EVENT_TAIL_LASH:
++                            DoCastAOE(SPELL_TAIL_LASH);
++                            events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
++                            break;
++                        case EVENT_METEOR_STRIKE:
++                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_TWILIGHT_REALM))
++                            {
++                                target->GetPosition(&_meteorStrikePos);
++                                me->CastSpell(_meteorStrikePos.GetPositionX(), _meteorStrikePos.GetPositionY(), _meteorStrikePos.GetPositionZ(), SPELL_METEOR_STRIKE, true, NULL, NULL, me->GetGUID());
++                                Talk(SAY_METEOR_STRIKE);
++                            }
++                            events.ScheduleEvent(EVENT_METEOR_STRIKE, 40000);
++                            break;
++                        case EVENT_FIERY_COMBUSTION:
++                        {
++                            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_TWILIGHT_REALM);
++                            if (!target) target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_TWILIGHT_REALM);
++                            if (target)  DoCast(target, SPELL_FIERY_COMBUSTION);
++                            events.ScheduleEvent(EVENT_FIERY_COMBUSTION, 25000);
++                            break;
++                        }
++                        default:
++                            break;
++                    }
++                }
++
++                DoMeleeAttackIfReady();
++            }
++
++            void setEventsPhase(uint32 p) { events.SetPhase(p); }
++
++        private:
++            Position _meteorStrikePos;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return GetRubySanctumAI<boss_halionAI>(creature);
++        }
++};
++
++typedef boss_halion::boss_halionAI HalionAI;
++
++class boss_twilight_halion : public CreatureScript
++{
++    public:
++        boss_twilight_halion() : CreatureScript("boss_twilight_halion") { }
++
++        struct boss_twilight_halionAI : public ScriptedAI
++        {
++            boss_twilight_halionAI(Creature* creature) : ScriptedAI(creature),
++                _instance(creature->GetInstanceScript())
++            {
++                me->SetPhaseMask(0x20, true); // Should not be visible with phasemask 0x21, so only 0x20
++                me->SetHealth(_instance->GetData(DATA_HALION_SHARED_HEALTH)); // Should be 75%
++            }
++
++            void EnterCombat(Unit* /*who*/)
++            {
++                events.Reset();
++                events.SetPhase(PHASE_TWO);
++                // All of Twilight Halion's abilities are not phase dependant as he is never on Phase One.
++                events.ScheduleEvent(EVENT_DARK_BREATH, urand(10000, 15000));
++                events.ScheduleEvent(EVENT_SOUL_CONSUMPTION, 20000);
++                events.ScheduleEvent(EVENT_CLEAVE, urand(8000, 10000));
++                events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
++            }
++
++            void KilledUnit(Unit* victim)
++            {
++                if (victim->GetTypeId() == TYPEID_PLAYER)
++                    Talk(SAY_KILL);
++
++                // Victims should not be in the Twilight Realm
++                me->CastSpell(victim, SPELL_LEAVE_TWILIGHT_REALM, true);
++            }
++
++            void JustDied(Unit* killer)
++            {
++                if (Creature* halion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION)))
++                {
++                    // Ensure looting
++                    if (me->IsDamageEnoughForLootingAndReward())
++                        halion->LowerPlayerDamageReq(halion->GetMaxHealth());
++
++                    if (halion->isAlive())
++                        killer->Kill(halion);
++                }
++
++                _instance->DoCastSpellOnPlayers(SPELL_LEAVE_TWILIGHT_REALM);
++            }
++
++            void JustReachedHome()
++            {
++                // If the Twilight Halion enters evade mode on phase 2, the players in the Physical realm should enter the Twilight Realm to end the fight (i.e. wipe)
++                // As a consequence, the Twilight Halion entering evade mode does not end the encounter.
++                if (events.GetPhaseMask() & PHASE_TWO_MASK)
++                    return;
++            }
++
++            void DamageTaken(Unit* /*attacker*/, uint32& damage)
++            {
++                if (me->GetHealth() - damage > 0)
++                    _instance->SetData(DATA_HALION_SHARED_HEALTH, me->GetHealth() - damage);
++
++                if (me->HealthBelowPctDamaged(50, damage) && (events.GetPhaseMask() & PHASE_TWO_MASK))
++                {
++                    events.SetPhase(PHASE_THREE);
++                    events.DelayEvents(2600); // 2.5 sec + 0.1sec lag
++
++                    me->CastStop();
++                    DoCast(me, SPELL_TWILIGHT_DIVISION);
++                    Talk(SAY_PHASE_THREE);
++                }
++
++                if (events.GetPhaseMask() & PHASE_THREE_MASK)
++                    if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
++                        controller->AI()->SetData(DATA_TWILIGHT_DAMAGE_TAKEN, damage);
++            }
++
++            void SpellHitTarget(Unit* /*who*/, const SpellInfo* spell)
++            {
++                if (spell->Id != SPELL_TWILIGHT_DIVISION)
++                    return;
++
++                DoCast(me, 74826); // 50% corporeality
++                if (Creature* halion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION)))
++                {
++                    halion->CastSpell(halion, 74826, false); // 50% corporeality
++                    halion->RemoveAurasDueToSpell(SPELL_TWILIGHT_PHASING);
++                    halion->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
++                    if (HalionAI* halionAI = CAST_AI(HalionAI, halion->AI()))
++                        halionAI->setEventsPhase(PHASE_THREE);
++                }
++
++                if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
++                    controller->AI()->DoAction(ACTION_PHASE_THREE);
++            }
++
++            void UpdateAI(uint32 const diff)
++            {
++                me->SetHealth(_instance->GetData(DATA_HALION_SHARED_HEALTH));
++
++                if (!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
++                    return;
++
++                events.Update(diff);
++
++                while (uint32 eventId = events.ExecuteEvent())
++                {
++                    switch (eventId)
++                    {
++                        case EVENT_DARK_BREATH:
++                        {
++                            DoCast(me, SPELL_DARK_BREATH);
++                            events.ScheduleEvent(EVENT_DARK_BREATH, urand(10000, 15000));
++                            break;
++                        }
++                        case EVENT_SOUL_CONSUMPTION:
++                        {
++                            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, SPELL_TWILIGHT_REALM);
++                            if (!target)
++                                target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, SPELL_TWILIGHT_REALM);
++                            if (target)
++                                DoCast(target, SPELL_SOUL_CONSUMPTION);
++                            events.ScheduleEvent(EVENT_SOUL_CONSUMPTION, 20000);
++                            break;
++                        }
++                        case EVENT_CLEAVE:
++                            DoCastVictim(SPELL_CLEAVE);
++                            events.ScheduleEvent(EVENT_CLEAVE, urand(8000, 10000));
++                            break;
++                        case EVENT_TAIL_LASH:
++                            DoCastAOE(SPELL_TAIL_LASH);
++                            events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
++                            break;
++                        default:
++                            break;
++                    }
++                }
++
++                DoMeleeAttackIfReady();
++            }
++
++        private:
++            InstanceScript* _instance;
++            EventMap events;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return GetRubySanctumAI<boss_twilight_halionAI>(creature);
++        }
++};
++
++typedef boss_twilight_halion::boss_twilight_halionAI twilightHalionAI;
++
++class npc_halion_controller : public CreatureScript
++{
++    public:
++        npc_halion_controller() : CreatureScript("npc_halion_controller") { }
++
++        struct npc_halion_controllerAI : public ScriptedAI
++        {
++            npc_halion_controllerAI(Creature* creature) : ScriptedAI(creature),
++                _instance(creature->GetInstanceScript()), _summons(me)
++            {
++                me->SetPhaseMask(me->GetPhaseMask() | 0x20, true);
++            }
++
++            void Reset() { me->SetReactState(REACT_PASSIVE); }
++
++            // Let him count as summoner for various NPCs, making them dissapear at encounter failure or success.
++            void JustSummoned(Creature* who)
++            {
++                _summons.Summon(who);
++            }
++
++            void DoAction(int32 const action)
++            {
++                switch (action)
++                {
++                    case ACTION_INTRO_HALION:
++                    {
++                        _events.Reset();
++                        _events.ScheduleEvent(EVENT_START_INTRO, 2000);
++                        _events.ScheduleEvent(EVENT_INTRO_PROGRESS_1, 6000);
++                        _events.ScheduleEvent(EVENT_INTRO_PROGRESS_2, 10000);
++                        _events.ScheduleEvent(EVENT_INTRO_PROGRESS_3, 14000);
++                        break;
++                    }
++                    case ACTION_PHASE_TWO:
++                    {
++                        // Fix the timer
++                        _events.ScheduleEvent(EVENT_SHADOW_PULSARS_SHOOT, 10000);
++
++                        me->SummonCreature(NPC_TWILIGHT_HALION, HalionSpawnPos);
++
++                        if (Creature* rotationFocus = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORB_ROTATION_FOCUS)))
++                            rotationFocus->AI()->DoAction(ACTION_BEGIN_ROTATION);
++
++                        if (Creature* halion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION)))
++                            halion->CastSpell(halion->GetPositionX(), halion->GetPositionY(), halion->GetPositionZ(), SPELL_SUMMON_TWILIGHT_PORTAL, true);
++                        break;
++                    }
++                    case ACTION_PHASE_THREE:
++                    {
++                        _events.ScheduleEvent(EVENT_CHECK_CORPOREALITY, 20000);
++
++                        TwilightDamageTaken = 0;
++                        MaterialDamageTaken = 0;
++                        corporealityValue = 50;
++                        _instance->DoUpdateWorldState(WORLDSTATE_CORPOREALITY_TOGGLE, 1);
++                        break;
++                    }
++                    case ACTION_DESPAWN_ADDS:
++                    {
++                        _summons.DespawnAll();
++                        _events.Reset();
++                        break;
++                    }
++                    case ACTION_BERSERK:
++                    {
++                        if (Creature* halion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION)))
++                        {
++                            halion->AI()->DoCast(halion, SPELL_BERSERK);
++                            halion->AI()->Talk(SAY_BERSERK);
++                        }
++                        if (Creature* tHalion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_TWILIGHT_HALION)))
++                            tHalion->AI()->DoCast(tHalion, SPELL_BERSERK);
++                        break;
++                    }
++                }
++            }
++
++            void UpdateAI(uint32 const diff)
++            {
++                _events.Update(diff);
++
++                while (uint32 eventId = _events.ExecuteEvent())
++                {
++                    switch (eventId)
++                    {
++                        case EVENT_START_INTRO:
++                            DoCast(me, SPELL_COSMETIC_FIRE_PILLAR, true);
++                            break;
++                        case EVENT_INTRO_PROGRESS_1:
++                            for (uint8 i = DATA_BURNING_TREE_3; i < DATA_BURNING_TREE_4; ++i)
++                                if (GameObject* tree = ObjectAccessor::GetGameObject(*me, _instance->GetData64(i)))
++                                    _instance->HandleGameObject(_instance->GetData64(i), true, tree);
++                            break;
++                        case EVENT_INTRO_PROGRESS_2:
++                            for (uint8 i = DATA_BURNING_TREE_1; i < DATA_BURNING_TREE_2; ++i)
++                                if (GameObject* tree = ObjectAccessor::GetGameObject(*me, _instance->GetData64(i)))
++                                    _instance->HandleGameObject(_instance->GetData64(i), true, tree);
++                            break;
++                        case EVENT_INTRO_PROGRESS_3:
++                            DoCast(me, SPELL_FIERY_EXPLOSION);
++                            if (Creature* halion = me->GetMap()->SummonCreature(NPC_HALION, HalionSpawnPos))
++                                halion->AI()->Talk(SAY_INTRO);
++                            break;
++                        // This event can't be in the Shadow Pulsars, else Halion would yell at every world update tick.
++                        case EVENT_SHADOW_PULSARS_SHOOT:
++                        {
++                            if (Creature* twilightHalion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_TWILIGHT_HALION)))
++                                twilightHalion->AI()->Talk(SAY_SPHERE_PULSE);
++
++                            if (Creature* orbCarrier = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORB_CARRIER)))
++                                orbCarrier->AI()->DoAction(ACTION_SHOOT);
++
++                            _events.ScheduleEvent(EVENT_SHADOW_PULSARS_SHOOT, 30000);
++                            _events.ScheduleEvent(EVENT_WARN_LASERS, 25000);
++                            break;
++                        }
++                        case EVENT_WARN_LASERS:
++                        {
++                            Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
++                            for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
++                                if (Player* player = i->getSource())
++                                    if (player->HasAura(SPELL_TWILIGHT_REALM))
++                                        Talk(EMOTE_WARN_LASER, player->GetGUID());
++                            break;
++                        }
++                        case EVENT_CHECK_CORPOREALITY:
++                        {
++                            bool canUpdate = false;
++                            if (MaterialDamageTaken != 0 && TwilightDamageTaken != 0)
++                            {
++                                if (MaterialDamageTaken >= 1.02f * TwilightDamageTaken)
++                                {
++                                    TwilightDamageTaken = 0;
++                                    MaterialDamageTaken = 0;
++                                    canUpdate = (corporealityValue != 0);
++                                    if (canUpdate) { corporealityValue -= 10; }
++                                }
++                                else if (TwilightDamageTaken >= 1.02 * MaterialDamageTaken)
++                                {
++                                    TwilightDamageTaken = 0;
++                                    MaterialDamageTaken = 0;
++                                    canUpdate = (corporealityValue != 100);
++                                    if (canUpdate) { corporealityValue += 10; }
++                                }
++                            }
++                            else
++                            {
++                                if (Creature* halion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION)))
++                                {
++                                    Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
++                                    for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
++                                        if (Player* player = i->getSource())
++                                            Talk(EMOTE_REGENERATE, player->GetGUID());
++                                    DoCast(halion, SPELL_TWILIGHT_MENDING); 
++                                }
++                                _events.ScheduleEvent(EVENT_CHECK_CORPOREALITY, 15000);
++                                break;
++                            }
++
++                            if (canUpdate)
++                            {
++                                uint32 twilightValue = 100 - corporealityValue;
++                                uint32 physicalValue = corporealityValue;
++                                uint32 twilightSpell, physicalSpell;
++                                for (uint8 i = 0; i < MAX_CORPOREALITY_STATE; i++)
++                                {
++                                    if (corporealityReference[i].physicalPercentage == physicalValue && corporealityReference[i].twilightPercentage == twilightValue)
++                                    {
++                                        twilightSpell = corporealityReference[i].twilightRealmSpellId;
++                                        physicalSpell = corporealityReference[i].physicalRealmSpellId;
++                                        break;
++                                    }
++                                }
++
++                                for (uint8 i = 0; i < 2; i++)
++                                {
++                                    if (Creature* halion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION + i)))
++                                    {
++                                        RemoveAnyCorporealityBuff(halion);
++                                        halion->CastSpell(halion, (i ? twilightSpell : physicalSpell), true);
++                                    }
++                                }
++
++                                _instance->DoUpdateWorldState(WORLDSTATE_CORPOREALITY_MATERIAL, physicalValue);
++                                _instance->DoUpdateWorldState(WORLDSTATE_CORPOREALITY_TWILIGHT, twilightValue);
++
++                                Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
++                                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
++                                {
++                                    if (Player* player = i->getSource())
++                                    {
++                                        if (physicalValue > twilightValue)
++                                        {
++                                            if (player->HasAura(SPELL_TWILIGHT_REALM))
++                                                Talk(EMOTE_TWILIGHT_OUT_TWILIGHT, player->GetGUID());
++                                            else
++                                                Talk(EMOTE_PHYSICAL_IN_PHYSICAL, player->GetGUID());
++                                        }
++                                        else
++                                        {
++                                            if (player->HasAura(SPELL_TWILIGHT_REALM))
++                                                Talk(EMOTE_TWILIGHT_IN_TWILIGHT, player->GetGUID());
++                                            else
++                                                Talk(EMOTE_PHYSICAL_OUT_PHYSICAL, player->GetGUID());
++                                        }
++                                    }
++                                }
++                            }
++                            _events.ScheduleEvent(EVENT_CHECK_CORPOREALITY, 15000);
++                            break;
++                        }
++                        default:
++                            break;
++                    }
++                }
++            }
++
++            void SetData(uint32 id, uint32 value)
++            {
++                switch (id)
++                {
++                    case DATA_MATERIAL_DAMAGE_TAKEN:
++                        MaterialDamageTaken += value;
++                        break;
++                    case DATA_TWILIGHT_DAMAGE_TAKEN:
++                        TwilightDamageTaken += value;
++                        break;
++                }
++            }
++
++            void RemoveAnyCorporealityBuff(Creature* who)
++            {
++                for (uint8 i = 0; i < MAX_CORPOREALITY_STATE; i++)
++                {
++                    if (who->HasAura(74826 + i))
++                    {
++                        who->RemoveAurasDueToSpell(74826 + i);
++                        break;
++                    }
++                }
++            }
++
++            void PushStacksForPlayer(uint64 plrGUID, uint32 stackamount)
++            {
++                _voidZonesStacks.insert(std::pair<uint64, uint32>(plrGUID, stackamount));
++            }
++
++            void RemoveStacksForPlayer(uint64 plrGUID)
++            {
++                for (std::map<uint64, uint32>::iterator itr = _voidZonesStacks.begin(); itr != _voidZonesStacks.end(); ++itr)
++                {
++                    if ((*itr).first == plrGUID)
++                    {
++                        _voidZonesStacks.erase(itr);
++                        break;
++                    }
++                }
++            }
++
++            uint32 GetStacksForPlayer(uint64 plrGUID)
++            {
++                for (std::map<uint64, uint32>::iterator itr = _voidZonesStacks.begin(); itr != _voidZonesStacks.end(); ++itr)
++                    if ((*itr).first == plrGUID)
++                        return (*itr).second;
++                return 0;
++            }
++
++        private:
++            EventMap _events;
++            InstanceScript* _instance;
++            SummonList _summons;
++            uint32 TwilightDamageTaken;
++            uint32 MaterialDamageTaken;
++            uint8 corporealityValue; // We always refer to the PHYSICAL VALUE.
++            std::map<uint64 /*plrGuid*/, uint32 /*stacks*/> _voidZonesStacks;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return GetRubySanctumAI<npc_halion_controllerAI>(creature);
++        }
++};
++
++typedef npc_halion_controller::npc_halion_controllerAI controllerAI;
++
++class npc_meteor_strike_initial : public CreatureScript
++{
++    public:
++        npc_meteor_strike_initial() : CreatureScript("npc_meteor_strike_initial") { }
++
++        struct npc_meteor_strike_initialAI : public Scripted_NoMovementAI
++        {
++            npc_meteor_strike_initialAI(Creature* creature) : Scripted_NoMovementAI(creature),
++                _instance(creature->GetInstanceScript())
++            { }
++
++            void DoAction(int32 const action)
++            {
++                switch (action)
++                {
++                    case ACTION_METEOR_STRIKE_AOE:
++                        DoCast(me, SPELL_METEOR_STRIKE_AOE_DAMAGE, true);
++                        DoCast(me, SPELL_METEOR_STRIKE_FIRE_AURA_1, true);
++                        for (std::list<Creature*>::iterator itr = _meteorList.begin(); itr != _meteorList.end(); ++itr)
++                            (*itr)->AI()->DoAction(ACTION_METEOR_STRIKE_BURN);
++                        break;
++                }
++            }
++
++            void IsSummonedBy(Unit* summoner)
++            {
++                _owner = summoner->ToCreature();
++
++                // Let Halion Controller count as summoner
++                if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
++                    controller->AI()->JustSummoned(me);
++
++                if (!_owner)
++                    return;
++
++                DoCast(me, SPELL_METEOR_STRIKE_COUNTDOWN);
++                DoCast(me, SPELL_BIRTH_NO_VISUAL); // Unknown purpose
++
++                if (HalionAI* halionAI = CAST_AI(HalionAI, _owner->AI()))
++                {
++                    Position const* ownerPos = halionAI->GetMeteorStrikePosition();
++                    Position newpos;
++                    float angle[4];
++                    angle[0] = me->GetAngle(ownerPos);
++                    angle[1] = me->GetAngle(ownerPos) - static_cast<float>(M_PI/2);
++                    angle[2] = me->GetAngle(ownerPos) - static_cast<float>(-M_PI/2);
++                    angle[3] = me->GetAngle(ownerPos) - static_cast<float>(M_PI);
++
++                    _meteorList.clear();
++                    for (uint8 i = 0; i < 4; i++)
++                    {
++                        MapManager::NormalizeOrientation(angle[i]);
++                        me->SetOrientation(angle[i]);
++                        me->GetNearPosition(newpos, 10.0f, 0.0f); // Exact distance
++                        if (Creature* meteor = me->SummonCreature(NPC_METEOR_STRIKE_NORTH + i, newpos, TEMPSUMMON_TIMED_DESPAWN, 30000))
++                            _meteorList.push_back(meteor);
++                    }
++                }
++            }
++
++            void UpdateAI(uint32 const /*diff*/) { }
++            void EnterEvadeMode() { }
++
++        private:
++            InstanceScript* _instance;
++            Creature* _owner;
++            std::list<Creature*> _meteorList;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return GetRubySanctumAI<npc_meteor_strike_initialAI>(creature);
++        }
++};
++
++class npc_meteor_strike : public CreatureScript
++{
++    public:
++        npc_meteor_strike() : CreatureScript("npc_meteor_strike") { }
++
++        struct npc_meteor_strikeAI : public Scripted_NoMovementAI
++        {
++            npc_meteor_strikeAI(Creature* creature) : Scripted_NoMovementAI(creature),
++                _instance(creature->GetInstanceScript())
++            {
++                _range = 5.0f;
++                _spawnCount = 0;
++            }
++
++            void DoAction(int32 const action)
++            {
++                if (action == ACTION_METEOR_STRIKE_BURN)
++                {
++                    DoCast(me, SPELL_METEOR_STRIKE_FIRE_AURA_2, true);
++                    me->setActive(true);
++                    _events.ScheduleEvent(EVENT_SPAWN_METEOR_FLAME, 500);
++                }
++            }
++
++            void IsSummonedBy(Unit* /*summoner*/)
++            {
++                // Let Halion Controller count as summoner.
++                if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
++                    controller->AI()->JustSummoned(me);
++            }
++
++            void UpdateAI(uint32 const diff)
++            {
++                if (_spawnCount > 5)
++                    return;
++
++                _events.Update(diff);
++
++                if (_events.ExecuteEvent() == EVENT_SPAWN_METEOR_FLAME)
++                {
++                    Position pos;
++                    me->GetNearPosition(pos, _range, 0.0f);
++
++                    if (Creature* flame = me->SummonCreature(NPC_METEOR_STRIKE_FLAME, pos, TEMPSUMMON_TIMED_DESPAWN, 25000))
++                    {
++                        if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
++                            controller->AI()->JustSummoned(flame);
++
++                        flame->CastSpell(flame, SPELL_METEOR_STRIKE_FIRE_AURA_2, true);
++                        _spawnCount++;
++                    }
++                    _range += 5.0f;
++                    _events.ScheduleEvent(EVENT_SPAWN_METEOR_FLAME, 800);
++                }
++            }
++
++        private:
++            InstanceScript* _instance;
++            EventMap _events;
++            float _range;
++            uint8 _spawnCount;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return GetRubySanctumAI<npc_meteor_strikeAI>(creature);
++        }
++};
++
++class npc_combustion : public CreatureScript
++{
++    public:
++        npc_combustion() : CreatureScript("npc_combustion") { }
++
++        struct npc_combustionAI : public Scripted_NoMovementAI
++        {
++            npc_combustionAI(Creature* creature) : Scripted_NoMovementAI(creature),
++                _instance(creature->GetInstanceScript())
++            {
++                if (IsHeroic())
++                    me->SetPhaseMask(me->GetPhaseMask() | 0x20, true);
++            }
++
++            void IsSummonedBy(Unit* summoner)
++            {
++                // Let Halion Controller count as summoner
++                if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
++                {
++                    controller->AI()->JustSummoned(me);
++
++                    // Get stacks of Marks of Combustion that were on the caster
++                    uint32 stacks = CAST_AI(controllerAI, controller->AI())->GetStacksForPlayer(summoner->ToPlayer()->GetGUID());
++                    CAST_AI(controllerAI, controller->AI())->RemoveStacksForPlayer(summoner->ToPlayer()->GetGUID());
++
++                    me->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, stacks, me, true);
++                    DoCast(me, SPELL_COMBUSTION_DAMAGE_AURA); // Void zone visual
++                    int32 damage = 1200 + (stacks * 1290);
++                    me->CastCustomSpell(SPELL_FIERY_COMBUSTION_EXPLOSION, SPELLVALUE_BASE_POINT0, damage, me);
++                }
++            }
++
++            void UpdateAI(const uint32 /*diff*/) { }
++
++        private:
++            InstanceScript* _instance;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return GetRubySanctumAI<npc_combustionAI>(creature);
++        }
++};
++
++class npc_consumption : public CreatureScript
++{
++    public:
++        npc_consumption() : CreatureScript("npc_consumption") { }
++
++        struct npc_consumptionAI : public Scripted_NoMovementAI
++        {
++            npc_consumptionAI(Creature* creature) : Scripted_NoMovementAI(creature),
++                   _instance(creature->GetInstanceScript())
++            {
++                me->SetPhaseMask(0x20, true);
++                if (IsHeroic())
++                    me->SetPhaseMask(me->GetPhaseMask() | 0x20, true);
++            }
++
++            void IsSummonedBy(Unit* summoner)
++            {
++                // Let Halion Controller count as summoner
++                if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
++                {
++                    controller->AI()->JustSummoned(me);
++
++                    // Get stacks of Marks of Consumption that were on the caster
++                    uint32 stacks = CAST_AI(controllerAI, controller->AI())->GetStacksForPlayer(summoner->ToPlayer()->GetGUID());
++                    CAST_AI(controllerAI, controller->AI())->RemoveStacksForPlayer(summoner->ToPlayer()->GetGUID());
++
++                    me->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, stacks, me, true);
++                    DoCast(me, SPELL_CONSUMPTION_DAMAGE_AURA); // Void zone visual
++                    int32 damage = 1200 + (stacks * 1290);
++                    me->CastCustomSpell(SPELL_SOUL_CONSUMPTION_EXPLOSION, SPELLVALUE_BASE_POINT0, damage, me);
++                }
++            }
++
++            void UpdateAI(const uint32 /*diff*/) { }
++
++        private:
++            InstanceScript* _instance;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return GetRubySanctumAI<npc_consumptionAI>(creature);
++        }
++};
++
++class npc_orb_carrier : public CreatureScript
++{
++    public:
++        npc_orb_carrier() : CreatureScript("npc_orb_carrier") { }
++
++        struct npc_orb_carrierAI : public ScriptedAI
++        {
++            npc_orb_carrierAI(Creature* creature) : ScriptedAI(creature)
++            {
++                ASSERT(creature->GetVehicleKit());
++            }
++
++            void UpdateAI(uint32 const diff)
++            {
++                //! According to sniffs this spell is cast every 1 or 2 seconds.
++                //! However, refreshing it looks bad, so just cast the spell if
++                //! we are not channeling it. Targeting will be handled by
++                //! conditions.
++                if (!me->HasUnitState(UNIT_STAT_CASTING))
++                    DoCast(me, SPELL_TRACK_ROTATION, false);
++            }
++
++            void DoAction(uint32 action)
++            {
++                if (action == ACTION_SHOOT)
++                {
++                    Vehicle* vehicle = me->GetVehicleKit();
++
++                    if (Unit* southOrb = vehicle->GetPassenger(SEAT_SOUTH))
++                        if (Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH))
++                            northOrb->CastSpell(southOrb, SPELL_TWILIGHT_CUTTER);
++
++                    // Doublecheck which one casts on which here (Need moar sniffz)
++                    if (IsHeroic())
++                        if (Unit* eastOrb = vehicle->GetPassenger(SEAT_EAST))
++                            if (Unit* westOrb = vehicle->GetPassenger(SEAT_WEST))
++                                eastOrb->CastSpell(westOrb, SPELL_TWILIGHT_CUTTER);
++                }
++            }
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return GetRubySanctumAI<npc_orb_carrierAI>(creature);
++        }
++};
++
++class spell_halion_meteor_strike_marker : public SpellScriptLoader
++{
++    public:
++        spell_halion_meteor_strike_marker() : SpellScriptLoader("spell_halion_meteor_strike_marker") { }
++
++        class spell_halion_meteor_strike_marker_AuraScript : public AuraScript
++        {
++            PrepareAuraScript(spell_halion_meteor_strike_marker_AuraScript);
++
++            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
++            {
++                if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
++                    if (Creature* creCaster = GetCaster()->ToCreature())
++                        creCaster->AI()->DoAction(ACTION_METEOR_STRIKE_AOE);
++            }
++
++            void Register()
++            {
++                AfterEffectRemove += AuraEffectRemoveFn(spell_halion_meteor_strike_marker_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
++            }
++        };
++
++        AuraScript* GetAuraScript() const
++        {
++            return new spell_halion_meteor_strike_marker_AuraScript();
++        }
++};
++
++class spell_halion_fiery_combustion : public SpellScriptLoader
++{
++    public:
++        spell_halion_fiery_combustion() : SpellScriptLoader("spell_halion_fiery_combustion") { }
++
++        class spell_halion_fiery_combustion_AuraScript : public AuraScript
++        {
++            PrepareAuraScript(spell_halion_fiery_combustion_AuraScript);
++
++            bool Validate(SpellEntry const* /*spell*/)
++            {
++                if (!sSpellMgr->GetSpellInfo(SPELL_MARK_OF_COMBUSTION))
++                    return false;
++                return true;
++            }
++
++            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
++            {
++                if (GetTarget()->HasAura(SPELL_MARK_OF_COMBUSTION))
++                    GetTarget()->RemoveAurasDueToSpell(SPELL_MARK_OF_COMBUSTION, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
++            }
++
++            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
++            {
++                GetTarget()->CastSpell(GetTarget(), SPELL_MARK_OF_COMBUSTION, true);
++            }
++
++            void AddMarkStack(AuraEffect const* /*aurEff*/)
++            {
++                GetTarget()->CastSpell(GetTarget(), SPELL_MARK_OF_COMBUSTION, true);
++            }
++
++            void Register()
++            {
++                OnEffectPeriodic += AuraEffectPeriodicFn(spell_halion_fiery_combustion_AuraScript::AddMarkStack, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
++                AfterEffectApply += AuraEffectApplyFn(spell_halion_fiery_combustion_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
++                AfterEffectRemove += AuraEffectRemoveFn(spell_halion_fiery_combustion_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
++            }
++        };
++
++        AuraScript* GetAuraScript() const
++        {
++            return new spell_halion_fiery_combustion_AuraScript();
++        }
++};
++
++class spell_halion_soul_consumption : public SpellScriptLoader
++{
++    public:
++        spell_halion_soul_consumption() : SpellScriptLoader("spell_halion_soul_consumption") { }
++
++        class spell_halion_soul_consumption_AuraScript : public AuraScript
++        {
++            PrepareAuraScript(spell_halion_soul_consumption_AuraScript);
++
++            bool Validate(SpellEntry const* /*spell*/)
++            {
++                if (!sSpellMgr->GetSpellInfo(SPELL_MARK_OF_CONSUMPTION))
++                    return false;
++                return true;
++            }
++
++            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
++            {
++                if (GetTarget()->HasAura(SPELL_MARK_OF_CONSUMPTION))
++                    GetTarget()->RemoveAurasDueToSpell(SPELL_MARK_OF_CONSUMPTION, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
++            }
++
++            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
++            {
++                GetTarget()->CastSpell(GetTarget(), SPELL_MARK_OF_CONSUMPTION, true);
++            }
++
++            void AddMarkStack(AuraEffect const* /*aurEff*/)
++            {
++                GetTarget()->CastSpell(GetTarget(), SPELL_MARK_OF_CONSUMPTION, true);
++            }
++
++            void Register()
++            {
++                OnEffectPeriodic += AuraEffectPeriodicFn(spell_halion_soul_consumption_AuraScript::AddMarkStack, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
++                AfterEffectApply += AuraEffectApplyFn(spell_halion_soul_consumption_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
++                AfterEffectRemove += AuraEffectRemoveFn(spell_halion_soul_consumption_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
++            }
++        };
++
++        AuraScript* GetAuraScript() const
++        {
++            return new spell_halion_soul_consumption_AuraScript();
++        }
++};
++
++class spell_halion_mark_of_combustion : public SpellScriptLoader
++{
++    public:
++        spell_halion_mark_of_combustion() : SpellScriptLoader("spell_halion_mark_of_combustion") { }
++
++        class spell_halion_mark_of_combustion_AuraScript : public AuraScript
++        {
++            PrepareAuraScript(spell_halion_mark_of_combustion_AuraScript);
++
++            bool Validate(SpellEntry const* /*spell*/)
++            {
++                if (!sSpellMgr->GetSpellInfo(SPELL_FIERY_COMBUSTION_SUMMON))
++                    return false;
++                if (!sSpellMgr->GetSpellInfo(SPELL_FIERY_COMBUSTION_EXPLOSION))
++                    return false;
++                return true;
++            }
++
++            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
++            {
++                Unit* target = GetTarget();
++
++                InstanceScript* instance = target->GetInstanceScript();
++                if (!instance)
++                    return;
++
++                uint8 stacks = aurEff->GetBase()->GetStackAmount();
++
++                // Save stacks in the controller, doesn't work with SPELLVALUE_AURA_STACKS
++                if (Creature* controller = ObjectAccessor::GetCreature(*target, instance->GetData64(DATA_HALION_CONTROLLER)))
++                    CAST_AI(controllerAI, controller->AI())->PushStacksForPlayer(target->GetGUID(), stacks);
++
++                target->CastSpell(target, SPELL_FIERY_COMBUSTION_SUMMON, true);
++            }
++
++            void Register()
++            {
++                AfterEffectRemove += AuraEffectRemoveFn(spell_halion_mark_of_combustion_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
++            }
++        };
++
++        AuraScript* GetAuraScript() const
++        {
++            return new spell_halion_mark_of_combustion_AuraScript();
++        }
++};
++
++class spell_halion_mark_of_consumption : public SpellScriptLoader
++{
++    public:
++        spell_halion_mark_of_consumption() : SpellScriptLoader("spell_halion_mark_of_consumption") { }
++
++        class spell_halion_mark_of_consumption_AuraScript : public AuraScript
++        {
++            PrepareAuraScript(spell_halion_mark_of_consumption_AuraScript);
++
++            bool Validate(SpellInfo const* /*spell*/)
++            {
++                if (!sSpellMgr->GetSpellInfo(SPELL_SOUL_CONSUMPTION_SUMMON))
++                    return false;
++                if (!sSpellMgr->GetSpellInfo(SPELL_SOUL_CONSUMPTION_EXPLOSION))
++                    return false;
++                return true;
++            }
++
++            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
++            {
++                Unit* target = GetTarget();
++
++                InstanceScript* instance = target->GetInstanceScript();
++                if (!instance)
++                    return;
++
++                uint8 stacks = aurEff->GetBase()->GetStackAmount();
++
++                // Save stacks in the controller, doesn't work with SPELLVALUE_AURA_STACKS
++                if (Creature* controller = ObjectAccessor::GetCreature(*target, instance->GetData64(DATA_HALION_CONTROLLER)))
++                    CAST_AI(controllerAI, controller->AI())->PushStacksForPlayer(target->GetGUID(), stacks);
++
++                target->CastSpell(target, SPELL_SOUL_CONSUMPTION_SUMMON, true);
++            }
++
++            void Register()
++            {
++                AfterEffectRemove += AuraEffectRemoveFn(spell_halion_mark_of_consumption_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
++            }
++        };
++
++        AuraScript* GetAuraScript() const
++        {
++            return new spell_halion_mark_of_consumption_AuraScript();
++        }
++};
++
++class spell_halion_combustion_consumption_summon : public SpellScriptLoader
++{
++    public:
++        spell_halion_combustion_consumption_summon() : SpellScriptLoader("spell_halion_combustion_consumption_summon") { }
++
++        class spell_halion_combustion_consumption_summon_SpellScript : public SpellScript
++        {
++            PrepareSpellScript(spell_halion_combustion_consumption_summon_SpellScript);
++
++            void HandleSummon(SpellEffIndex effIndex)
++            {
++                PreventHitDefaultEffect(effIndex);
++                Unit* caster = GetCaster();
++                uint32 entry = uint32(GetSpellInfo()->Effects[effIndex].MiscValue);
++                SummonPropertiesEntry const* properties = sSummonPropertiesStore.LookupEntry(uint32(GetSpellInfo()->Effects[effIndex].MiscValueB));
++                uint32 duration = uint32(GetSpellInfo()->GetDuration());
++
++                InstanceScript* instance = caster->GetInstanceScript();
++                if (!instance)
++                    return;
++
++                Position pos;
++                caster->GetPosition(&pos);
++                caster->GetMap()->SummonCreature(entry, pos, properties, duration, caster, GetSpellInfo()->Id);
++            }
++
++            void Register()
++            {
++                OnEffectHit += SpellEffectFn(spell_halion_combustion_consumption_summon_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
++            }
++        };
++
++        SpellScript* GetSpellScript() const
++        {
++            return new spell_halion_combustion_consumption_summon_SpellScript();
++        }
++};
++
++class spell_halion_leave_twilight_realm : public SpellScriptLoader
++{
++    public:
++        spell_halion_leave_twilight_realm() : SpellScriptLoader("spell_halion_leave_twilight_realm") { }
++
++        class spell_halion_leave_twilight_realm_AuraScript: public AuraScript
++        {
++            PrepareAuraScript(spell_halion_leave_twilight_realm_AuraScript);
++
++            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*handle*/)
++            {
++                GetTarget()->RemoveAurasDueToSpell(SPELL_TWILIGHT_REALM);
++            }
++
++            void Register()
++            {
++                AfterEffectRemove += AuraEffectRemoveFn(spell_halion_leave_twilight_realm_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL); 
++            }
++        };
++
++        class spell_halion_leave_twilight_realm_SpellScript : public SpellScript
++        {
++            PrepareSpellScript(spell_halion_leave_twilight_realm_SpellScript);
++
++            void HandleBeforeHit()
++            {
++                // Right before, make the Soul Consumption explode
++                if (Player* plr = GetHitPlayer())
++                    plr->RemoveAurasDueToSpell(SPELL_SOUL_CONSUMPTION, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
++            }
++
++            void Register()
++            {
++                BeforeHit += SpellHitFn(spell_halion_leave_twilight_realm_SpellScript::HandleBeforeHit);
++            }
++        };
++
++        SpellScript* GetSpellScript() const
++        {
++            return new spell_halion_leave_twilight_realm_SpellScript();
++        }
++
++        AuraScript* GetAuraScript() const
++        {
++            return new spell_halion_leave_twilight_realm_AuraScript();
++        }
++};
++
++class spell_halion_enter_twilight_realm : public SpellScriptLoader
++{
++    public:
++        spell_halion_enter_twilight_realm() : SpellScriptLoader("spell_halion_enter_twilight_realm") { }
++
++        class spell_halion_enter_twilight_realm_SpellScript : public SpellScript
++        {
++            PrepareSpellScript(spell_halion_enter_twilight_realm_SpellScript);
++
++            void HandleBeforeHit()
++            {
++                // Right before, make the Fiery Combustion explode
++                if (Player* plr = GetHitPlayer())
++                    plr->RemoveAurasDueToSpell(SPELL_FIERY_COMBUSTION, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
++            }
++
++            void Register()
++            {
++                BeforeHit += SpellHitFn(spell_halion_enter_twilight_realm_SpellScript::HandleBeforeHit);
++            }
++        };
++
++        SpellScript* GetSpellScript() const
++        {
++            return new spell_halion_enter_twilight_realm_SpellScript();
++        }
++};
++
++class TwilightCutterSelector
++{
++    public:
++        TwilightCutterSelector(Unit* caster, Unit* cutterCaster) : _caster(caster), _cutterCaster(cutterCaster) {}
++
++        bool operator()(Unit* unit)
++        {
++            if (unit->IsInBetween(_caster, _cutterCaster, 4.0f))
++                return false;
++
++            sLog->outError("%s is inbetween, do damage!", unit->GetName());
++            return true;
++        }
++
++    private:
++        Unit* _caster;
++        Unit* _cutterCaster;
++};
++
++class spell_halion_twilight_cutter : public SpellScriptLoader
++{
++    public:
++        spell_halion_twilight_cutter() : SpellScriptLoader("spell_halion_twilight_cutter") { }
++
++        class spell_halion_twilight_cutter_SpellScript : public SpellScript
++        {
++            PrepareSpellScript(spell_halion_twilight_cutter_SpellScript);
++
++            void RemoveNotBetween(std::list<Unit*>& targets)
++            {
++                Unit* caster = GetCaster();
++                if (Aura* cutter = GetCaster()->GetAura(SPELL_TWILIGHT_CUTTER))
++                {
++                    if (Unit* cutterCaster = cutter->GetCaster())
++                        targets.remove_if(TwilightCutterSelector(caster, cutterCaster));
++                    else
++                        sLog->outError("No cutterCaster");
++                }
++                else
++                    sLog->outError("No cutter");
++            }
++
++            void Register()
++            {
++                OnUnitTargetSelect += SpellUnitTargetFn(spell_halion_twilight_cutter_SpellScript::RemoveNotBetween, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
++            }
++        };
++
++        SpellScript* GetSpellScript() const
++        {
++            return new spell_halion_twilight_cutter_SpellScript();
++        }
++};
++
++void AddSC_boss_halion()
++{
++    new boss_halion();
++    new boss_twilight_halion();
++
++    new npc_halion_controller();
++    new npc_meteor_strike_initial();
++    new npc_meteor_strike();
++    new npc_combustion();
++    new npc_consumption();
++    new npc_orb_carrier();
++
++    new spell_halion_meteor_strike_marker();
++    new spell_halion_combustion_consumption_summon();
++    new spell_halion_mark_of_combustion();
++    new spell_halion_mark_of_consumption();
++    new spell_halion_fiery_combustion();
++    new spell_halion_soul_consumption();
++    new spell_halion_leave_twilight_realm();
++    new spell_halion_enter_twilight_realm();
++    new spell_halion_twilight_cutter();
++}
+diff --git a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/instance_ruby_sanctum.cpp b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/instance_ruby_sanctum.cpp
+index abfaaa0..e0bc225 100644
+--- a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/instance_ruby_sanctum.cpp
++++ b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/instance_ruby_sanctum.cpp
+@@ -36,18 +36,21 @@ class instance_ruby_sanctum : public InstanceMapScript
+             {
+                 SetBossNumber(EncounterCount);
+                 LoadDoorData(doorData);
+-                BaltharusTheWarbornGUID = 0;
+-                GeneralZarithrianGUID   = 0;
+-                SavianaRagefireGUID     = 0;
+-                HalionGUID              = 0;
+-                HalionControllerGUID    = 0;
++                BaltharusTheWarbornGUID  = 0;
++                GeneralZarithrianGUID    = 0;
++                SavianaRagefireGUID      = 0;
++                HalionGUID               = 0;
++                TwilightHalionGUID       = 0;
++                OrbCarrierGUID           = 0;
++                OrbRotationFocusGUID     = 0;
++                HalionControllerGUID     = 0;
+                 CrystalChannelTargetGUID = 0;
+-                XerestraszaGUID         = 0;
+-                BaltharusSharedHealth   = 0;
+-                FlameWallsGUID          = 0;
+-                FlameRingGUID           = 0;
+-                memset(ZarithianSpawnStalkerGUID, 0, 2*sizeof(uint64));
+-                memset(BurningTreeGUID, 0, 4*sizeof(uint64));
++                XerestraszaGUID          = 0;
++                BaltharusSharedHealth    = 0;
++                FlameWallsGUID           = 0;
++                FlameRingGUID            = 0;
++                memset(ZarithianSpawnStalkerGUID, 0, 2 * sizeof(uint64));
++                memset(BurningTreeGUID, 0, 4 * sizeof(uint64));
+             }
+ 
+             void OnCreatureCreate(Creature* creature)
+@@ -66,8 +69,18 @@ class instance_ruby_sanctum : public InstanceMapScript
+                     case NPC_HALION:
+                         HalionGUID = creature->GetGUID();
+                         break;
++                    case NPC_TWILIGHT_HALION:
++                        TwilightHalionGUID = creature->GetGUID();
++                        break;
+                     case NPC_HALION_CONTROLLER:
+                         HalionControllerGUID = creature->GetGUID();
++                        break;
++                    case NPC_ORB_CARRIER:
++                        OrbCarrierGUID = creature->GetGUID();
++                        break;
++                    case NPC_ORB_ROTATION_FOCUS:
++                        OrbRotationFocusGUID = creature->GetGUID();
++                        break;
+                     case NPC_BALTHARUS_TARGET:
+                         CrystalChannelTargetGUID = creature->GetGUID();
+                         break;
+@@ -100,6 +113,9 @@ class instance_ruby_sanctum : public InstanceMapScript
+                     case GO_FLAME_RING:
+                         FlameRingGUID = go->GetGUID();
+                         break;
++                    case GO_TWILIGHT_FLAME_RING:
++                        TwilightFlameRingGUID = go->GetGUID();
++                        break;
+                     case GO_BURNING_TREE_1:
+                         BurningTreeGUID[0] = go->GetGUID();
+                         if (GetBossState(DATA_GENERAL_ZARITHRIAN) == DONE)
+@@ -152,23 +168,27 @@ class instance_ruby_sanctum : public InstanceMapScript
+                     case DATA_GENERAL_ZARITHRIAN:
+                         return GeneralZarithrianGUID;
+                     case DATA_ZARITHIAN_SPAWN_STALKER_1:
+-                        return ZarithianSpawnStalkerGUID[0];
+                     case DATA_ZARITHIAN_SPAWN_STALKER_2:
+-                        return ZarithianSpawnStalkerGUID[1];
++                        return ZarithianSpawnStalkerGUID[type - DATA_BURNING_TREE_1];
+                     case DATA_HALION:
+                         return HalionGUID;
++                    case DATA_TWILIGHT_HALION:
++                        return TwilightHalionGUID;
++                    case DATA_ORB_CARRIER:
++                        return OrbCarrierGUID;
++                    case DATA_ORB_ROTATION_FOCUS:
++                        return OrbRotationFocusGUID;
+                     case DATA_HALION_CONTROLLER:
+                         return HalionControllerGUID;
+                     case DATA_BURNING_TREE_1:
+-                        return BurningTreeGUID[0];
+                     case DATA_BURNING_TREE_2:
+-                        return BurningTreeGUID[1];
+                     case DATA_BURNING_TREE_3:
+-                        return BurningTreeGUID[2];
+                     case DATA_BURNING_TREE_4:
+                         return BurningTreeGUID[3];
+                     case DATA_FLAME_RING:
+                         return FlameRingGUID;
++                    case DATA_TWILIGHT_FLAME_RING:
++                        return TwilightFlameRingGUID;
+                     default:
+                         break;
+                 }
+@@ -206,18 +226,20 @@ class instance_ruby_sanctum : public InstanceMapScript
+                     case DATA_GENERAL_ZARITHRIAN:
+                         if (GetBossState(DATA_SAVIANA_RAGEFIRE) == DONE && GetBossState(DATA_BALTHARUS_THE_WARBORN) == DONE)
+                             HandleGameObject(FlameWallsGUID, state != IN_PROGRESS);
+-                        /*
+                         if (state == DONE)
+                             if (Creature* halionController = instance->SummonCreature(NPC_HALION_CONTROLLER, HalionControllerSpawnPos))
+                                 halionController->AI()->DoAction(ACTION_INTRO_HALION);
+-                        */
+                         break;
+                     case DATA_HALION:
+-                        /*
+-                        if (state != IN_PROGRESS)
+-                            HandleGameObject(FlameRingGUID, true);
+-                        */
++                    {
++                        if (state == IN_PROGRESS)
++                            break;
++
++                        DoUpdateWorldState(WORLDSTATE_CORPOREALITY_TOGGLE, 0);
++                        HandleGameObject(FlameRingGUID, true);
++                        HandleGameObject(TwilightFlameRingGUID, true);
+                         break;
++                    }
+                     default:
+                         break;
+                 }
+@@ -232,6 +254,11 @@ class instance_ruby_sanctum : public InstanceMapScript
+                     case DATA_BALTHARUS_SHARED_HEALTH:
+                         BaltharusSharedHealth = data;
+                         break;
++                    case DATA_HALION_SHARED_HEALTH:
++                        HalionSharedHealth = data;
++                        break;
++                    default:
++                        break;
+                 }
+             }
+ 
+@@ -241,6 +268,8 @@ class instance_ruby_sanctum : public InstanceMapScript
+                 {
+                     case DATA_BALTHARUS_SHARED_HEALTH:
+                         return BaltharusSharedHealth;
++                    case DATA_HALION_SHARED_HEALTH:
++                        return HalionSharedHealth;
+                     default:
+                         break;
+                 }
+@@ -259,6 +288,13 @@ class instance_ruby_sanctum : public InstanceMapScript
+                 return saveStream.str();
+             }
+ 
++            void FillInitialWorldStates(WorldPacket& data)
++            {
++                data << uint32(WORLDSTATE_CORPOREALITY_MATERIAL) << uint32(50);
++                data << uint32(WORLDSTATE_CORPOREALITY_TWILIGHT) << uint32(50);
++                data << uint32(WORLDSTATE_CORPOREALITY_TOGGLE) << uint32(0);
++            }
++
+             void Load(char const* str)
+             {
+                 if (!str)
+@@ -297,14 +333,20 @@ class instance_ruby_sanctum : public InstanceMapScript
+             uint64 GeneralZarithrianGUID;
+             uint64 SavianaRagefireGUID;
+             uint64 HalionGUID;
++            uint64 TwilightHalionGUID;
+             uint64 HalionControllerGUID;
++            uint64 OrbCarrierGUID;
++            uint64 OrbRotationFocusGUID;
+             uint64 CrystalChannelTargetGUID;
+             uint64 XerestraszaGUID;
+             uint64 FlameWallsGUID;
+             uint64 ZarithianSpawnStalkerGUID[2];
+             uint64 BurningTreeGUID[4];
+             uint64 FlameRingGUID;
++            uint64 TwilightFlameRingGUID;
++
+             uint32 BaltharusSharedHealth;
++            uint32 HalionSharedHealth;
+         };
+ 
+         InstanceScript* GetInstanceScript(InstanceMap* map) const
+diff --git a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/ruby_sanctum.h b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/ruby_sanctum.h
+index 52a4c67..9e9f151 100644
+--- a/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/ruby_sanctum.h
++++ b/src/server/scripts/Northrend/ChamberOfAspects/RubySanctum/ruby_sanctum.h
+@@ -36,17 +36,22 @@ enum DataTypes
+     DATA_HALION                             = 3,
+ 
+     // Etc
+-    DATA_XERESTRASZA                        = 4,
+-    DATA_CRYSTAL_CHANNEL_TARGET             = 5,
+-    DATA_BALTHARUS_SHARED_HEALTH            = 6,
+-    DATA_ZARITHIAN_SPAWN_STALKER_1          = 7,
+-    DATA_ZARITHIAN_SPAWN_STALKER_2          = 8,
+-    DATA_HALION_CONTROLLER                  = 9,
+-    DATA_BURNING_TREE_1                     = 10,
+-    DATA_BURNING_TREE_2                     = 11,
+-    DATA_BURNING_TREE_3                     = 12,
+-    DATA_BURNING_TREE_4                     = 13,
+-    DATA_FLAME_RING                         = 14,
++    DATA_TWILIGHT_HALION                    = 4,
++    DATA_XERESTRASZA                        = 5,
++    DATA_CRYSTAL_CHANNEL_TARGET             = 6,
++    DATA_BALTHARUS_SHARED_HEALTH            = 7,
++    DATA_ZARITHIAN_SPAWN_STALKER_1          = 8,
++    DATA_ZARITHIAN_SPAWN_STALKER_2          = 9,
++    DATA_HALION_CONTROLLER                  = 10,
++    DATA_ORB_CARRIER                        = 11,
++    DATA_ORB_ROTATION_FOCUS                 = 12,
++    DATA_HALION_SHARED_HEALTH               = 13,
++    DATA_BURNING_TREE_1                     = 14,
++    DATA_BURNING_TREE_2                     = 15,
++    DATA_BURNING_TREE_3                     = 16,
++    DATA_BURNING_TREE_4                     = 17,
++    DATA_FLAME_RING                         = 18,
++    DATA_TWILIGHT_FLAME_RING                = 19,
+ };
+ 
+ enum SharedActions
+@@ -73,7 +78,7 @@ enum CreaturesIds
+ 
+     // Halion
+     NPC_HALION                              = 39863,
+-    NPC_HALION_TWILIGHT                     = 40142,
++    NPC_TWILIGHT_HALION                     = 40142,
+     NPC_HALION_CONTROLLER                   = 40146,
+     NPC_LIVING_INFERNO                      = 40681,
+     NPC_LIVING_EMBER                        = 40683,
+@@ -81,6 +86,8 @@ enum CreaturesIds
+     NPC_ORB_ROTATION_FOCUS                  = 40091,
+     NPC_SHADOW_ORB_N                        = 40083,
+     NPC_SHADOW_ORB_S                        = 40100,
++    NPC_SHADOW_ORB_E                        = 40468, // These two may be interverted
++    NPC_SHADOW_ORB_W                        = 40469, //
+     NPC_METEOR_STRIKE_MARK                  = 40029,
+     NPC_METEOR_STRIKE_NORTH                 = 40041,
+     NPC_METEOR_STRIKE_EAST                  = 40042,
+@@ -88,6 +95,7 @@ enum CreaturesIds
+     NPC_METEOR_STRIKE_SOUTH                 = 40044,
+     NPC_METEOR_STRIKE_FLAME                 = 40055,
+     NPC_COMBUSTION                          = 40001,
++    NPC_CONSUMPTION                         = 40135,
+ 
+     // Xerestrasza
+     NPC_XERESTRASZA                         = 40429,
+@@ -101,6 +109,7 @@ enum GameObjectsIds
+     GO_FIRE_FIELD                           = 203005,
+     GO_FLAME_WALLS                          = 203006,
+     GO_FLAME_RING                           = 203007,
++    GO_TWILIGHT_FLAME_RING                  = 203624,
+     GO_BURNING_TREE_1                       = 203034,
+     GO_BURNING_TREE_2                       = 203035,
+     GO_BURNING_TREE_3                       = 203036,
+@@ -114,6 +123,12 @@ enum WorldStatesRS
+     WORLDSTATE_CORPOREALITY_TOGGLE   = 5051,
+ };
+ 
++enum InstanceSpell
++{
++    SPELL_BERSERK                       = 26662,
++    SPELL_TWILIGHT_REALM                = 74807,
++};
++
+ template<class AI>
+ CreatureAI* GetRubySanctumAI(Creature* creature)
+ {
+-- 
+1.7.6.msysgit.0
+

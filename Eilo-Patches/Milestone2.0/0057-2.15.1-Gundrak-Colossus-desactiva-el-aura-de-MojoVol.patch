@@ -1,0 +1,26 @@
+From d1a01c9ca7eaa4b2561aa0191966a705cafe8f58 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 17 Dec 2011 16:19:47 -0500
+Subject: [PATCH 57/65] 2.15.1 Gundrak: Colossus desactiva el aura de
+ MojoVolley al morir
+
+---
+ .../Northrend/Gundrak/boss_drakkari_colossus.cpp   |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/Gundrak/boss_drakkari_colossus.cpp b/src/server/scripts/Northrend/Gundrak/boss_drakkari_colossus.cpp
+index b66c3d7..90ef71e 100644
+--- a/src/server/scripts/Northrend/Gundrak/boss_drakkari_colossus.cpp
++++ b/src/server/scripts/Northrend/Gundrak/boss_drakkari_colossus.cpp
+@@ -275,6 +275,8 @@ class boss_drakkari_elemental : public CreatureScript
+                 if (killer == me)
+                     return;
+ 
++                me->RemoveAurasDueToSpell(SPELL_MOJO_VOLLEY);
++
+                 if (instance)
+                 {
+                     if (Creature* colossus = Unit::GetCreature(*me, instance->GetData64(DATA_DRAKKARI_COLOSSUS)))
+-- 
+1.7.8.msysgit.0
+

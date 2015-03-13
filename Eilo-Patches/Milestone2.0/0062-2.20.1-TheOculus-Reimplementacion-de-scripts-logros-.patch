@@ -1,0 +1,3002 @@
+From 1c5468c24f4517eb5fbf4cb4184440b7f0786cdd Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Mon, 6 Feb 2012 20:19:08 -0500
+Subject: [PATCH 62/65] 2.20.1 TheOculus: Reimplementacion de scripts, logros
+ y adecuacones de spells y loot
+
+---
+ .../world/reanemu/2011_12_19_100_world_oculus.sql  |  372 ++++++++++++++++
+ src/server/game/DungeonFinding/LFGMgr.cpp          |    4 +
+ src/server/game/Entities/Unit/Unit.cpp             |   16 +-
+ src/server/game/Spells/Auras/SpellAuraEffects.cpp  |    5 +
+ src/server/game/Spells/SpellEffects.cpp            |    6 +
+ src/server/game/Spells/SpellInfo.cpp               |    1 +
+ src/server/game/Spells/SpellMgr.cpp                |   12 +
+ .../scripts/Northrend/Nexus/Oculus/boss_drakos.cpp |  263 ++++++------
+ .../scripts/Northrend/Nexus/Oculus/boss_eregos.cpp |  465 ++++++++++++--------
+ .../scripts/Northrend/Nexus/Oculus/boss_urom.cpp   |  446 ++++++++++---------
+ .../scripts/Northrend/Nexus/Oculus/boss_varos.cpp  |  347 +++++++++------
+ .../Northrend/Nexus/Oculus/instance_oculus.cpp     |   30 +-
+ .../scripts/Northrend/Nexus/Oculus/oculus.cpp      |  395 +++++++++++++-----
+ src/server/scripts/Northrend/Nexus/Oculus/oculus.h |   11 +-
+ 14 files changed, 1602 insertions(+), 771 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_12_19_100_world_oculus.sql
+
+diff --git a/sql/updates/world/reanemu/2011_12_19_100_world_oculus.sql b/sql/updates/world/reanemu/2011_12_19_100_world_oculus.sql
+new file mode 100644
+index 0000000..59a611f
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_12_19_100_world_oculus.sql
+@@ -0,0 +1,372 @@
++-- Eilo (https://github.com/eilo)
++-- Recopilacion y adecuacion de querys originales de Zwerg
++
++-- INSTANCE: The Oculus
++-- first remove unneeded stuff from recent commits
++UPDATE `gameobject_template` SET `AIName`='' WHERE `entry` IN (188715,189985);
++DELETE FROM `smart_scripts` WHERE `entryorguid` IN (188715,189985);
++DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_emerald_drake_touch_the_nightmare';
++DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (49346,49460,49464);
++UPDATE `creature_template` SET `AIName`='',`ScriptName`='' WHERE `entry`=28239;
++DELETE FROM `creature` WHERE `id`=28183;
++DELETE FROM `creature_addon` WHERE `guid` BETWEEN 100227 AND 100234;
++-- end remove
++
++UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry`=30879;
++UPDATE `creature_template` SET `IconName`='',`ScriptName`='npc_oculus_mount' WHERE `entry` IN (27692,27755,27756);
++UPDATE `creature_template` SET `InhabitType`=5,`ScriptName`='npc_planar_anomaly' WHERE `entry`=30879;
++UPDATE `creature_template_addon` SET `auras`='50325' WHERE `entry` IN (27692,27755);
++UPDATE `creature_template_addon` SET `auras`='50248 50325' WHERE `entry`=27756;
++UPDATE `creature_template` SET `spell2`=50240,`spell3`=50253,`spell4`=0 WHERE `entry`=27756;
++
++UPDATE `creature_template` SET `mingold`=7666,`maxgold`=12776 WHERE `entry` IN(27633,27635,27636,27641, 30901,30902,30904,30905,30915,30916);
++UPDATE `creature_template` SET `mingold`=40000,`maxgold`=60000,`mechanic_immune_mask`=646676351 WHERE `entry` IN(27447,27654,27655,27656);
++UPDATE `creature_template` SET `mingold`=120000,`maxgold`=180000,`mechanic_immune_mask`=646676351 WHERE `entry` IN(31558,31559,31560,31561);
++
++DELETE FROM `spell_script_names` WHERE `spell_id` IN(49838,49840,50240,49592);
++INSERT INTO `spell_script_names` VALUES
++(49840,'spell_amber_drake_shock_lance'),
++(49838,'spell_amber_drake_stop_time'),
++(50240,'spell_ruby_drake_evasive_maneuvers'),
++(49592,'spell_amber_drake_temporal_rift');
++
++DELETE FROM `spell_proc_event` WHERE `entry`=50240;
++INSERT INTO `spell_proc_event` (`entry`,`procEx`,`CustomChance`)VALUES
++(50240,4,100);
++
++DELETE FROM `creature_addon` WHERE `guid` IN (101924,101933,101922,101974,102064,101967);
++DELETE FROM `creature_template_addon` WHERE `entry` IN (27641,30905,28153,30917);
++INSERT INTO `creature_template_addon` (`entry`,`auras`) VALUES
++(27641,'50088'),
++(30905,'50088'),
++(28153,'44604'),
++(30917,'44604');
++
++-- SAI
++UPDATE `creature_template` SET `AIName`='SmartAI',`ScriptName`='' WHERE `entry` IN (27636,27633,27635,27638,27640,28153,27639,28276,27642,27644,27645,27650,27651,27653,27647,27648);
++DELETE FROM `creature_ai_scripts` WHERE `creature_id` IN (27636,27633,27635,27638,27641,27640,28153,27639,28276,27642,27644,27645,27650,27651,27653,27647,27648);
++DELETE FROM `smart_scripts` WHERE `entryorguid` IN (27636,27633,27635,27638,27640,28153,27639,28276,27642,27644,27645,27650,27651,27653,27647,27648);
++INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
++(27636,0,0,0,0,0,100,2,2000,4000,2000,4000,11,50705,0,0,0,0,0,2,0,0,0,0,0,0,0,'Azure Ley-Whelp - IC - cast Arcane Bolt'),
++(27636,0,1,0,0,0,100,4,2000,4000,2000,4000,11,59210,0,0,0,0,0,2,0,0,0,0,0,0,0,'Azure Ley-Whelp - IC - cast Arcane Bolt H'),
++
++(27633,0,0,0,0,0,100,0,3000,5000,6000,8000,11,50573,0,0,0,0,0,2,0,0,0,0,0,0,0,'Azure Inquisitor - IC - cast Arcane Cleave'),
++(27633,0,1,0,0,0,100,0,9000,10000,15000,20000,11,50690,0,0,0,0,0,5,0,0,0,0,0,0,0,'Azure Inquisitor - IC - cast Immobilizing Field'),
++(27633,0,2,0,9,0,100,2,5,30,3000,5000,11,51454,0,0,0,0,0,6,0,0,0,0,0,0,0,'Azure Inquisitor - IC - cast Throw'),
++(27633,0,3,0,9,0,100,4,5,30,3000,5000,11,59209,0,0,0,0,0,6,0,0,0,0,0,0,0,'Azure Inquisitor - IC - cast Throw H'),
++
++(27635,0,0,0,0,0,100,2,3000,5000,12000,14000,11,50702,0,0,0,0,0,1,0,0,0,0,0,0,0,'Azure Spellbinder - IC - cast Arcane Volley '),
++(27635,0,1,0,0,0,100,4,3000,5000,12000,14000,11,59212,0,0,0,0,0,1,0,0,0,0,0,0,0,'Azure Spellbinder - IC - cast Arcane Volley H'),
++(27635,0,2,0,0,0,100,2,7000,9000,15000,20000,11,50566,0,0,0,0,0,5,0,0,0,0,0,0,0,'Azure Spellbinder - IC - cast Mind Warp'),
++(27635,0,3,0,0,0,100,4,7000,9000,15000,20000,11,38047,0,0,0,0,0,5,0,0,0,0,0,0,0,'Azure Spellbinder - IC - cast Mind Warp H'),
++(27635,0,4,0,0,0,100,0,10000,13000,20000,25000,11,50572,0,0,0,0,0,5,0,0,0,0,0,0,0,'Azure Spellbinder - IC - cast Power Sap'),
++
++(27638,0,0,0,0,0,100,2,0,5000,6000,8000,11,49549,0,0,0,0,0,2,0,0,0,0,0,0,0,'Azure Ring Guardian - IC - cast Ice Beam'),
++(27638,0,1,0,0,0,100,4,0,5000,6000,8000,11,59211,0,0,0,0,0,2,0,0,0,0,0,0,0,'Azure Ring Guardian - IC - cast Ice Beam H'),
++
++(27640,0,0,0,23,0,100,2,50717,0,0,0,11,50717,0,0,0,0,0,1,0,0,0,0,0,0,0,'Ring-Lord Conjurer - On missing Aura: Charged Skin - cast Charged Skin'),
++(27640,0,1,0,23,0,100,4,59276,0,0,0,11,59276,0,0,0,0,0,1,0,0,0,0,0,0,0,'Ring-Lord Conjurer - On missing Aura: Charged Skin H - cast Charged Skin H'),
++(27640,0,2,0,0,0,100,0,4000,6000,13000,15000,11,50719,0,0,0,0,0,1,0,0,0,0,0,0,0,'Ring-Lord Conjurer - IC - cast Conjure Snowflake'),
++-- may implement beam to misc Centrifuge Construct
++
++(28153,0,0,0,0,0,100,2,0,0,0,0,11,50721,0,0,0,0,0,5,0,0,0,0,0,0,0,'Snowflake - IC - cast Frostbolt'),
++(28153,0,1,0,0,0,100,4,0,0,0,0,11,59280,0,0,0,0,0,5,0,0,0,0,0,0,0,'Snowflake - IC - cast Frostbolt H'),
++
++(27639,0,0,0,0,0,100,2,5000,7000,20000,25000,11,50715,0,0,0,0,0,5,0,0,0,0,0,0,0,'Ring-Lord Sorceress - IC - cast Blizzard'),
++(27639,0,1,0,0,0,100,4,5000,7000,20000,25000,11,59278,0,0,0,0,0,5,0,0,0,0,0,0,0,'Ring-Lord Sorceress - IC - cast Blizzard H'),
++(27639,0,2,0,0,0,100,2,2000,4000,8000,10000,11,16102,0,0,0,0,0,5,0,0,0,0,0,0,0,'Ring-Lord Sorceress - IC - cast Flamestrike'),
++(27639,0,3,0,0,0,100,4,2000,4000,8000,10000,11,61402,0,0,0,0,0,5,0,0,0,0,0,0,0,'Ring-Lord Sorceress - IC - cast Flamestrike H'),
++-- may implement beam to misc Centrifuge Construct
++
++(28276,0,0,0,0,0,100,2,2000,4000,2000,4000,11,50705,0,0,0,0,0,2,0,0,0,0,0,0,0,'Greater Ley-Whelp - IC - cast Arcane Bolt'),
++(28276,0,1,0,0,0,100,4,2000,4000,2000,4000,11,59210,0,0,0,0,0,2,0,0,0,0,0,0,0,'Greater Ley-Whelp - IC - cast Arcane Bolt H'),
++
++-- Mage-Lord Urom Adds
++(27642,0,0,0,9,0,100,0,8,25,6000,8000,11,32323,0,0,0,0,0,6,0,0,0,0,0,0,0,'Phantasmal Mammoth - IC - cast Charge'),
++(27642,0,1,0,0,0,100,0,4000,6000,10000,12000,11,51253,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Mammoth - IC - cast Trample'),
++
++(27644,0,0,0,0,0,100,2,3000,6000,12000,14000,11,50728,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Wolf - IC - cast Furious Howl'),
++(27644,0,1,0,0,0,100,4,3000,6000,12000,14000,11,59274,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Wolf - IC - cast Furious Howl H'),
++(27644,0,2,0,0,0,100,2,5000,8000,14000,17000,11,50729,0,0,0,0,0,2,0,0,0,0,0,0,0,'Phantasmal Wolf - IC - cast Carnivorous Bite'),
++(27644,0,3,0,0,0,100,4,5000,8000,14000,17000,11,59269,0,0,0,0,0,2,0,0,0,0,0,0,0,'Phantasmal Wolf - IC - cast Carnivorous Bite H'),
++
++(27645,0,0,0,0,0,100,2,6000,8000,10000,12000,11,59220,0,0,0,0,0,5,0,0,0,0,0,0,0,'Phantasmal Cloudscraper - IC - cast Chain Lightning'),
++(27645,0,1,0,0,0,100,4,6000,8000,10000,12000,11,15588,0,0,0,0,0,5,0,0,0,0,0,0,0,'Phantasmal Cloudscraper - IC - cast Chain Lightning H'),
++(27645,0,2,0,0,0,100,2,2000,4000,12000,14000,11,15588,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Cloudscraper - IC - cast Thunderclap'),
++(27645,0,3,0,0,0,100,4,2000,4000,12000,14000,11,59217,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Cloudscraper - IC - cast Thunderclap H'),
++
++(27650,0,0,0,4,0,100,2,0,0,0,0,11,25020,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Air - On Aggro - cast Lightning Shield'),
++(27650,0,1,0,4,0,100,4,0,0,0,0,11,20545,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Air - On Aggro - cast Lightning Shield H'),
++
++(27651,0,0,0,0,0,100,2,3000,5000,5000,8000,11,50744,0,0,0,0,0,5,0,0,0,0,0,0,0,'Phantasmal Fire - IC - cast Blaze'),
++(27651,0,1,0,0,0,100,4,3000,5000,5000,8000,11,59225,0,0,0,0,0,5,0,0,0,0,0,0,0,'Phantasmal Fire - IC - cast Blaze H'),
++
++(27653,0,0,0,0,0,100,2,3000,5000,7000,9000,11,37924,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Water - IC - cast Water Bolt Volley'),
++(27653,0,1,0,0,0,100,4,3000,5000,7000,9000,11,59266,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Water - IC - cast Water Bolt Volley H'),
++
++(27647,0,0,0,0,0,100,0,2000,5000,7000,9000,11,50731,0,0,0,0,0,5,0,0,0,0,0,0,0,'Phantasmal Ogre - IC - cast Mace Smash'),
++(27647,0,1,0,4,0,100,0,0,0,0,0,11,50730,0,0,0,0,0,1,0,0,0,0,0,0,0,'Phantasmal Ogre - On Aggro - cast Bloodlust'),
++
++(27648,0,0,0,0,0,100,2,3000,5000,8000,10000,11,50732,0,0,0,0,0,5,0,0,0,0,0,0,0,'Phantasmal Naga - IC - cast Water Tomb'),
++(27648,0,1,0,0,0,100,4,3000,5000,8000,10000,11,59261,0,0,0,0,0,5,0,0,0,0,0,0,0,'Phantasmal Naga - IC - cast Water Tomb H'),
++(27648,0,2,0,0,0,100,0,4000,6000,6000,8000,11,49711,0,0,0,0,0,5,0,0,0,0,0,0,0,'Phantasmal Naga - IC - cast Hooked Net');
++
++-- skinnloot
++UPDATE `creature_template` SET `skinloot`=70210 WHERE `entry` IN (27636,27633,27635,27638,28276, 30902,30901,30904,30903,30991);
++UPDATE `creature_template` SET `skinloot`=29730,`type_flags`=`type_flags`|32768 WHERE `entry` IN (27641, 30905);
++UPDATE `creature_template` SET `skinloot`=70211 WHERE `entry` IN (27642,27644,27645, 30909,30914,30907);
++
++-- Conditions
++DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=17 AND `SourceEntry` IN (50232,50328,50341,49840,49592);
++DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (61407,62136,54069,56251,51024,50087);
++INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionValue1`,`ConditionValue2`) VALUES
++-- Searing Wrath
++(17,50232,1,19,27638,0),
++(17,50232,2,19,27656,0),
++(17,50232,3,19,28276,0),
++-- Leeching Poison
++(17,50328,1,19,27638,0),
++(17,50328,2,19,27656,0),
++(17,50328,3,19,28276,0),
++-- Touch the Nightmare
++(17,50341,1,19,27638,0),
++(17,50341,2,19,27656,0),
++(17,50341,3,19,28276,0),
++-- Shock Lance
++(17,49840,1,19,27638,0),
++(17,49840,2,19,27656,0),
++(17,49840,3,19,28276,0),
++-- Temporal Rift
++(17,49592,1,19,27638,0),
++(17,49592,2,19,27656,0),
++(17,49592,3,19,28276,0),
++
++(13,61407,0,18,1,28183),
++(13,62136,0,18,1,28183),
++(13,54069,0,18,1,28183),
++(13,56251,0,18,1,28183),
++(13,51024,0,18,1,28239),
++
++(13,50087,0,18,1,27641);
++
++DELETE FROM creature_loot_template WHERE entry IN(30901, 30902, 30904, 30905, 30906, 30907, 30908, 30909, 30910, 30911, 30912, 30913, 30914, 30915, 30916);
++INSERT INTO creature_loot_template VALUES
++(30902, 33631, 73, 1, 0, 1, 1),
++(30902, 33632, 17, 1, 0, 1, 1),
++(30902, 37366, 1, 1, 0, 1, 1),
++(30902, 37365, 1, 1, 0, 1, 1),
++(30902, 37364, 1, 1, 0, 1, 1),
++(30902, 43297, 0.1, 1, 0, 1, 1),
++(30902, 45912, 0.1, 1, 0, 1, 1),
++(30901, 33470, 33, 1, 0, 1, 7),
++(30901, 43852, 19, 1, 0, 1, 1),
++(30901, 33454, 8, 1, 0, 1, 1),
++(30901, 33445, 4, 1, 0, 1, 1),
++(30901, 33447, 2, 1, 0, 1, 1),
++(30901, 33448, 2, 1, 0, 1, 1),
++(30901, 37364, 1.2, 1, 0, 1, 1),
++(30901, 37366, 1, 1, 0, 1, 1),
++(30901, 37365, 1, 1, 0, 1, 1),
++(30901, 43297, 0.1, 1, 0, 1, 1),
++(30901, 45912, 0.1, 1, 0, 1, 1),
++(30904, 33470, 31, 1, 0, 1, 7),
++(30904, 43852, 19, 1, 0, 1, 1),
++(30904, 33454, 7, 1, 0, 1, 1),
++(30904, 33445, 4, 1, 0, 1, 1),
++(30904, 33447, 2, 1, 0, 1, 1),
++(30904, 37366, 1, 1, 0, 1, 1),
++(30904, 37365, 1, 1, 0, 1, 1),
++(30904, 37364, 1, 1, 0, 1, 1),
++(30904, 43297, 0.1, 1, 0, 1, 1),
++(30904, 45912, 0.1, 1, 0, 1, 1),
++(30916, 33470, 32, 1, 0, 1, 7),
++(30916, 43852, 18, 1, 0, 1, 1),
++(30916, 33454, 8, 1, 0, 1, 1),
++(30916, 33445, 4, 1, 0, 1, 1),
++(30916, 33447, 2, 1, 0, 1, 1),
++(30916, 37366, 1, 1, 0, 1, 1),
++(30916, 37365, 1, 1, 0, 1, 1),
++(30916, 37364, 1, 1, 0, 1, 1),
++(30916, 43297, 0.1, 1, 0, 1, 1),
++(30916, 45912, 0.1, 1, 0, 1, 1),
++(30915, 33470, 33, 1, 0, 1, 7),
++(30915, 43852, 19, 1, 0, 1, 1),
++(30915, 33454, 8, 1, 0, 1, 1),
++(30915, 33445, 4, 1, 0, 1, 1),
++(30915, 33447, 2, 1, 0, 1, 1),
++(30915, 33478, 2, 1, 0, 1, 1),
++(30915, 37366, 1, 1, 0, 1, 1),
++(30915, 37365, 1, 1, 0, 1, 1),
++(30915, 37364, 1, 1, 0, 1, 1),
++(30915, 43297, 0.1, 1, 0, 1, 1),
++(30915, 45912, 0.1, 1, 0, 1, 1),
++(30905, 39209, 72, 1, 0, 1, 1),
++(30905, 39210, 17, 1, 0, 1, 1),
++(30905, 37366, 1, 1, 0, 1, 1),
++(30905, 37365, 1, 1, 0, 1, 1),
++(30905, 37364, 1, 1, 0, 1, 1),
++(30905, 43297, 0.1, 1, 0, 1, 1),
++(30905, 45912, 0.1, 1, 0, 1, 1),
++(30906, 39512, 72, 1, 0, 1, 4),
++(30906, 37700, 28, 1, 0, 1, 4),
++(30906, 39513, 17, 1, 0, 1, 4),
++(30906, 37366, 1, 1, 0, 1, 1),
++(30906, 37365, 1, 1, 0, 1, 1),
++(30906, 37364, 1, 1, 0, 1, 1),
++(30908, 39512, 69, 1, 0, 1, 4),
++(30908, 37702, 30, 1, 0, 1, 4),
++(30908, 39513, 18, 1, 0, 1, 4),
++(30908, 37366, 1.7, 1, 0, 1, 1),
++(30908, 37365, 1, 1, 0, 1, 1),
++(30908, 37364, 1, 1, 0, 1, 1),
++(30913, 39512, 72, 1, 0, 1, 4),
++(30913, 37705, 30, 1, 0, 1, 4),
++(30913, 39513, 18, 1, 0, 1, 4),
++(30913, 37366, 1, 1, 0, 1, 1),
++(30913, 37365, 1, 1, 0, 1, 1),
++(30913, 37364, 1, 1, 0, 1, 1),
++(30912, 33470, 33, 1, 0, 1, 4),
++(30912, 43852, 18, 1, 0, 1, 1),
++(30912, 33454, 7, 1, 0, 1, 1),
++(30912, 33445, 6, 1, 0, 1, 1),
++(30912, 33447, 2, 1, 0, 1, 1),
++(30912, 33764, 1.8, 1, 0, 1, 1),
++(30912, 36047, 1.1, 1, 0, 1, 1),
++(30912, 36148, 1.1, 1, 0, 1, 1),
++(30912, 37097, 1, 1, 0, 1, 1),
++(30912, 33448, 2, 1, 0, 1, 1),
++(30912, 36371, 1.3, 1, 0, 1, 1),
++(30912, 37366, 1, 1, 0, 1, 1),
++(30912, 37365, 1, 1, 0, 1, 1),
++(30912, 37364, 1, 1, 0, 1, 1),
++(30910, 17057, 27, 1, 0, 1, 1),
++(30910, 17058, 25, 1, 0, 1, 1),
++(30910, 33470, 19, 1, 0, 1, 1),
++(30910, 36781, 16, 1, 0, 1, 1),
++(30910, 43852, 12, 1, 0, 1, 1),
++(30910, 37365, 1.2, 1, 0, 1, 1),
++(30910, 33447, 2, 1, 0, 1, 1),
++(30910, 37366, 1, 1, 0, 1, 1),
++(30910, 37364, 1, 1, 0, 1, 1),
++(30911, 17057, 26, 1, 0, 1, 1),
++(30911, 17058, 25, 1, 0, 1, 1),
++(30911, 33470, 17, 1, 0, 1, 7),
++(30911, 36781, 14, 1, 0, 1, 1),
++(30911, 43853, 10, 1, 0, 1, 1),
++(30911, 37366, 1, 1, 0, 1, 1),
++(30911, 37365, 1, 1, 0, 1, 1),
++(30911, 37364, 1, 1, 0, 1, 1),
++(30914, 39211, 71, 1, 0, 1, 5),
++(30914, 43011, 46, 1, 0, 1, 1),
++(30914, 39212, 17, 1, 0, 1, 4),
++(30914, 43013, 13, 1, 0, 1, 1),
++(30914, 37366, 1, 1, 0, 1, 1),
++(30914, 37365, 1, 1, 0, 1, 1),
++(30914, 37364, 1, 1, 0, 1, 1),
++(30907, 39567, 73, 1, 0, 1, 5),
++(30907, 39568, 16, 1, 0, 1, 4),
++(30907, 37366, 1, 1, 0, 1, 1),
++(30907, 37365, 1, 1, 0, 1, 1),
++(30907, 37364, 1, 1, 0, 1, 1),
++(30909, 39562, 72, 1, 0, 1, 4),
++(30909, 34736, 49, 1, 0, 1, 1),
++(30909, 39563, 18, 1, 0, 1, 3),
++(30909, 43013, 11, 1, 0, 1, 1),
++(30909, 33422, 1, 1, 0, 1, 1),
++(30909, 37366, 1, 1, 0, 1, 1),
++(30909, 37365, 1, 1, 0, 1, 1),
++(30909, 37364, 1, 1, 0, 1, 1);
++
++DELETE FROM `script_texts` WHERE `entry` BETWEEN  -1578024 AND -1578005 OR (`npc_entry` IN (27654,27447,27655,27656));
++DELETE FROM `creature_text` WHERE `entry` IN (27654,27447,27655,27656);
++INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
++-- Drakos
++(27654,1,0,'The prisoners shall not go free. The word of Malygos is law!',14,0,0,5,0,13594,'Drakos the Interrogator - Aggro'),
++(27654,2,0,'A fitting punishment!',14,0,0,5,0,13602,'Drakos the Interrogator - Kill 1'),
++(27654,2,1,'Sentence: executed!',14,0,0,5,0,13603,'Drakos the Interrogator - Kill 2'),
++(27654,2,2,'Another casualty of war!',14,0,0,5,0,13604,'Drakos the Interrogator - Kill 3'),
++(27654,3,0,'It is too late to run!',14,0,0,5,0,13598,'Drakos the Interrogator - Pull 1'),
++(27654,3,1,'Gather ''round...',14,0,0,5,0,13599,'Drakos the Interrogator - Pull 2'),
++(27654,3,2,'None shall escape!',14,0,0,5,0,13600,'Drakos the Interrogator - Pull 3'),
++(27654,3,3,'I condemn you to death!',14,0,0,5,0,13601,'Drakos the Interrogator - Pull 4'),
++(27654,4,0,'Tremble, worms!',14,0,0,5,0,13595,'Drakos the Interrogator - Stomp 1'),
++(27654,4,1,'I will crush you!',14,0,0,5,0,13596,'Drakos the Interrogator - Stomp 2'),
++(27654,4,2,'Can you fly?',14,0,0,5,0,13597,'Drakos the Interrogator - Stomp 3'),
++(27654,5,0,'The war... goes on.',14,0,0,5,0,13605,'Drakos the Interrogator - Death'),
++-- Varos
++(27447,1,0,'There will be no mercy!',14,0,0,5,0,13649,'Varos Cloudstrider - Aggro'),
++(27447,2,0,'They are... too strong! Underestimated their... fortitude.',14,0,0,5,0,13655,'Varos Cloudstrider - Death'),
++(27447,3,0,'Blast them! Destroy them!',14,0,0,5,0,13650,'Varos Cloudstrider - Air Strike 1'),
++(27447,3,1,'Take no prisoners! Attack!',14,0,0,5,0,13651,'Varos Cloudstrider - Air Strike 2'),
++(27447,3,2,'Strike now! Obliterate them!',14,0,0,5,0,13652,'Varos Cloudstrider - Air Strike 3'),
++(27447,4,0,'You have been warned!',14,0,0,5,0,13653,'Varos Cloudstrider - Kill 1'),
++(27447,4,1,'The Oculus is ours!',14,0,0,5,0,13654,'Varos Cloudstrider - Kill 2'),
++(27447,5,0,'Intruders, your victory will be short-lived. I am Commander Varos Cloudstrider. My drakes control the skies and protect this conduit. I will see to it personnaly that the Oculus does not fall into your hands!',14,0,0,5,0,13648,'Varos Cloudstrider - Spawn'),
++-- Urom
++(27655,1,0,'Poor blind fools!',14,0,0,5,0,13638,'Mage-Lord Urom - Aggro'),
++(27655,2,0,'What do we have here... those would defy the Spell-Weaver? Those without foresight or understanding. How could I make you see? Malygos is saving the world from itself! Bah! You are hardly worth my time!',14,0,0,5,0,13635,'Mage-Lord Urom - Summon 1'),
++(27655,3,0,'Clearly my pets failed. Perhaps another demonstration is in order.',14,0,0,5,0,13636,'Mage-Lord Urom - Summon 2'),
++(27655,4,0,'Still you fight. Still you cling to misguided principles. If you survive, you''ll find me in the center ring.',14,0,0,5,0,13637,'Mage-Lord Urom - Summon 3'),
++(27655,5,0,'If only you understood!',14,0,0,5,0,13641,'Mage-Lord Urom - Kill 1'),
++(27655,5,1,'Now do you see? Do you?!',14,0,0,5,0,13642,'Mage-Lord Urom - Kill 2'),
++(27655,5,2,'Unfortunate, but necessary.',14,0,0,5,0,13643,'Mage-Lord Urom - Kill 3'),
++(27655,6,0,'A taste... just a small taste... of the Spell-Weaver''s power!',14,0,0,5,0,13639,'Mage-Lord Urom - Explotion 1'),
++(27655,6,1,'So much unstable energy... but worth the risk to destroy you!',14,0,0,5,0,13640,'Mage-Lord Urom - Explotion 2'),
++(27655,7,0,'Everything I''ve done... has been for Azeroth...',14,0,0,5,0,13644,'Mage-Lord Urom - Death'),
++-- Eregos
++(27656,1,0,'You brash interlopers are out of your element! I will ground you!',14,0,0,5,0,13623,'Ley-Guardian Eregos - Aggro'),
++(27656,2,0,'Simpletons! You cannot comprehend the forces you have set in motion. The ley line conduit will not be disrupted! Your defeat shall be absolute!',14,0,0,5,0,13622,'Ley-Guardian Eregos - Spawn'),
++(27656,3,0,'Such insolence... such arrogance... must be PUNISHED!',14,0,0,5,0,13624,'Ley-Guardian Eregos - Frenzy'),
++(27656,4,0,'It''s a long way down...',14,0,0,5,0,13628,'Ley-Guardian Eregos - Kill 1'),
++(27656,4,1,'Back to the earth with you!',14,0,0,5,0,13629,'Ley-Guardian Eregos - Kill 2'),
++(27656,4,2,'Enjoy the fall!',14,0,0,5,0,13630,'Ley-Guardian Eregos - Kill 3'),
++(27656,5,0,'Savor this small victory, foolish little creatures. You and your dragon allies have won this battle. But we will win... the Nexus War.',14,0,0,5,0,13631,'Ley-Guardian Eregos - Death'),
++(27656,6,0,'Anomalies form as Ley-Guardian Eregos shifts into the Astral Plane!',41,0,0,0,0,0,'Ley-Guardian Eregos - Astral');
++
++DELETE FROM creature_onkill_reputation WHERE creature_id IN (30902, 30901, 30904, 30915, 30916, 30905, 30903, 31558, 31559, 31560, 31561);
++INSERT INTO creature_onkill_reputation VALUES
++(30902, 1037, 1052, 7, 0, 2, 7, 0, 2, 1),
++(30901, 1037, 1052, 7, 0, 15, 7, 0, 15, 1),
++(30904, 1037, 1052, 7, 0, 15, 7, 0, 15, 1),
++(30915, 1037, 1052, 7, 0, 15, 7, 0, 15, 1),
++(30916, 1037, 1052, 7, 0, 15, 7, 0, 15, 1),
++(30905, 1037, 1052, 7, 0, 30, 7, 0, 30, 1),
++(30903, 1037, 1052, 7, 0, 15, 7, 0, 15, 1),
++(31558, 1037, 1052, 7, 0, 250, 7, 0, 250, 1),
++(31559, 1037, 1052, 7, 0, 250, 7, 0, 250, 1),
++(31560, 1037, 1052, 7, 0, 250, 7, 0, 250, 1),
++(31561, 1037, 1052, 7, 0, 250, 7, 0, 250, 1);
++
++-- 06/12/2011
++-- Achievements
++-- Voids
++DELETE FROM `disables` WHERE `sourceType`=4 AND `entry` IN (7323,7324,7325);
++DELETE FROM `achievement_criteria_data` WHERE `type`=11 AND `criteria_id` IN (7323,7324,7325);
++INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES
++(7323,11,0,0,'achievement_ruby_void'),
++(7324,11,0,0,'achievement_emerald_void'),
++(7325,11,0,0,'achievement_amber_void');
++
++-- 10/12/2011
++-- Achievements
++-- Experienced Drake Rider
++DELETE FROM `disables` WHERE `sourceType`=4 AND `entry` IN (7177,7178,7179);
++DELETE FROM `achievement_criteria_data` WHERE `type` IN (5,11) AND `criteria_id` IN (7177,7178,7179);
++INSERT INTO `achievement_criteria_data` (`criteria_id`, `type`, `value1`, `value2`, `ScriptName`) VALUES
++(7177,11,0,0,'achievement_experienced_drake_rider_amber'),
++(7178,11,0,0,'achievement_experienced_drake_rider_emerald'),
++(7179,11,0,0,'achievement_experienced_drake_rider_ruby');
++
++-- 10/12/2011
++-- Cache of the Ley-Guardian
++DELETE FROM `item_loot_template` WHERE `entry`=52676;
++INSERT INTO `item_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
++-- Gems
++(52676,36921,0,1,1,1,3),
++(52676,36933,0,1,1,1,3),
++(52676,36930,0,1,1,1,3),
++(52676,36918,0,1,1,1,3),
++(52676,36927,0,1,1,1,3),
++(52676,36924,0,1,1,1,3),
++-- Mount
++(52676,43953,5,1,0,1,1);
+\ No newline at end of file
+diff --git a/src/server/game/DungeonFinding/LFGMgr.cpp b/src/server/game/DungeonFinding/LFGMgr.cpp
+index cccb780..5f47382 100755
+--- a/src/server/game/DungeonFinding/LFGMgr.cpp
++++ b/src/server/game/DungeonFinding/LFGMgr.cpp
+@@ -1891,6 +1891,10 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
+     if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS, 1);
+ 
++    // Oculus, Cache of the Ley-Guardian (workaround)
++    if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC && player->GetMapId() == 578)
++        player->AddItem(52676, 1);
++
+     LfgReward const* reward = GetRandomDungeonReward(rDungeonId, player->getLevel());
+     if (!reward)
+         return;
+diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
+index 8bfbbcb..5df0f62 100755
+--- a/src/server/game/Entities/Unit/Unit.cpp
++++ b/src/server/game/Entities/Unit/Unit.cpp
+@@ -7872,6 +7872,13 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
+         case SPELLFAMILY_GENERIC:
+             switch (dummySpell->Id)
+             {
++                // Evasive Maneuvers
++                case 50240:
++                {
++                    RemoveAuraFromStack(50241);
++                    *handled = true;
++                    return !HasAura(50241); // drop in case of non-existing 50241
++                }
+                 // Nevermelting Ice Crystal
+                 case 71564:
+                     RemoveAuraFromStack(71564);
+@@ -8645,6 +8652,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
+                 return false;
+             break;
+         }
++        // Evasive Aura
++        case 50248:
++        {
++            if (HasAura(50240))
++                return false;
++            break;
++        }
+         // Deflection
+         case 52420:
+         {
+@@ -10000,7 +10014,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, SpellInfo const* spellInfo)
+ 
+         Unit::AuraEffectList const& magnetAuras = victim->GetAuraEffectsByType(SPELL_AURA_SPELL_MAGNET);
+         for (Unit::AuraEffectList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
+-            if (Unit* magnet = (*itr)->GetBase()->GetUnitOwner())
++            if (Unit* magnet = (*itr)->GetBase()->GetCaster())
+                 if (magnet->isAlive() && IsWithinLOSInMap(magnet))
+                 {
+                     (*itr)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
+diff --git a/src/server/game/Spells/Auras/SpellAuraEffects.cpp b/src/server/game/Spells/Auras/SpellAuraEffects.cpp
+index 6dbe9f7..388a1e2 100755
+--- a/src/server/game/Spells/Auras/SpellAuraEffects.cpp
++++ b/src/server/game/Spells/Auras/SpellAuraEffects.cpp
+@@ -6099,6 +6099,11 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster)
+             // Poison (Grobbulus)
+             case 28158:
+             case 54362:
++            // Soar
++            case 50325:
++                if (caster && caster->isInCombat())
++                    return;
++                break;
+             // Slime Pool (Dreadscale & Acidmaw)
+             case 66882:
+                 target->CastCustomSpell(triggerSpellId, SPELLVALUE_RADIUS_MOD, (int32)((((float)m_tickNumber / 60) * 0.9f + 0.1f) * 10000 * 2 / 3), NULL, true, NULL, this);
+diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
+index 7628939..79a9b0b 100755
+--- a/src/server/game/Spells/SpellEffects.cpp
++++ b/src/server/game/Spells/SpellEffects.cpp
+@@ -397,6 +397,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
+                         damage = unitTarget->CountPctFromMaxHealth(50);
+                         break;
+                     }
++                    case 50341: // Touch the Nightmare
++                    {
++                        if (effIndex == EFFECT_2)
++                            damage = unitTarget->CountPctFromMaxHealth(30);
++                        break;
++                    }
+                     case 20625: // Ritual of Doom Sacrifice
+                     case 29142: // Eyesore Blaster
+                     case 35139: // Throw Boom's Doom
+diff --git a/src/server/game/Spells/SpellInfo.cpp b/src/server/game/Spells/SpellInfo.cpp
+index ad46576..9067d74 100644
+--- a/src/server/game/Spells/SpellInfo.cpp
++++ b/src/server/game/Spells/SpellInfo.cpp
+@@ -1841,6 +1841,7 @@ AuraStateType SpellInfo::GetAuraState() const
+ 
+     switch (Id)
+     {
++        case 50241: // Evasive Charges
+         case 71465: // Divine Surge
+             return AURA_STATE_UNKNOWN22;
+         default:
+diff --git a/src/server/game/Spells/SpellMgr.cpp b/src/server/game/Spells/SpellMgr.cpp
+index 272e5c8..695990f 100755
+--- a/src/server/game/Spells/SpellMgr.cpp
++++ b/src/server/game/Spells/SpellMgr.cpp
+@@ -3037,12 +3037,24 @@ void SpellMgr::LoadDbcDataCorrections()
+             case 62136: // Energize Cores
+             case 54069: // Energize Cores
+             case 56251: // Energize Cores
++                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENTRY;
+                 break;
+             case 50785: // Energize Cores
+             case 59372: // Energize Cores
+                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENEMY;
+                 break;
++            case 49346: // Emerald Drake Saddle
++            case 49460: // Amber Drake Saddle
++            case 49464: // Ruby Drake Saddle
++                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
++                spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ANY;
++                break;
++            case 66667: // Gear Scaling
++                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
++                spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
++                spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ANY;
++                break;
+             case 8494: // Mana Shield (rank 2)
+                 // because of bug in dbc
+                 spellInfo->procChance = 0;
+diff --git a/src/server/scripts/Northrend/Nexus/Oculus/boss_drakos.cpp b/src/server/scripts/Northrend/Nexus/Oculus/boss_drakos.cpp
+index bb75b78..9e7b8a9 100644
+--- a/src/server/scripts/Northrend/Nexus/Oculus/boss_drakos.cpp
++++ b/src/server/scripts/Northrend/Nexus/Oculus/boss_drakos.cpp
+@@ -1,52 +1,45 @@
+ /*
+  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+- *
+- * This program is free software; you can redistribute it and/or modify it
+- * under the terms of the GNU General Public License as published by the
+- * Free Software Foundation; either version 2 of the License, or (at your
+- * option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful, but WITHOUT
+- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+- * more details.
+- *
+- * You should have received a copy of the GNU General Public License along
+- * with this program. If not, see <http://www.gnu.org/licenses/>.
+- */
++*
++* This program is free software; you can redistribute it and/or modify it
++* under the terms of the GNU General Public License as published by the
++* Free Software Foundation; either version 2 of the License, or (at your
++* option) any later version.
++*
++* This program is distributed in the hope that it will be useful, but WITHOUT
++* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++* more details.
++*
++* You should have received a copy of the GNU General Public License along
++* with this program. If not, see <http://www.gnu.org/licenses/>.
++*/
+ 
+ #include "ScriptPCH.h"
+ #include "oculus.h"
+ 
+ enum Spells
+ {
+-    SPELL_MAGIC_PULL                              = 51336,
+-    SPELL_THUNDERING_STOMP                        = 50774,
+-    SPELL_UNSTABLE_SPHERE_PASSIVE                 = 50756,
+-    SPELL_UNSTABLE_SPHERE_PULSE                   = 50757,
+-    SPELL_UNSTABLE_SPHERE_TIMER                   = 50758,
+-    NPC_UNSTABLE_SPHERE                           = 28166,
++    SPELL_MAGIC_PULL                = 51336,
++    SPELL_THUNDERING_STOMP          = 50774,
++    SPELL_UNSTABLE_SPHERE_PASSIVE   = 50756,
++    SPELL_UNSTABLE_SPHERE_PULSE     = 50757,
++    SPELL_UNSTABLE_SPHERE_TIMER     = 50758,
++    NPC_UNSTABLE_SPHERE             = 28166
+ };
+ 
+ enum Yells
+ {
+-    SAY_AGGRO                                     = -1578005,
+-    SAY_KILL_1                                    = -1578006,
+-    SAY_KILL_2                                    = -1578007,
+-    SAY_KILL_3                                    = -1578008,
+-    SAY_DEATH                                     = -1578009,
+-    SAY_PULL_1                                    = -1578010,
+-    SAY_PULL_2                                    = -1578011,
+-    SAY_PULL_3                                    = -1578012,
+-    SAY_PULL_4                                    = -1578013,
+-    SAY_STOMP_1                                   = -1578014,
+-    SAY_STOMP_2                                   = -1578015,
+-    SAY_STOMP_3                                   = -1578016
++    SAY_AGGRO      = 1,
++    SAY_KILL       = 2,
++    SAY_PULL       = 3,
++    SAY_STOMP      = 4,
++    SAY_DEATH      = 5
+ };
+ 
+ enum DrakosAchievement
+ {
+-    ACHIEV_TIMED_START_EVENT                      = 18153,
++    ACHIEV_TIMED_START_EVENT = 18153
+ };
+ 
+ enum DrakosEvents
+@@ -58,141 +51,141 @@ enum DrakosEvents
+ 
+ class boss_drakos : public CreatureScript
+ {
+-public:
+-    boss_drakos() : CreatureScript("boss_drakos") { }
++    public:
++        boss_drakos() : CreatureScript("boss_drakos") { }
+ 
+-    CreatureAI* GetAI(Creature* creature) const
+-    {
+-        return new boss_drakosAI (creature);
+-    }
+-
+-    struct boss_drakosAI : public BossAI
+-    {
+-        boss_drakosAI(Creature* creature) : BossAI(creature, DATA_DRAKOS_EVENT) {}
+-
+-        void Reset()
++        struct boss_drakosAI : public BossAI
+         {
+-            _Reset();
++            boss_drakosAI(Creature* creature) : BossAI(creature, DATA_DRAKOS_EVENT) {}
+ 
+-            events.ScheduleEvent(EVENT_MAGIC_PULL, 15000);
+-            events.ScheduleEvent(EVENT_STOMP, 17000);
+-            events.ScheduleEvent(EVENT_BOMB_SUMMON, 2000);
++            void Reset()
++            {
++                _Reset();
+ 
+-            postPull = false;
+-        }
++                events.ScheduleEvent(EVENT_MAGIC_PULL, 15000);
++                events.ScheduleEvent(EVENT_STOMP, 17000);
++                events.ScheduleEvent(EVENT_BOMB_SUMMON, 2000);
+ 
+-        void EnterCombat(Unit* /*who*/)
+-        {
+-            _EnterCombat();
+-            DoScriptText(SAY_AGGRO, me);
+-        }
++                _postPull = false;
++            }
+ 
+-        void UpdateAI(const uint32 diff)
+-        {
+-            //Return since we have no target
+-            if (!UpdateVictim())
+-                return;
++            void EnterCombat(Unit* /*who*/)
++            {
++                _EnterCombat();
++                Talk(SAY_AGGRO);
++            }
+ 
+-            events.Update(diff);
++            void UpdateAI(uint32 const diff)
++            {
++                if (!UpdateVictim())
++                    return;
+ 
+-            if (me->HasUnitState(UNIT_STATE_CASTING))
+-                return;
++                events.Update(diff);
++                _DoAggroPulse(diff);
+ 
+-            while (uint32 eventId = events.ExecuteEvent())
+-            {
+-                switch (eventId)
+-                {
+-                    case EVENT_BOMB_SUMMON:
+-                        {
+-                            Position pPosition;
+-                            me->GetPosition(&pPosition);
++                if (me->HasUnitState(UNIT_STATE_CASTING))
++                    return;
+ 
+-                            for (uint8 i = 0; i <= (postPull ? 3 : 0); i++)
++                while (uint32 eventId = events.ExecuteEvent())
++                {
++                    switch (eventId)
++                    {
++                        case EVENT_BOMB_SUMMON:
++                            Position position;
++                            me->GetPosition(&position);
++                            for (uint8 i = 0; i <= (_postPull ? 3 : 0); ++i)
+                             {
+-                                me->GetRandomNearPosition(pPosition, float(urand(0, 10)));
+-                                me->SummonCreature(NPC_UNSTABLE_SPHERE, pPosition);
++                                me->GetRandomNearPosition(position, float(urand(0, 10)));
++                                me->SummonCreature(NPC_UNSTABLE_SPHERE, position);
+                             }
+-                        }
+-                        events.ScheduleEvent(EVENT_BOMB_SUMMON, 2000);
+-                        break;
+-                    case EVENT_MAGIC_PULL:
+-                        DoCast(SPELL_MAGIC_PULL);
+-                        postPull = true;
+-                        events.ScheduleEvent(EVENT_MAGIC_PULL, 15000);
+-                        break;
+-                    case EVENT_STOMP:
+-                        DoScriptText(RAND(SAY_STOMP_1, SAY_STOMP_2, SAY_STOMP_3), me);
+-                        DoCast(SPELL_THUNDERING_STOMP);
+-                        events.ScheduleEvent(EVENT_STOMP, 17000);
+-                        break;
++                            events.ScheduleEvent(EVENT_BOMB_SUMMON, 3000);
++                            break;
++                        case EVENT_MAGIC_PULL:
++                            Talk(SAY_PULL);
++                            DoCast(SPELL_MAGIC_PULL);
++                            _postPull = true;
++                            events.ScheduleEvent(EVENT_MAGIC_PULL, 15000);
++                            break;
++                        case EVENT_STOMP:
++                            Talk(SAY_STOMP);
++                            DoCast(SPELL_THUNDERING_STOMP);
++                            events.ScheduleEvent(EVENT_STOMP, 17000);
++                            break;
++                    }
+                 }
++                DoMeleeAttackIfReady();
+             }
+ 
+-            DoMeleeAttackIfReady();
+-        }
++            void JustDied(Unit* /*killer*/)
++            {
++                _JustDied();
++                Talk(SAY_DEATH);
+ 
+-        void JustDied(Unit* /*killer*/)
+-        {
+-            _JustDied();
++                // start achievement timer (kill Eregos within 20 min)
++                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
++            }
+ 
+-            DoScriptText(SAY_DEATH, me);
++            void KilledUnit(Unit* /*victim*/)
++            {
++                Talk(SAY_KILL);
++            }
+ 
+-            // start achievement timer (kill Eregos within 20 min)
+-            instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+-        }
++        private:
++            bool _postPull;
++        };
+ 
+-        void KilledUnit(Unit* /*victim*/)
++        CreatureAI* GetAI(Creature* creature) const
+         {
+-            DoScriptText(RAND(SAY_KILL_1, SAY_KILL_2, SAY_KILL_3), me);
++            return new boss_drakosAI(creature);
+         }
+-    private:
+-        bool postPull;
+-    };
+ };
+ 
+ class npc_unstable_sphere : public CreatureScript
+ {
+-public:
+-    npc_unstable_sphere() : CreatureScript("npc_unstable_sphere") { }
+-
+-    CreatureAI* GetAI(Creature* creature) const
+-    {
+-        return new npc_unstable_sphereAI (creature);
+-    }
+-
+-    struct npc_unstable_sphereAI : public ScriptedAI
+-    {
+-        npc_unstable_sphereAI(Creature* creature) : ScriptedAI(creature) {}
++    public:
++        npc_unstable_sphere() : CreatureScript("npc_unstable_sphere") { }
+ 
+-        void Reset()
++        struct npc_unstable_sphereAI : public ScriptedAI
+         {
+-            me->SetReactState(REACT_PASSIVE);
+-            me->GetMotionMaster()->MoveRandom(40.0f);
++            npc_unstable_sphereAI(Creature* creature) : ScriptedAI(creature) {}
+ 
+-            me->AddAura(SPELL_UNSTABLE_SPHERE_PASSIVE, me);
+-            me->AddAura(SPELL_UNSTABLE_SPHERE_TIMER, me);
++            void Reset()
++            {
++                me->SetReactState(REACT_PASSIVE);
++                me->GetMotionMaster()->MoveRandom(40.0f);
+ 
+-            pulseTimer = 3000;
+-            deathTimer = 19000;
+-        }
++                me->AddAura(SPELL_UNSTABLE_SPHERE_PASSIVE, me);
++                me->AddAura(SPELL_UNSTABLE_SPHERE_TIMER, me);
+ 
+-        void UpdateAI(const uint32 diff)
+-        {
+-            if (pulseTimer <= diff)
++                _pulseTimer = 3000;
++                _deathTimer = 19000;
++            }
++
++            void UpdateAI(uint32 const diff)
+             {
+-                DoCast(SPELL_UNSTABLE_SPHERE_PULSE);
+-                pulseTimer = 3*IN_MILLISECONDS;
+-            } else pulseTimer -= diff;
++                if (_pulseTimer <= diff)
++                {
++                    DoCast(SPELL_UNSTABLE_SPHERE_PULSE);
++                    _pulseTimer = 3*IN_MILLISECONDS;
++                }
++                else
++                    _pulseTimer -= diff;
+ 
+-            if (deathTimer <= diff)
+-                me->DisappearAndDie();
+-            else deathTimer -= diff;
+-        }
+-    private:
+-        uint32 pulseTimer;
+-        uint32 deathTimer;
+-    };
++                if (_deathTimer <= diff)
++                    me->DisappearAndDie();
++                else
++                    _deathTimer -= diff;
++            }
++
++        private:
++            uint32 _pulseTimer;
++            uint32 _deathTimer;
++        };
+ 
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return new npc_unstable_sphereAI(creature);
++        }
+ };
+ 
+ void AddSC_boss_drakos()
+diff --git a/src/server/scripts/Northrend/Nexus/Oculus/boss_eregos.cpp b/src/server/scripts/Northrend/Nexus/Oculus/boss_eregos.cpp
+index ab814a2..7763247 100644
+--- a/src/server/scripts/Northrend/Nexus/Oculus/boss_eregos.cpp
++++ b/src/server/scripts/Northrend/Nexus/Oculus/boss_eregos.cpp
+@@ -1,26 +1,23 @@
+ /*
+  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+- *
+- * This program is free software; you can redistribute it and/or modify it
+- * under the terms of the GNU General Public License as published by the
+- * Free Software Foundation; either version 2 of the License, or (at your
+- * option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful, but WITHOUT
+- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+- * more details.
+- *
+- * You should have received a copy of the GNU General Public License along
+- * with this program. If not, see <http://www.gnu.org/licenses/>.
+- */
++*
++* This program is free software; you can redistribute it and/or modify it
++* under the terms of the GNU General Public License as published by the
++* Free Software Foundation; either version 2 of the License, or (at your
++* option) any later version.
++*
++* This program is distributed in the hope that it will be useful, but WITHOUT
++* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++* more details.
++*
++* You should have received a copy of the GNU General Public License along
++* with this program. If not, see <http://www.gnu.org/licenses/>.
++*/
+ 
+ #include "ScriptPCH.h"
+ #include "oculus.h"
+ 
+-//Types of drake mounts: Ruby(Tank),  Amber(DPS),  Emerald(Healer)
+-//Two Repeating phases
+-
+ enum Events
+ {
+     EVENT_ARCANE_BARRAGE = 1,
+@@ -29,35 +26,47 @@ enum Events
+     EVENT_SUMMON_LEY_WHELP
+ };
+ 
+-enum Says
++enum Texts
+ {
+-    SAY_AGGRO = 0,
+-    SAY_ENRAGE = 1,
+-    SAY_DEATH = 2
++    SAY_AGGRO           = 1,
++    SAY_SPAWN           = 2,
++    SAY_FRENZY          = 3,
++    SAY_KILL            = 4,
++    SAY_DEATH           = 5,
++    EMOTE_ASTRAL_PLANE  = 6
+ };
+ 
+ enum Spells
+ {
+-    SPELL_ARCANE_BARRAGE                          = 50804,
+-    SPELL_ARCANE_VOLLEY                           = 51153,
+-    SPELL_ENRAGED_ASSAULT                         = 51170,
+-    SPELL_PLANAR_ANOMALIES                        = 57959,
+-    SPELL_PLANAR_SHIFT                            = 51162,
+-    SPELL_SUMMON_LEY_WHELP                        = 51175,
+-    SPELL_SUMMON_PLANAR_ANOMALIES                 = 57963,
+-    SPELL_PLANAR_BLAST                            = 57976
++    SPELL_ARCANE_BARRAGE            = 50804,
++    SPELL_ARCANE_BARRAGE_H          = 59381,
++    SPELL_ARCANE_VOLLEY             = 51153,
++    SPELL_ARCANE_VOLLEY_H           = 59382,
++    SPELL_ENRAGED_ASSAULT           = 51170,
++    SPELL_PLANAR_ANOMALIES          = 57959,
++    SPELL_PLANAR_SHIFT              = 51162,
++    SPELL_SUMMON_LEY_WHELP          = 51175,
++    SPELL_PLANAR_ANOMALY_AGGRO      = 57971,
++    SPELL_PLANAR_BLAST              = 57976,
++    SPELL_PLANAR_DISTORTION         = 59379,
++
++    SPELL_RUBY_DRAKE_SADDLE         = 49464,
++    SPELL_EMERALD_DRAKE_SADDLE      = 49346,
++    SPELL_AMBER_DRAKE_SADDLE        = 49460
+ };
+ 
+-enum Npcs
++enum Phases
+ {
+-    NPC_PLANAR_ANOMALY = 30879
++    PHASE_NORMAL          = 1,
++    PHASE_FIRST_PLANAR    = 2,
++    PHASE_SECOND_PLANAR   = 3
+ };
+ 
+-enum Phases
++enum AchievementData
+ {
+-    PHASE_NORMAL = 1,
+-    PHASE_FIRST_PLANAR = 2,
+-    PHASE_SECOND_PLANAR = 3
++    DATA_RUBY_VOID = 1,
++    DATA_EMERALD_VOID,
++    DATA_AMBER_VOID
+ };
+ 
+ enum Actions
+@@ -65,182 +74,240 @@ enum Actions
+     ACTION_SET_NORMAL_EVENTS = 1
+ };
+ 
+-/*Ruby Drake,
+-(npc 27756) (item 37860)
+-(summoned by spell Ruby Essence = 37860 ---> Call Amber Drake == 49462 ---> Summon 27756)
+-*/
+-enum RubyDrake
+-{
+-    NPC_RUBY_DRAKE_VEHICLE                        = 27756,
+-    SPELL_RIDE_RUBY_DRAKE_QUE                     = 49463,          //Apply Aura: Periodic Trigger, Interval: 3 seconds ---> 49464
+-    SPELL_RUBY_DRAKE_SADDLE                       = 49464,          //Allows you to ride on the back of an Amber Drake. ---> Dummy
+-    SPELL_RUBY_SEARING_WRATH                      = 50232,          //(60 yds) - Instant - Breathes a stream of fire at an enemy dragon, dealing 6800 to 9200 Fire damage and then jumping to additional dragons within 30 yards. Each jump increases the damage by 50%. Affects up to 5 total targets
+-    SPELL_RUBY_EVASIVE_AURA                       = 50248,          //Instant - Allows the Ruby Drake to generate Evasive Charges when hit by hostile attacks and spells.
+-    SPELL_RUBY_EVASIVE_MANEUVERS                  = 50240,          //Instant - 5 sec. cooldown - Allows your drake to dodge all incoming attacks and spells. Requires Evasive Charges to use. Each attack or spell dodged while this ability is active burns one Evasive Charge. Lasts 30 sec. or until all charges are exhausted.
+-    //you do not have acces to until you kill Mage-Lord Urom
+-    SPELL_RUBY_MARTYR                             = 50253          //Instant - 10 sec. cooldown - Redirect all harmful spells cast at friendly drakes to yourself for 10 sec.
+-};
+-/*Amber Drake,
+-(npc 27755)  (item 37859)
+-(summoned by spell Amber Essence = 37859 ---> Call Amber Drake == 49461 ---> Summon 27755)
+-*/
+-enum AmberDrake
+-{
+-    NPC_AMBER_DRAKE_VEHICLE                       = 27755,
+-    SPELL_RIDE_AMBER_DRAKE_QUE                    = 49459,          //Apply Aura: Periodic Trigger, Interval: 3 seconds ---> 49460
+-    SPELL_AMBER_DRAKE_SADDLE                      = 49460,          //Allows you to ride on the back of an Amber Drake. ---> Dummy
+-    SPELL_AMBER_SHOCK_LANCE                       = 49840,         //(60 yds) - Instant - Deals 4822 to 5602 Arcane damage and detonates all Shock Charges on an enemy dragon. Damage is increased by 6525 for each detonated.
+-//  SPELL_AMBER_STOP_TIME                                    //Instant - 1 min cooldown - Halts the passage of time, freezing all enemy dragons in place for 10 sec. This attack applies 5 Shock Charges to each affected target.
+-    //you do not have access to until you kill the  Mage-Lord Urom.
+-    SPELL_AMBER_TEMPORAL_RIFT                     = 49592         //(60 yds) - Channeled - Channels a temporal rift on an enemy dragon for 10 sec. While trapped in the rift, all damage done to the target is increased by 100%. In addition, for every 15, 000 damage done to a target affected by Temporal Rift, 1 Shock Charge is generated.
+-};
+-
+-/*Emerald Drake,
+-(npc 27692)  (item 37815),
+- (summoned by spell Emerald Essence = 37815 ---> Call Emerald Drake == 49345 ---> Summon 27692)
+-*/
+-enum EmeraldDrake
+-{
+-    NPC_EMERALD_DRAKE_VEHICLE                     = 27692,
+-    SPELL_RIDE_EMERALD_DRAKE_QUE                  = 49427,         //Apply Aura: Periodic Trigger, Interval: 3 seconds ---> 49346
+-    SPELL_EMERALD_DRAKE_SADDLE                    = 49346,         //Allows you to ride on the back of an Amber Drake. ---> Dummy
+-    SPELL_EMERALD_LEECHING_POISON                 = 50328,         //(60 yds) - Instant - Poisons the enemy dragon, leeching 1300 to the caster every 2 sec. for 12 sec. Stacks up to 3 times.
+-    SPELL_EMERALD_TOUCH_THE_NIGHTMARE             = 50341,         //(60 yds) - Instant - Consumes 30% of the caster's max health to inflict 25, 000 nature damage to an enemy dragon and reduce the damage it deals by 25% for 30 sec.
+-    // you do not have access to until you kill the Mage-Lord Urom
+-    SPELL_EMERALD_DREAM_FUNNEL                    = 50344         //(60 yds) - Channeled - Transfers 5% of the caster's max health to a friendly drake every second for 10 seconds as long as the caster channels.
+-};
+-
+ class boss_eregos : public CreatureScript
+ {
+-public:
+-    boss_eregos() : CreatureScript("boss_eregos") { }
++    public:
++        boss_eregos() : CreatureScript("boss_eregos") { }
+ 
+-    CreatureAI* GetAI(Creature* creature) const
+-    {
+-        return new boss_eregosAI (creature);
+-    }
++        struct boss_eregosAI : public BossAI
++        {
++            boss_eregosAI(Creature* creature) : BossAI(creature, DATA_EREGOS_EVENT) { }
+ 
+-    struct boss_eregosAI : public BossAI
+-    {
+-        boss_eregosAI(Creature* creature) : BossAI(creature, DATA_EREGOS_EVENT) { }
++            void Reset()
++            {
++                _Reset();
+ 
+-        void Reset()
+-        {
+-            _Reset();
++                _rubyVoid = true;
++                _emeraldVoid = true;
++                _amberVoid = true;
+ 
+-            phase = PHASE_NORMAL;
++                _phase = PHASE_NORMAL;
++                DoAction(ACTION_SET_NORMAL_EVENTS);
+ 
+-            DoAction(ACTION_SET_NORMAL_EVENTS);
+-        }
++                _spawntextTimer = urand (1, 60) *IN_MILLISECONDS;
++            }
+ 
+-        void EnterCombat(Unit* /*who*/)
+-        {
+-            _EnterCombat();
++            void KilledUnit(Unit* /*victim*/)
++            {
++                Talk(SAY_KILL);
++            }
+ 
+-            Talk(SAY_AGGRO);
+-        }
++            void CheckVoids()
++            {
++                Map* map = me->GetMap();
++                if (map && map->IsDungeon())
++                {
++                    Map::PlayerList const& Players = map->GetPlayers();
++                    for (Map::PlayerList::const_iterator itr = Players.begin(); itr != Players.end(); ++itr)
++                    {
++                        if (Player* player = itr->getSource())
++                        {
++                            if (player->isGameMaster())
++                                continue;
++
++                            if (player->HasAura(SPELL_RUBY_DRAKE_SADDLE))
++                                _rubyVoid = false;
++                            if (player->HasAura(SPELL_EMERALD_DRAKE_SADDLE))
++                                _emeraldVoid = false;
++                            if (player->HasAura(SPELL_AMBER_DRAKE_SADDLE))
++                                _amberVoid = false;
++                        }
++                    }
++                }
++            }
+ 
+-        void DoAction(const int32 action)
+-        {
+-            if (action != ACTION_SET_NORMAL_EVENTS)
+-                return;
++            void EnterCombat(Unit* /*who*/)
++            {
++                CheckVoids();
++                _EnterCombat();
++                Talk(SAY_AGGRO);
++            }
+ 
+-            events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3, 10) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+-            events.ScheduleEvent(EVENT_ARCANE_VOLLEY, urand(10, 25) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+-            events.ScheduleEvent(EVENT_ENRAGED_ASSAULT, urand(35, 50) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+-            events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, urand(15, 30) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+-        }
++            uint32 GetData(uint32 type)
++            {
++                switch (type)
++                {
++                    case DATA_RUBY_VOID:
++                        return _rubyVoid ? 1 : 0;
++                    case DATA_EMERALD_VOID:
++                        return _emeraldVoid ? 1 : 0;
++                    case DATA_AMBER_VOID:
++                        return _amberVoid ? 1 : 0;
++                }
+ 
+-        void JustSummoned(Creature* summon)
+-        {
+-            BossAI::JustSummoned(summon);
++                return 0;
++            }
+ 
+-            if (summon->GetEntry() != NPC_PLANAR_ANOMALY)
+-                return;
++            void DoAction(int32 const action)
++            {
++                if (action != ACTION_SET_NORMAL_EVENTS)
++                    return;
+ 
+-            summon->CombatStop(true);
+-            summon->SetReactState(REACT_PASSIVE);
+-            summon->GetMotionMaster()->MoveRandom(100.0f);
+-        }
++                events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3, 10) * IN_MILLISECONDS, 0, PHASE_NORMAL);
++                events.ScheduleEvent(EVENT_ARCANE_VOLLEY, urand(10, 25) * IN_MILLISECONDS, 0, PHASE_NORMAL);
++                events.ScheduleEvent(EVENT_ENRAGED_ASSAULT, urand(30, 45) * IN_MILLISECONDS, 0, PHASE_NORMAL);
++                events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, urand(15, 20) * IN_MILLISECONDS, 0, PHASE_NORMAL);
++            }
+ 
+-        void SummonedCreatureDespawn(Creature* summon)
+-        {
+-            if (summon->GetEntry() != NPC_PLANAR_ANOMALY)
+-                return;
++            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
++            {
++                if (!IsHeroic())
++                    return;
+ 
+-            // TO-DO: See why the spell is not casted
+-            summon->CastSpell(summon, SPELL_PLANAR_BLAST, true);
+-        }
++                if ((me->GetHealthPct() < 60.0f && me->GetHealthPct() > 20.0f && _phase < PHASE_FIRST_PLANAR)
++                    || (me->GetHealthPct() < 20.0f && _phase < PHASE_SECOND_PLANAR))
++                {
++                    events.Reset();
++                    _phase = (me->GetHealthPct() < 60.0f && me->GetHealthPct() > 20.0f) ? PHASE_FIRST_PLANAR : PHASE_SECOND_PLANAR;
+ 
+-        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+-        {
+-            if (!me->GetMap()->IsHeroic())
+-                return;
++                    // not sure about the amount, and if we should despawn previous spawns (dragon trashs)
++                    summons.DespawnAll();
+ 
+-            if ( (me->GetHealthPct() < 60.0f  && me->GetHealthPct() > 20.0f && phase < PHASE_FIRST_PLANAR)
+-                || (me->GetHealthPct() < 20.0f && phase < PHASE_SECOND_PLANAR) )
++                    DoCast(me, SPELL_PLANAR_ANOMALIES, true);
++                    DoCast(me, SPELL_PLANAR_SHIFT, true);
++                    Talk(EMOTE_ASTRAL_PLANE);
++                }
++            }
++
++            void UpdateAI(uint32 const diff)
+             {
+-                events.Reset();
+-                phase = (me->GetHealthPct() < 60.0f  && me->GetHealthPct() > 20.0f) ? PHASE_FIRST_PLANAR : PHASE_SECOND_PLANAR;
++                if (!me->isInCombat() && me->isAlive())
++                {
++                    if (_spawntextTimer <= diff)
++                    {
++                        Talk(SAY_SPAWN);
++                        _spawntextTimer = 60 *IN_MILLISECONDS;
++                    }
++                    else
++                        _spawntextTimer -= diff;
++                }
++
++                if (!UpdateVictim())
++                    return;
++
++                events.Update(diff);
++                _DoAggroPulse(diff);
+ 
+-                DoCast(SPELL_PLANAR_SHIFT);
++                if (me->HasUnitState(UNIT_STATE_CASTING))
++                    return;
+ 
+-                // not sure about the amount, and if we should despawn previous spawns (dragon trashs)
+-                summons.DespawnAll();
+-                for (uint8 i = 0; i < 6; i++)
+-                    DoCast(SPELL_PLANAR_ANOMALIES);
++                while (uint32 eventId = events.ExecuteEvent())
++                {
++                    switch (eventId)
++                    {
++                        case EVENT_ARCANE_BARRAGE:
++                            DoCastVictim(DUNGEON_MODE(SPELL_ARCANE_BARRAGE, SPELL_ARCANE_BARRAGE_H));
++                            events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3, 10) * IN_MILLISECONDS, 0, PHASE_NORMAL);
++                            break;
++                        case EVENT_ARCANE_VOLLEY:
++                            DoCastAOE(DUNGEON_MODE(SPELL_ARCANE_VOLLEY, SPELL_ARCANE_VOLLEY_H));
++                            events.ScheduleEvent(EVENT_ARCANE_VOLLEY, urand(10, 25) * IN_MILLISECONDS, 0, PHASE_NORMAL);
++                            break;
++                        case EVENT_ENRAGED_ASSAULT:
++                            Talk(SAY_FRENZY);
++                            DoCast(SPELL_ENRAGED_ASSAULT);
++                            events.ScheduleEvent(EVENT_ENRAGED_ASSAULT, urand(35, 50) * IN_MILLISECONDS, 0, PHASE_NORMAL);
++                            break;
++                        case EVENT_SUMMON_LEY_WHELP:
++                            for (uint8 i = 0; i < 3; ++i)
++                                DoCast(SPELL_SUMMON_LEY_WHELP);
++                            events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, 15*IN_MILLISECONDS, 0, PHASE_NORMAL);
++                            break;
++                    }
++                }
++
++                DoMeleeAttackIfReady();
++            }
++
++            void JustDied(Unit* /*killer*/)
++            {
++                Talk(SAY_DEATH);
++                _JustDied();
+             }
+-        }
+ 
+-        void UpdateAI(const uint32 diff)
++        private:
++            uint8 _phase;
++            bool _rubyVoid;
++            bool _emeraldVoid;
++            bool _amberVoid;
++            uint32 _spawntextTimer;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
+         {
+-            //Return since we have no target
+-            if (!UpdateVictim())
+-                return;
++            return new boss_eregosAI(creature);
++        }
++};
++
++class npc_planar_anomaly : public CreatureScript
++{
++    public:
++        npc_planar_anomaly() : CreatureScript("npc_planar_anomaly") { }
+ 
+-            events.Update(diff);
++        struct npc_planar_anomalyAI : public ScriptedAI
++        {
++            npc_planar_anomalyAI(Creature* creature) : ScriptedAI(creature)
++            {
++                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
++                me->SetDisplayId(11686);
++                me->SetFlying(true);
++
++                DoCast(me, SPELL_PLANAR_ANOMALY_AGGRO, true);
++                DoCast(me, SPELL_PLANAR_DISTORTION, true);
++                chaseTimer = 500;
++                blastTimer = 15000;
++            }
+ 
+-            if (me->HasUnitState(UNIT_STATE_CASTING))
+-                return;
++            void Reset()
++            {
++                DoZoneInCombat(me, 200.0f);
++            }
+ 
+-            while (uint32 eventId = events.ExecuteEvent())
++            void UpdateAI(uint32 const diff)
+             {
+-                switch (eventId)
++                if (!UpdateVictim())
++                    return;
++
++                if (chaseTimer <= diff)
+                 {
+-                    case EVENT_ARCANE_BARRAGE:
+-                        DoCast(me->getVictim(), SPELL_ARCANE_BARRAGE);
+-                        events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3, 10) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+-                        break;
+-                    case EVENT_ARCANE_VOLLEY:
+-                        DoCastAOE(SPELL_ARCANE_VOLLEY);
+-                        events.ScheduleEvent(EVENT_ARCANE_VOLLEY, urand(10, 25) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+-                        break;
+-                    case EVENT_ENRAGED_ASSAULT:
+-                        Talk(SAY_ENRAGE);
+-                        DoCast(SPELL_ENRAGED_ASSAULT);
+-                        events.ScheduleEvent(EVENT_ENRAGED_ASSAULT, urand(35, 50) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+-                        break;
+-                    case EVENT_SUMMON_LEY_WHELP:
+-                        for (uint8 i = 0; i < 3; i++)
+-                            DoCast(SPELL_SUMMON_LEY_WHELP);
+-                        events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, urand(15, 30) * IN_MILLISECONDS, 0, PHASE_NORMAL);
+-                        break;
++                     if (me->ToTempSummon())
++                        if (Unit* summoner = me->ToTempSummon()->GetSummoner())
++                            me->GetMotionMaster()->MoveFollow(summoner, 0.0f, 0.0f);
++
++                    chaseTimer = 20000;
++                }
++                else
++                    chaseTimer -= diff;
++
++                if (blastTimer <= diff)
++                {
++                    DoCast(SPELL_PLANAR_BLAST);
++                    me->RemoveAllAuras();
++                    blastTimer = 10000;
+                 }
++                else
++                    blastTimer -= diff;
+             }
+ 
+-            DoMeleeAttackIfReady();
+-        }
++        private:
++            uint32 chaseTimer;
++            uint32 blastTimer;
++        };
+ 
+-        void JustDied(Unit* /*killer*/)
++        CreatureAI* GetAI(Creature* creature) const
+         {
+-            Talk(SAY_DEATH);
+-
+-            _JustDied();
++            return new npc_planar_anomalyAI(creature);
+         }
+-
+-    private:
+-        uint8 phase;
+-    };
+ };
+ 
+ class spell_eregos_planar_shift : public SpellScriptLoader
+@@ -271,8 +338,54 @@ class spell_eregos_planar_shift : public SpellScriptLoader
+         }
+ };
+ 
++class achievement_ruby_void : public AchievementCriteriaScript
++{
++    public:
++        achievement_ruby_void() : AchievementCriteriaScript("achievement_ruby_void") { }
++
++        bool OnCheck(Player* /*source*/, Unit* target)
++        {
++            if (target && target->IsAIEnabled)
++                return target->GetAI()->GetData(DATA_RUBY_VOID);
++
++            return false;
++        }
++};
++
++class achievement_emerald_void : public AchievementCriteriaScript
++{
++    public:
++        achievement_emerald_void() : AchievementCriteriaScript("achievement_emerald_void") { }
++
++        bool OnCheck(Player* /*source*/, Unit* target)
++        {
++            if (target && target->IsAIEnabled)
++                return target->GetAI()->GetData(DATA_EMERALD_VOID);
++
++            return false;
++        }
++};
++
++class achievement_amber_void : public AchievementCriteriaScript
++{
++    public:
++        achievement_amber_void() : AchievementCriteriaScript("achievement_amber_void") { }
++
++        bool OnCheck(Player* /*source*/, Unit* target)
++        {
++            if (target && target->IsAIEnabled)
++                return target->GetAI()->GetData(DATA_AMBER_VOID);
++
++            return false;
++        }
++};
++
+ void AddSC_boss_eregos()
+ {
+     new boss_eregos();
++    new npc_planar_anomaly();
+     new spell_eregos_planar_shift();
++    new achievement_ruby_void();
++    new achievement_emerald_void();
++    new achievement_amber_void();
+ }
+diff --git a/src/server/scripts/Northrend/Nexus/Oculus/boss_urom.cpp b/src/server/scripts/Northrend/Nexus/Oculus/boss_urom.cpp
+index aef959a..88d5803 100644
+--- a/src/server/scripts/Northrend/Nexus/Oculus/boss_urom.cpp
++++ b/src/server/scripts/Northrend/Nexus/Oculus/boss_urom.cpp
+@@ -27,29 +27,30 @@ EndScriptData */
+ 
+ enum Spells
+ {
+-
+-    SPELL_ARCANE_SHIELD                           = 53813, //Dummy --> Channeled, shields the caster from damage.
+     SPELL_EMPOWERED_ARCANE_EXPLOSION              = 51110,
+-    SPELL_EMPOWERED_ARCANE_EXPLOSION_2            = 59377,
++    SPELL_EMPOWERED_ARCANE_EXPLOSION_H            = 59377,
+     SPELL_FROSTBOMB                               = 51103, //Urom throws a bomb, hitting its target with the highest aggro which inflict directly 650 frost damage and drops a frost zone on the ground. This zone deals 650 frost damage per second and reduce the movement speed by 35%. Lasts 1 minute.
++    SPELL_FROST_BUFFET                            = 58025,
+     SPELL_SUMMON_MENAGERIE                        = 50476, //Summons an assortment of creatures and teleports the caster to safety.
+     SPELL_SUMMON_MENAGERIE_2                      = 50495,
+     SPELL_SUMMON_MENAGERIE_3                      = 50496,
+     SPELL_TELEPORT                                = 51112, //Teleports to the center of Oculus
+     SPELL_TIME_BOMB                               = 51121, //Deals arcane damage to a random player, and after 6 seconds, deals zone damage to nearby equal to the health missing of the target afflicted by the debuff.
+-    SPELL_TIME_BOMB_2                             = 59376
++    SPELL_TIME_BOMB_H                             = 59376
+ };
+ 
+ enum Yells
+ {
+-    SAY_AGGRO_1                                   = -1578000,
+-    SAY_AGGRO_2                                   = -1578001,
+-    SAY_AGGRO_3                                   = -1578002,
+-    SAY_AGGRO_4                                   = -1578003,
+-    SAY_TELEPORT                                  = -1578004,
++    SAY_AGGRO       = 1,
++    SAY_SUMMON_1    = 2,
++    SAY_SUMMON_2    = 3,
++    SAY_SUMMON_3    = 4,
++    SAY_KILL        = 5,
++    SAY_EXPLOSION   = 6,
++    SAY_DEATH       = 7
+ };
+ 
+-enum eCreature
++enum UromCreature
+ {
+     NPC_PHANTASMAL_CLOUDSCRAPER                   = 27645,
+     NPC_PHANTASMAL_MAMMOTH                        = 27642,
+@@ -83,260 +84,293 @@ static uint32 TeleportSpells[]=
+ 
+ static int32 SayAggro[]=
+ {
+-    SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3, SAY_AGGRO_4
++    SAY_SUMMON_1, SAY_SUMMON_2, SAY_SUMMON_3, SAY_AGGRO
+ };
+ 
+ class boss_urom : public CreatureScript
+ {
+-public:
+-    boss_urom() : CreatureScript("boss_urom") { }
+-
+-    CreatureAI* GetAI(Creature* creature) const
+-    {
+-        return new boss_uromAI (creature);
+-    }
+-
+-    struct boss_uromAI : public BossAI
+-    {
+-        boss_uromAI(Creature* creature) : BossAI(creature, DATA_UROM_EVENT) {}
++    public:
++        boss_urom() : CreatureScript("boss_urom") { }
+ 
+-        void Reset()
++        struct boss_uromAI : public BossAI
+         {
+-            if (instance->GetBossState(DATA_VAROS_EVENT) != DONE)
+-                DoCast(SPELL_ARCANE_SHIELD);
+-
+-            _Reset();
+-
+-            if (instance->GetData(DATA_UROM_PLATAFORM) == 0)
++            boss_uromAI(Creature* creature) : BossAI(creature, DATA_UROM_EVENT)
+             {
+-                for (uint8 i = 0; i < 3; i++)
+-                    group[i] = 0;
++                if (instance->GetBossState(DATA_VAROS_EVENT) != DONE)
++                    DoCast(SPELL_ARCANE_SHIELD);
+             }
+ 
+-            x = 0.0f;
+-            y = 0.0f;
+-            canCast = false;
+-            canGoBack = false;
++            void Reset()
++            {
++                _Reset();
+ 
+-            me->GetMotionMaster()->MoveIdle();
++                if (instance->GetData(DATA_UROM_PLATFORM) == 0)
++                {
++                    for (uint8 i = 0; i < 3; ++i)
++                        group[i] = 0;
++                }
+ 
+-            teleportTimer = urand(30000, 35000);
+-            arcaneExplosionTimer = 9000;
+-            castArcaneExplosionTimer = 2000;
+-            frostBombTimer = urand(5000, 8000);
+-            timeBombTimer = urand(20000, 25000);
+-        }
++                x = 0.0f;
++                y = 0.0f;
++                canCast = false;
++                canGoBack = false;
+ 
+-        void EnterCombat(Unit* /*who*/)
+-        {
+-            _EnterCombat();
++                me->GetMotionMaster()->MoveIdle();
+ 
+-            SetGroups();
+-            SummonGroups();
+-            CastTeleport();
++                teleportTimer = urand(30000, 35000);
++                arcaneExplosionTimer = 9000;
++                castArcaneExplosionTimer = 2000;
++                frostBombTimer = urand(5000, 8000);
++                timeBombTimer = urand(20000, 25000);
++            }
+ 
+-            if (instance->GetData(DATA_UROM_PLATAFORM) != 3)
+-                instance->SetData(DATA_UROM_PLATAFORM, instance->GetData(DATA_UROM_PLATAFORM)+1);
+-        }
++            void EnterCombat(Unit* /*who*/)
++            {
++                _EnterCombat();
+ 
+-        void AttackStart(Unit* who)
+-        {
+-            if (!who)
+-                return;
++                SetGroups();
++                SummonGroups();
++                CastTeleport();
++
++                if (instance->GetData(DATA_UROM_PLATFORM) != 3)
++                    instance->SetData(DATA_UROM_PLATFORM, instance->GetData(DATA_UROM_PLATFORM) + 1);
++            }
+ 
+-            if (me->GetPositionZ() > 518.63f)
+-                DoStartNoMovement(who);
++            void KilledUnit(Unit* /*victim*/)
++            {
++                Talk(SAY_KILL);
++            }
+ 
+-            if (me->GetPositionZ() < 518.63f)
++            void AttackStart(Unit* who)
+             {
+-                if (me->Attack(who, true))
++                if (!who)
++                    return;
++
++                if (me->GetPositionZ() > 518.63f)
++                    DoStartNoMovement(who);
++
++                if (me->GetPositionZ() < 518.63f)
+                 {
+-                    DoScriptText(SayAggro[3], me);
++                    if (me->Attack(who, true))
++                    {
++                        DoScriptText(SayAggro[3], me);
+ 
+-                    me->SetInCombatWith(who);
+-                    who->SetInCombatWith(me);
++                        me->SetInCombatWith(who);
++                        who->SetInCombatWith(me);
+ 
+-                    me->GetMotionMaster()->MoveChase(who, 0, 0);
++                        me->GetMotionMaster()->MoveChase(who, 0, 0);
++                    }
+                 }
+             }
+-        }
+-
+-        void SetGroups()
+-        {
+-            if (!instance || instance->GetData(DATA_UROM_PLATAFORM) != 0)
+-                return;
+ 
+-            while (group[0] == group[1] || group[0] == group[2] || group[1] == group[2])
++            void SetGroups()
+             {
+-                for (uint8 i = 0; i < 3; i++)
+-                    group[i] = urand(0, 2);
++                if (!instance || instance->GetData(DATA_UROM_PLATFORM) != 0)
++                    return;
++
++                while (group[0] == group[1] || group[0] == group[2] || group[1] == group[2])
++                {
++                    for (uint8 i = 0; i < 3; ++i)
++                        group[i] = urand(0, 2);
++                }
+             }
+-        }
+ 
+-        void SetPosition(uint8 i)
+-        {
+-            switch (i)
++            void SetPosition(uint8 i)
+             {
+-                case 0:
+-                    x = me->GetPositionX() + 4;
+-                    y = me->GetPositionY() - 4;
+-                    break;
+-                case 1:
+-                    x = me->GetPositionX() + 4;
+-                    y = me->GetPositionY() + 4;
+-                    break;
+-                case 2:
+-                    x = me->GetPositionX() - 4;
+-                    y = me->GetPositionY() + 4;
+-                    break;
+-                case 3:
+-                    x = me->GetPositionX() - 4;
+-                    y = me->GetPositionY() - 4;
+-                    break;
+-                default:
+-                    break;
++                switch (i)
++                {
++                    case 0:
++                        x = me->GetPositionX() + 4;
++                        y = me->GetPositionY() - 4;
++                        break;
++                    case 1:
++                        x = me->GetPositionX() + 4;
++                        y = me->GetPositionY() + 4;
++                        break;
++                    case 2:
++                        x = me->GetPositionX() - 4;
++                        y = me->GetPositionY() + 4;
++                        break;
++                    case 3:
++                        x = me->GetPositionX() - 4;
++                        y = me->GetPositionY() - 4;
++                        break;
++                    default:
++                        break;
++                }
+             }
+-        }
+ 
+-        void SummonGroups()
+-        {
+-            if (!instance || instance->GetData(DATA_UROM_PLATAFORM) > 2)
+-                return;
++            void SummonGroups()
++            {
++                if (!instance || instance->GetData(DATA_UROM_PLATFORM) > 2)
++                    return;
++
++                for (uint8 i = 0; i < 4; ++i)
++                {
++                    SetPosition(i);
++                    me->SummonCreature(Group[group[instance->GetData(DATA_UROM_PLATFORM)]].entry[i], x, y, me->GetPositionZ(), me->GetOrientation());
++                }
++            }
+ 
+-            for (uint8 i = 0; i < 4 ; i++)
++            void CastTeleport()
+             {
+-                SetPosition(i);
+-                me->SummonCreature(Group[group[instance->GetData(DATA_UROM_PLATAFORM)]].entry[i], x, y, me->GetPositionZ(), me->GetOrientation());
++                if (!instance || instance->GetData(DATA_UROM_PLATFORM) > 2)
++                    return;
++
++                Talk(SayAggro[instance->GetData(DATA_UROM_PLATFORM)]);
++                DoCast(TeleportSpells[instance->GetData(DATA_UROM_PLATFORM)]);
+             }
+-        }
+ 
+-        void CastTeleport()
+-        {
+-            if (!instance || instance->GetData(DATA_UROM_PLATAFORM) > 2)
+-                return;
++            void UpdateAI(uint32 const diff)
++            {
++                if (!me->IsNonMeleeSpellCasted(false) && !UpdateVictim())
++                    return;
+ 
+-            DoScriptText(SayAggro[instance->GetData(DATA_UROM_PLATAFORM)], me);
+-            DoCast(TeleportSpells[instance->GetData(DATA_UROM_PLATAFORM)]);
+-        }
++                if (!instance || instance->GetData(DATA_UROM_PLATFORM) < 2)
++                    return;
+ 
+-        void UpdateAI(const uint32 uiDiff)
+-        {
+-            //Return since we have no target
+-            if (!UpdateVictim())
+-                return;
++                if (teleportTimer <= diff)
++                {
++                    me->InterruptNonMeleeSpells(false);
++                    if (frostBombTimer <= 8000)
++                        frostBombTimer += 8000;
++                    if (timeBombTimer <= 2500)
++                        timeBombTimer += 2500;
++                    Talk(SAY_EXPLOSION);
++                    me->GetMotionMaster()->MoveIdle();
++                    DoCast(SPELL_TELEPORT);
++                    teleportTimer = urand(30000, 35000);
+ 
+-            if (!instance || instance->GetData(DATA_UROM_PLATAFORM) < 2)
+-                return;
++                }
++                else
++                    teleportTimer -= diff;
+ 
+-            if (teleportTimer <= uiDiff)
+-            {
+-                me->InterruptNonMeleeSpells(false);
+-                DoScriptText(SAY_TELEPORT, me);
+-                me->GetMotionMaster()->MoveIdle();
+-                DoCast(SPELL_TELEPORT);
+-                teleportTimer = urand(30000, 35000);
++                if (canCast && !me->FindCurrentSpellBySpellId(SPELL_EMPOWERED_ARCANE_EXPLOSION))
++                {
++                    if (castArcaneExplosionTimer <= diff)
++                    {
++                        canCast = false;
++                        canGoBack = true;
++                        DoCastAOE(DUNGEON_MODE(SPELL_EMPOWERED_ARCANE_EXPLOSION, SPELL_EMPOWERED_ARCANE_EXPLOSION_H));
++                        castArcaneExplosionTimer = 2000;
++                    }
++                    else
++                        castArcaneExplosionTimer -= diff;
++                }
+ 
+-            } else teleportTimer -= uiDiff;
++                if (canGoBack)
++                {
++                    if (arcaneExplosionTimer <= diff)
++                    {
++                        Position pos;
++                        me->getVictim()->GetPosition(&pos);
++
++                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
++                        me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
++                        me->GetMotionMaster()->MoveChase(me->getVictim(), 0, 0);
++                        //me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
++
++                        canCast = false;
++                        canGoBack = false;
++                        arcaneExplosionTimer = 9000;
++                    }
++                    else
++                        arcaneExplosionTimer -= diff;
++                }
+ 
+-            if (canCast && !me->FindCurrentSpellBySpellId(SPELL_EMPOWERED_ARCANE_EXPLOSION))
+-            {
+-                if (castArcaneExplosionTimer <= uiDiff)
++                if (!me->IsNonMeleeSpellCasted(false, true, true))
+                 {
+-                    canCast = false;
+-                    canGoBack = true;
+-                    DoCastAOE(SPELL_EMPOWERED_ARCANE_EXPLOSION);
+-                    castArcaneExplosionTimer = 2000;
+-                }else castArcaneExplosionTimer -= uiDiff;
++                    if (frostBombTimer <= diff)
++                    {
++                        DoCastVictim(SPELL_FROSTBOMB);
++                        frostBombTimer = urand(7000, 15000);
++                    }
++                    else
++                        frostBombTimer -= diff;
++
++                    if (timeBombTimer <= diff)
++                    {
++                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
++                            DoCast(target, DUNGEON_MODE(SPELL_TIME_BOMB, SPELL_TIME_BOMB_H));
++
++                        timeBombTimer = urand(20000, 25000);
++                    }
++                    else
++                        timeBombTimer -= diff;
++                }
++
++                DoMeleeAttackIfReady();
+             }
+ 
+-            if (canGoBack)
++            void JustDied(Unit* /*killer*/)
+             {
+-                if (arcaneExplosionTimer <= uiDiff)
+-                {
+-                    Position pPos;
+-                    me->getVictim()->GetPosition(&pPos);
+-
+-                    me->NearTeleportTo(pPos.GetPositionX(), pPos.GetPositionY(), pPos.GetPositionZ(), pPos.GetOrientation());
+-                    me->GetMotionMaster()->MoveChase(me->getVictim(), 0, 0);
+-                    me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
++                Talk(SAY_DEATH);
++                _JustDied();
++                DoCast(me, SPELL_DEATH_SPELL, true);
++            }
+ 
+-                    canCast = false;
+-                    canGoBack = false;
+-                    arcaneExplosionTimer = 9000;
+-                } else arcaneExplosionTimer -= uiDiff;
++            void LeaveCombat()
++            {
++                me->RemoveAllAuras();
++                me->CombatStop(false);
++                me->DeleteThreatList();
+             }
+ 
+-            if (!me->IsNonMeleeSpellCasted(false, true, true))
++            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+             {
+-                if (frostBombTimer <= uiDiff)
++                switch (spell->Id)
+                 {
+-                    DoCastVictim(SPELL_FROSTBOMB);
+-                    frostBombTimer = urand(5000, 8000);
+-                } else frostBombTimer -= uiDiff;
++                    case SPELL_SUMMON_MENAGERIE:
++                        me->SetHomePosition(968.66f, 1042.53f, 527.32f, 0.077f);
++                        LeaveCombat();
++                        DoCast(SPELL_EVOCATION);
++                        break;
++                    case SPELL_SUMMON_MENAGERIE_2:
++                        me->SetHomePosition(1164.02f, 1170.85f, 527.321f, 3.66f);
++                        LeaveCombat();
++                        DoCast(SPELL_EVOCATION);
++                        break;
++                    case SPELL_SUMMON_MENAGERIE_3:
++                        me->SetHomePosition(1118.31f, 1080.377f, 508.361f, 4.25f);
++                        LeaveCombat();
++                        break;
++                    case SPELL_TELEPORT:
++                        me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); // without it the npc will fall down while is casting
++                        canCast = true;
++                        break;
++                    default:
++                        break;
++                }
++            }
+ 
+-                if (timeBombTimer <= uiDiff)
+-                {
+-                    if (Unit* unit = SelectTarget(SELECT_TARGET_RANDOM))
+-                        DoCast(unit, SPELL_TIME_BOMB);
++            void DamageDealt(Unit* victim, uint32& /*damage*/, DamageEffectType damageType)
++            {
++                if (!IsHeroic())
++                    return;
+ 
+-                    timeBombTimer = urand(20000, 25000);
+-                } else timeBombTimer -= uiDiff;
++                if (damageType == DOT)
++                    DoCast(victim, SPELL_FROST_BUFFET, true);
+             }
+ 
+-            DoMeleeAttackIfReady();
+-        }
++            private:
++                float x, y;
+ 
+-        void JustDied(Unit* /*killer*/)
+-        {
+-            _JustDied();
+-            DoCast(me, SPELL_DEATH_SPELL, true); // we cast the spell as triggered or the summon effect does not occur 
+-        }
++                bool canCast;
++                bool canGoBack;
+ 
+-        void LeaveCombat()
+-        {
+-            me->RemoveAllAuras();
+-            me->CombatStop(false);
+-            me->DeleteThreatList();
+-        }
++                uint8 group[3];
+ 
+-        void SpellHit(Unit* /*pCaster*/, const SpellInfo* pSpell)
++                uint32 teleportTimer;
++                uint32 arcaneExplosionTimer;
++                uint32 castArcaneExplosionTimer;
++                uint32 frostBombTimer;
++                uint32 timeBombTimer;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
+         {
+-            switch (pSpell->Id)
+-            {
+-                case SPELL_SUMMON_MENAGERIE:
+-                    me->SetHomePosition(968.66f, 1042.53f, 527.32f, 0.077f);
+-                    LeaveCombat();
+-                    break;
+-                case SPELL_SUMMON_MENAGERIE_2:
+-                    me->SetHomePosition(1164.02f, 1170.85f, 527.321f, 3.66f);
+-                    LeaveCombat();
+-                    break;
+-                case SPELL_SUMMON_MENAGERIE_3:
+-                    me->SetHomePosition(1118.31f, 1080.377f, 508.361f, 4.25f);
+-                    LeaveCombat();
+-                    break;
+-                case SPELL_TELEPORT:
+-                    me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); // with out it the npc will fall down while is casting
+-                    canCast = true;
+-                    break;
+-                default:
+-                    break;
+-            }
++            return new boss_uromAI(creature);
+         }
+-        private:
+-            float x, y;
+-
+-            bool canCast;
+-            bool canGoBack;
+-
+-            uint8 group[3];
+-
+-            uint32 teleportTimer;
+-            uint32 arcaneExplosionTimer;
+-            uint32 castArcaneExplosionTimer;
+-            uint32 frostBombTimer;
+-            uint32 timeBombTimer;
+-    };
+ };
+ 
+ void AddSC_boss_urom()
+diff --git a/src/server/scripts/Northrend/Nexus/Oculus/boss_varos.cpp b/src/server/scripts/Northrend/Nexus/Oculus/boss_varos.cpp
+index 8852338..7b638c9 100644
+--- a/src/server/scripts/Northrend/Nexus/Oculus/boss_varos.cpp
++++ b/src/server/scripts/Northrend/Nexus/Oculus/boss_varos.cpp
+@@ -1,19 +1,19 @@
+ /*
+  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+- *
+- * This program is free software; you can redistribute it and/or modify it
+- * under the terms of the GNU General Public License as published by the
+- * Free Software Foundation; either version 2 of the License, or (at your
+- * option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful, but WITHOUT
+- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+- * more details.
+- *
+- * You should have received a copy of the GNU General Public License along
+- * with this program. If not, see <http://www.gnu.org/licenses/>.
+- */
++*
++* This program is free software; you can redistribute it and/or modify it
++* under the terms of the GNU General Public License as published by the
++* Free Software Foundation; either version 2 of the License, or (at your
++* option) any later version.
++*
++* This program is distributed in the hope that it will be useful, but WITHOUT
++* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
++* more details.
++*
++* You should have received a copy of the GNU General Public License along
++* with this program. If not, see <http://www.gnu.org/licenses/>.
++*/
+ 
+ #include "ScriptPCH.h"
+ #include "oculus.h"
+@@ -21,25 +21,29 @@
+ 
+ enum Says
+ {
+-    SAY_AGGRO           = 0,
+-    SAY_AZURE           = 1,
+-    SAY_AZURE_EMOTE     = 2,
+-    SAY_DEATH           = 3
++    SAY_AGGRO       = 1,
++    SAY_DEATH       = 2,
++    SAY_AIR_STRIKE  = 3,
++    SAY_KILL        = 4,
++    SAY_SPAWN       = 5
+ };
+ 
+ enum Spells
+ {
+-    SPELL_ENERGIZE_CORES_VISUAL                   = 62136,
+-    SPELL_ENERGIZE_CORES                          = 50785, //Damage 5938 to 6562, effec2 Triggers 54069, effect3 Triggers 56251
+-    SPELL_CALL_AZURE_RING_CAPTAIN                 = 51002, //Effect    Send Event (12229)
+-    /*SPELL_CALL_AZURE_RING_CAPTAIN_2               = 51006, //Effect    Send Event (10665)
+-    SPELL_CALL_AZURE_RING_CAPTAIN_3               = 51007, //Effect    Send Event (18454)
+-    SPELL_CALL_AZURE_RING_CAPTAIN_4               = 51008, //Effect    Send Event (18455)*/
+-    SPELL_CALL_AMPLIFY_MAGIC                      = 51054,
+-
+-    SPELL_ICE_BEAM                                = 49549,
+-    SPELL_ARCANE_BEAM_PERIODIC                    = 51019,
+-    SPELL_SUMMON_ARCANE_BEAM                      = 51017
++    SPELL_ENERGIZE_CORES_VISUAL       = 62136,
++    SPELL_ENERGIZE_CORES              = 50785, // Damage 5938 to 6562, effec2 Triggers 54069, effect3 Triggers 56251
++    SPELL_ENERGIZE_CORES_H            = 59372,
++    SPELL_CALL_AZURE_RING_CAPTAIN     = 51002, // Effect Send Event (12229)
++    /*SPELL_CALL_AZURE_RING_CAPTAIN_2 = 51006, // Effect Send Event (10665)
++    SPELL_CALL_AZURE_RING_CAPTAIN_3   = 51007, // Effect Send Event (18454)
++    SPELL_CALL_AZURE_RING_CAPTAIN_4   = 51008, // Effect Send Event (18455)*/
++    SPELL_CALL_AMPLIFY_MAGIC          = 51054,
++    SPELL_CALL_AMPLIFY_MAGIC_H        = 59371,
++
++    SPELL_ARCANE_BEAM_PERIODIC        = 51019,
++    SPELL_SUMMON_ARCANE_BEAM          = 51017,
++    SPELL_ARCANE_BEAM_VISUAL          = 51024,
++    SPELL_CENTRIFUGE_CORE_PASSIVE     = 50798
+ };
+ 
+ enum Events
+@@ -50,107 +54,154 @@ enum Events
+     EVENT_ENERGIZE_CORES_VISUAL
+ };
+ 
+-class boss_varos : public CreatureScript
++static Position corePositions[]=
+ {
+-public:
+-    boss_varos() : CreatureScript("boss_varos") { }
++    {1305.189f, 1029.883f, 438.942f, 0.0f},
++    {1276.570f, 1026.267f, 438.942f, 0.0f},
++    {1245.383f, 1050.026f, 438.942f, 0.0f},
++    {1241.266f, 1080.340f, 438.942f, 0.0f},
++    {1264.629f, 1110.341f, 438.942f, 0.0f},
++    {1295.459f, 1114.321f, 438.942f, 0.0f},
++    {1325.323f, 1091.365f, 438.942f, 0.0f},
++    {1329.289f, 1060.288f, 438.942f, 0.0f},
++};
+ 
+-    CreatureAI* GetAI(Creature* creature) const
+-    {
+-        return new boss_varosAI (creature);
+-    }
++class boss_varos : public CreatureScript
++{
++    public:
++        boss_varos() : CreatureScript("boss_varos") { }
+ 
+-    struct boss_varosAI : public BossAI
+-    {
+-        boss_varosAI(Creature* creature) : BossAI(creature, DATA_VAROS_EVENT)
++        struct boss_varosAI : public BossAI
+         {
+-            if (instance->GetBossState(DATA_DRAKOS_EVENT) != DONE)
+-                DoCast(me, SPELL_CENTRIFUGE_SHIELD);
+-        }
++            boss_varosAI(Creature* creature) : BossAI(creature, DATA_VAROS_EVENT)
++            {
++                if (instance->GetBossState(DATA_DRAKOS_EVENT) != DONE)
++                    DoCast(me, SPELL_CENTRIFUGE_SHIELD);
++            }
+ 
+-        void Reset()
+-        {
+-            _Reset();
++            void Reset()
++            {
++                _Reset();
+ 
+-            events.ScheduleEvent(EVENT_AMPLIFY_MAGIC, urand(20, 25) * IN_MILLISECONDS);
+-            events.ScheduleEvent(EVENT_ENERGIZE_CORES_VISUAL, 5000);
+-            // not sure if this is handled by a timer or hp percentage
+-            events.ScheduleEvent(EVENT_CALL_AZURE, urand(15, 30) * IN_MILLISECONDS);
++                events.ScheduleEvent(EVENT_AMPLIFY_MAGIC, urand(20, 25) * IN_MILLISECONDS);
++                events.ScheduleEvent(EVENT_ENERGIZE_CORES_VISUAL, 5000);
++                // not sure if this is handled by a timer or hp percentage
++                events.ScheduleEvent(EVENT_CALL_AZURE, urand(15, 30) * IN_MILLISECONDS);
+ 
+-            firstCoreEnergize = false;
+-            coreEnergizeOrientation = 0.0f;
+-        }
++                energizedCore = 0; // clockwise?
+ 
+-        void EnterCombat(Unit* /*who*/)
+-        {
+-            _EnterCombat();
++                _spawntextTimer = urand (1, 60) *IN_MILLISECONDS;
++            }
+ 
+-            Talk(SAY_AGGRO);
+-        }
++            void EnterCombat(Unit* /*who*/)
++            {
++                _EnterCombat();
++                Talk(SAY_AGGRO);
++                SpawnCores();
++            }
+ 
+-        float GetCoreEnergizeOrientation()
+-        {
+-            return coreEnergizeOrientation;
+-        }
++            void JustSummoned(Creature* summon)
++            {
++                summons.Summon(summon);
++            }
+ 
+-        void UpdateAI(const uint32 diff)
+-        {
+-            //Return since we have no target
+-            if (!UpdateVictim())
+-                return;
++            float GetCoreEnergizeOrientation(bool first)
++            {
++                uint8 mod = first ? energizedCore : energizedCore + 3;
++                if (mod >= 8)
++                    mod -= 8;
+ 
+-            events.Update(diff);
++                float angle = me->GetAngle(corePositions[mod].GetPositionX(), corePositions[mod].GetPositionY());
++                angle += first ? 0.2f : -0.2f;
++                angle = MapManager::NormalizeOrientation(angle);
+ 
+-            if (me->HasUnitState(UNIT_STATE_CASTING))
+-                return;
++                return angle;
++            }
+ 
+-            while (uint32 eventId = events.ExecuteEvent())
++            void SpawnCores()
+             {
+-                switch (eventId)
++                for (uint8 i = 0; i < 8; ++i)
++                    if (Creature* core = me->SummonCreature(NPC_CENTRIFUGE_CORE, corePositions[i]))
++                    {
++                        core->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
++                        core->SetDisplayId(core->GetCreatureInfo()->Modelid2);
++                        core->AddAura(SPELL_CENTRIFUGE_CORE_PASSIVE, core);
++                    }
++            }
++
++            void UpdateAI(uint32 const diff)
++            {
++                if (!me->isInCombat() && me->isAlive())
+                 {
+-                    case EVENT_ENERGIZE_CORES:
+-                        DoCast(me, SPELL_ENERGIZE_CORES);
+-                        events.CancelEvent(EVENT_ENERGIZE_CORES);
+-                        break;
+-                    case EVENT_ENERGIZE_CORES_VISUAL:
+-                        if (!firstCoreEnergize)
+-                        {
+-                            coreEnergizeOrientation = me->GetOrientation();
+-                            firstCoreEnergize = true;
+-                        } else
+-                            coreEnergizeOrientation = MapManager::NormalizeOrientation(coreEnergizeOrientation - 2.0f);
+-
+-                        DoCast(me, SPELL_ENERGIZE_CORES_VISUAL);
+-                        events.ScheduleEvent(EVENT_ENERGIZE_CORES_VISUAL, 5000);
+-                        events.ScheduleEvent(EVENT_ENERGIZE_CORES, 4000);
+-                        break;
+-                    case EVENT_CALL_AZURE:
+-                        // not sure how blizz handles this, i cant see any pattern between the differnt spells
+-                        DoCast(me, SPELL_CALL_AZURE_RING_CAPTAIN);
+-                        Talk(SAY_AZURE);
+-                        Talk(SAY_AZURE_EMOTE);
+-                        events.ScheduleEvent(EVENT_CALL_AZURE, urand(20, 25) * IN_MILLISECONDS);
+-                        break;
+-                    case EVENT_AMPLIFY_MAGIC:
+-                        DoCast(me->getVictim(), SPELL_CALL_AMPLIFY_MAGIC);
+-                        events.ScheduleEvent(EVENT_AMPLIFY_MAGIC, urand(17, 20) * IN_MILLISECONDS);
+-                        break;
++                    if (_spawntextTimer <= diff)
++                    {
++                        Talk(SAY_SPAWN);
++                        _spawntextTimer = 60 *IN_MILLISECONDS;
++                    }
++                    else
++                        _spawntextTimer -= diff;
++                }
++
++                if (!UpdateVictim())
++                    return;
++
++                events.Update(diff);
++                _DoAggroPulse(diff);
++
++            if (me->HasUnitState(UNIT_STATE_CASTING))
++                    return;
++
++                while (uint32 eventId = events.ExecuteEvent())
++                {
++                    switch (eventId)
++                    {
++                        case EVENT_ENERGIZE_CORES:
++                            DoCast(me, DUNGEON_MODE(SPELL_ENERGIZE_CORES, SPELL_ENERGIZE_CORES_H));
++                            break;
++                        case EVENT_ENERGIZE_CORES_VISUAL:
++                            energizedCore += 2;
++                            if (energizedCore >= 8)
++                                energizedCore -= 8;
++                            DoCast(me, SPELL_ENERGIZE_CORES_VISUAL);
++                            events.ScheduleEvent(EVENT_ENERGIZE_CORES_VISUAL, 5000);
++                            events.ScheduleEvent(EVENT_ENERGIZE_CORES, 4000);
++                            break;
++                        case EVENT_CALL_AZURE:
++                            DoCast(me, SPELL_CALL_AZURE_RING_CAPTAIN);
++                            Talk(SAY_AIR_STRIKE);
++                            events.ScheduleEvent(EVENT_CALL_AZURE, urand(20, 25) * IN_MILLISECONDS);
++                            break;
++                        case EVENT_AMPLIFY_MAGIC:
++                            DoCastVictim(DUNGEON_MODE(SPELL_CALL_AMPLIFY_MAGIC, SPELL_CALL_AMPLIFY_MAGIC_H));
++                            events.ScheduleEvent(EVENT_AMPLIFY_MAGIC, urand(17, 20) * IN_MILLISECONDS);
++                            break;
++                    }
+                 }
++
++                DoMeleeAttackIfReady();
+             }
+ 
+-            DoMeleeAttackIfReady();
+-        }
++            void JustDied(Unit* /*killer*/)
++            {
++                Talk(SAY_DEATH);
++                _JustDied();
++                DoCast(me, SPELL_DEATH_SPELL, true);
++            }
++
++            void KilledUnit(Unit* /*victim*/)
++            {
++                Talk(SAY_KILL);
++            }
+ 
+-        void JustDied(Unit* /*killer*/)
++        private:
++            uint8 energizedCore;
++            uint32 _spawntextTimer;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
+         {
+-            _JustDied();
+-            Talk(SAY_DEATH);
+-            DoCast(me, SPELL_DEATH_SPELL, true); // we cast the spell as triggered or the summon effect does not occur
++            return new boss_varosAI(creature);
+         }
+-    private:
+-        bool firstCoreEnergize;
+-        float coreEnergizeOrientation;
+-    };
+ };
+ 
+ class npc_azure_ring_captain : public CreatureScript
+@@ -173,16 +224,7 @@ class npc_azure_ring_captain : public CreatureScript
+                 me->SetReactState(REACT_AGGRESSIVE);
+             }
+ 
+-            void SpellHitTarget(Unit* target, SpellInfo const* spell)
+-            {
+-                if (spell->Id == SPELL_ICE_BEAM)
+-                {
+-                    target->CastSpell(target, SPELL_SUMMON_ARCANE_BEAM, true);
+-                    me->DespawnOrUnsummon();
+-                }
+-            }
+-
+-            void UpdateAI(const uint32 /*diff*/)
++            void UpdateAI(uint32 const /*diff*/)
+             {
+                 if (!UpdateVictim())
+                     return;
+@@ -192,17 +234,22 @@ class npc_azure_ring_captain : public CreatureScript
+ 
+             void MovementInform(uint32 type, uint32 id)
+             {
+-                if (type != POINT_MOTION_TYPE ||
+-                    id != ACTION_CALL_DRAGON_EVENT)
++                if (type != POINT_MOTION_TYPE || id != ACTION_CALL_DRAGON_EVENT)
+                     return;
+ 
+                 me->GetMotionMaster()->MoveIdle();
+ 
+                 if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
+-                    DoCast(target, SPELL_ICE_BEAM);
++                {
++                    if (Creature* summoned = target->SummonCreature(28239, *target, TEMPSUMMON_TIMED_DESPAWN, 10000))
++                    {
++                        summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
++                        DoCast(summoned, SPELL_ARCANE_BEAM_VISUAL);
++                    }
++                }
+             }
+ 
+-            void DoAction(const int32 action)
++            void DoAction(int32 const action)
+             {
+                 switch (action)
+                 {
+@@ -213,6 +260,7 @@ class npc_azure_ring_captain : public CreatureScript
+                             {
+                                 if (Unit* victim = varos->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0))
+                                 {
++                                    me->DespawnOrUnsummon(20*IN_MILLISECONDS);
+                                     me->SetReactState(REACT_PASSIVE);
+                                     me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                     me->GetMotionMaster()->MovePoint(ACTION_CALL_DRAGON_EVENT, victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ() + 20.0f);
+@@ -222,7 +270,7 @@ class npc_azure_ring_captain : public CreatureScript
+                         }
+                         break;
+                 }
+-           }
++            }
+ 
+         private:
+             uint64 targetGUID;
+@@ -255,7 +303,6 @@ class spell_varos_centrifuge_shield : public SpellScriptLoader
+                 if (Unit* caster = GetCaster())
+                 {
+                     // flags taken from sniffs
+-                    // UNIT_FLAG_UNK_9 -> means passive but it is not yet implemented in core
+                     if (caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15|UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_UNK_6))
+                     {
+                         caster->ToCreature()->SetReactState(REACT_PASSIVE);
+@@ -268,7 +315,7 @@ class spell_varos_centrifuge_shield : public SpellScriptLoader
+             {
+                 if (Unit* caster = GetCaster())
+                 {
+-                    caster->ToCreature()->SetReactState(REACT_AGGRESSIVE);
++                    caster->ToCreature()->SetReactState(REACT_DEFENSIVE);
+                     caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15|UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_UNK_6);
+                 }
+             }
+@@ -304,21 +351,26 @@ class spell_varos_energize_core_area_enemy : public SpellScriptLoader
+                 if (varos->GetEntry() != NPC_VAROS)
+                     return;
+ 
+-                float orientation = CAST_AI(boss_varos::boss_varosAI, varos->AI())->GetCoreEnergizeOrientation();
++                float lborder = CAST_AI(boss_varos::boss_varosAI, varos->AI())->GetCoreEnergizeOrientation(true);
++                float rborder = CAST_AI(boss_varos::boss_varosAI, varos->AI())->GetCoreEnergizeOrientation(false);
++                std::list<Unit*> tempList;
+ 
+-                for (std::list<Unit*>::iterator itr = targetList.begin() ; itr != targetList.end();)
++                for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
+                 {
+-                    Position pos;
+-                    (*itr)->GetPosition(&pos);
+-
+                     float angle = varos->GetAngle((*itr)->GetPositionX(), (*itr)->GetPositionY());
+-                    float diff = fabs(orientation - angle);
+ 
+-                    if (diff > 1.0f)
+-                        itr = targetList.erase(itr);
+-                    else
+-                        ++itr;
++                    if (lborder < rborder)
++                    {
++                        if (angle >= lborder && angle <= rborder)
++                            continue;
++                    }
++                    else if (angle >= lborder || angle <= rborder)
++                        continue;
++
++                    tempList.push_back(*itr);
+                 }
++
++                targetList = tempList;
+             }
+ 
+             void Register()
+@@ -351,21 +403,26 @@ class spell_varos_energize_core_area_entry : public SpellScriptLoader
+                 if (varos->GetEntry() != NPC_VAROS)
+                     return;
+ 
+-                float orientation = CAST_AI(boss_varos::boss_varosAI, varos->AI())->GetCoreEnergizeOrientation();
++                float lborder = CAST_AI(boss_varos::boss_varosAI, varos->AI())->GetCoreEnergizeOrientation(true);
++                float rborder = CAST_AI(boss_varos::boss_varosAI, varos->AI())->GetCoreEnergizeOrientation(false);
++                std::list<Unit*> tempList;
+ 
+-                for (std::list<Unit*>::iterator itr = targetList.begin() ; itr != targetList.end();)
++                for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
+                 {
+-                    Position pos;
+-                    (*itr)->GetPosition(&pos);
+-
+                     float angle = varos->GetAngle((*itr)->GetPositionX(), (*itr)->GetPositionY());
+-                    float diff = fabs(orientation - angle);
+ 
+-                    if (diff > 1.0f)
+-                        itr = targetList.erase(itr);
+-                    else
+-                        ++itr;
++                    if (lborder < rborder)
++                    {
++                        if (angle >= lborder && angle <= rborder)
++                            continue;
++                    }
++                    else if (angle >= lborder || angle <= rborder)
++                        continue;
++
++                    tempList.push_back(*itr);
+                 }
++
++                targetList = tempList;
+             }
+ 
+             void Register()
+diff --git a/src/server/scripts/Northrend/Nexus/Oculus/instance_oculus.cpp b/src/server/scripts/Northrend/Nexus/Oculus/instance_oculus.cpp
+index 46498a6..ecde851 100644
+--- a/src/server/scripts/Northrend/Nexus/Oculus/instance_oculus.cpp
++++ b/src/server/scripts/Northrend/Nexus/Oculus/instance_oculus.cpp
+@@ -80,7 +80,8 @@ public:
+             {
+                 player->SendUpdateWorldState(WORLD_STATE_CENTRIFUGE_CONSTRUCT_SHOW, 1);
+                 player->SendUpdateWorldState(WORLD_STATE_CENTRIFUGE_CONSTRUCT_AMOUNT, centrifugueConstructCounter);
+-            } else
++            }
++            else
+             {
+                 player->SendUpdateWorldState(WORLD_STATE_CENTRIFUGE_CONSTRUCT_SHOW, 0);
+                 player->SendUpdateWorldState(WORLD_STATE_CENTRIFUGE_CONSTRUCT_AMOUNT, 0);
+@@ -97,7 +98,7 @@ public:
+             if (!varos)
+                 return;
+ 
+-            if (Creature* drake = varos->SummonCreature(NPC_AZURE_RING_GUARDIAN, varos->GetPositionX(), varos->GetPositionY(), varos->GetPositionZ()+40))
++            if (Creature* drake = varos->SummonCreature(NPC_AZURE_RING_GUARDIAN, varos->GetPositionX(), varos->GetPositionY(), varos->GetPositionZ() + 40))
+                 drake->AI()->DoAction(ACTION_CALL_DRAGON_EVENT);
+         }
+ 
+@@ -113,9 +114,13 @@ public:
+                     break;
+                 case NPC_UROM:
+                     uromGUID = creature->GetGUID();
++                    if (GetBossState(DATA_VAROS_EVENT) != DONE)
++                        creature->setFaction(35);
+                     break;
+                 case NPC_EREGOS:
+                     eregosGUID = creature->GetGUID();
++                    if (GetBossState(DATA_UROM_EVENT) != DONE)
++                        creature->setFaction(35);
+                     break;
+                 case NPC_CENTRIFUGE_CONSTRUCT:
+                     if (creature->isAlive())
+@@ -161,7 +166,20 @@ public:
+                     break;
+                 case DATA_VAROS_EVENT:
+                     if (state == DONE)
++                    {
+                         DoUpdateWorldState(WORLD_STATE_CENTRIFUGE_CONSTRUCT_SHOW, 0);
++                        if (Creature* urom = instance->GetCreature(uromGUID))
++                        {
++                            urom->RestoreFaction();
++                            urom->RemoveAllAuras();
++                            urom->AI()->DoCast(SPELL_EVOCATION);
++                        }
++                    }
++                    break;
++                case DATA_UROM_EVENT:
++                    if (state == DONE)
++                        if (Creature* eregos = instance->GetCreature(eregosGUID))
++                            eregos->RestoreFaction();
+                     break;
+                 case DATA_EREGOS_EVENT:
+                     if (state == DONE)
+@@ -176,7 +194,7 @@ public:
+         {
+             switch (type)
+             {
+-                case DATA_UROM_PLATAFORM:
++                case DATA_UROM_PLATFORM:
+                     platformUrom = data;
+                     break;
+             }
+@@ -186,9 +204,9 @@ public:
+         {
+             switch (type)
+             {
+-                case DATA_UROM_PLATAFORM:              return platformUrom;
++                case DATA_UROM_PLATFORM:          return platformUrom;
+                 // used by condition system
+-                case DATA_UROM_EVENT:                  return GetBossState(DATA_UROM_EVENT);
++                case DATA_UROM_EVENT:             return GetBossState(DATA_UROM_EVENT);
+             }
+ 
+             return 0;
+@@ -261,6 +279,7 @@ public:
+ 
+             OUT_LOAD_INST_DATA_COMPLETE;
+         }
++
+         private:
+             uint64 drakosGUID;
+             uint64 varosGUID;
+@@ -277,7 +296,6 @@ public:
+             std::list<uint64> gameObjectList;
+             std::list<uint64> azureDragonsList;
+     };
+-
+ };
+ 
+ void AddSC_instance_oculus()
+diff --git a/src/server/scripts/Northrend/Nexus/Oculus/oculus.cpp b/src/server/scripts/Northrend/Nexus/Oculus/oculus.cpp
+index c687aad..fff33d4 100644
+--- a/src/server/scripts/Northrend/Nexus/Oculus/oculus.cpp
++++ b/src/server/scripts/Northrend/Nexus/Oculus/oculus.cpp
+@@ -36,7 +36,7 @@ enum Drakes
+     GOSSIP_TEXTID_BELGARISTRASZ3                  = 13254,
+     GOSSIP_TEXTID_VERDISA1                        = 1,
+     GOSSIP_TEXTID_VERDISA2                        = 1,
+-    GOSSIP_TEXTID_VERDISA3                        = 1,
++    GOSSIP_TEXTID_VERDISA3                        = 13258,
+     GOSSIP_TEXTID_ETERNOS1                        = 1,
+     GOSSIP_TEXTID_ETERNOS2                        = 1,
+     GOSSIP_TEXTID_ETERNOS3                        = 13256,
+@@ -47,7 +47,10 @@ enum Drakes
+ 
+     NPC_VERDISA                                   = 27657,
+     NPC_BELGARISTRASZ                             = 27658,
+-    NPC_ETERNOS                                   = 27659
++    NPC_ETERNOS                                   = 27659,
++
++    SPELL_SHOCK_CHARGE                            = 49836,
++    SPELL_MARTYR                                  = 50253
+ };
+ 
+ enum Says
+@@ -58,126 +61,314 @@ enum Says
+ 
+ class npc_oculus_drake : public CreatureScript
+ {
+-public:
+-    npc_oculus_drake() : CreatureScript("npc_oculus_drake") { }
++    public:
++        npc_oculus_drake() : CreatureScript("npc_oculus_drake") { }
+ 
+-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+-    {
+-        player->PlayerTalkClass->ClearMenus();
+-        switch (creature->GetEntry())
++        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+         {
+-        case NPC_VERDISA: //Verdisa
+-            switch (uiAction)
++            player->PlayerTalkClass->ClearMenus();
++            switch (creature->GetEntry())
+             {
+-            case GOSSIP_ACTION_INFO_DEF + 1:
+-                if (!HAS_ESSENCE(player))
+-                {
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_VERDISA1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_VERDISA2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+-                    player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_VERDISA1, creature->GetGUID());
+-                }
+-                else
+-                {
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_VERDISA2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+-                    player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_VERDISA2, creature->GetGUID());
+-                }
+-                break;
+-            case GOSSIP_ACTION_INFO_DEF + 2:
+-            {
+-                ItemPosCountVec dest;
+-                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_EMERALD_ESSENCE, 1);
+-                if (msg == EQUIP_ERR_OK)
+-                    player->StoreNewItem(dest, ITEM_EMERALD_ESSENCE, true);
+-                player->CLOSE_GOSSIP_MENU();
+-                break;
+-            }
+-            case GOSSIP_ACTION_INFO_DEF + 3:
+-                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_VERDISA3, creature->GetGUID());
+-                break;
+-            }
+-            break;
+-        case NPC_BELGARISTRASZ: //Belgaristrasz
+-            switch (uiAction)
+-            {
+-            case GOSSIP_ACTION_INFO_DEF + 1:
+-                if (!HAS_ESSENCE(player))
++                case NPC_VERDISA:
++                    switch (action)
++                    {
++                        case GOSSIP_ACTION_INFO_DEF + 1:
++                            if (!HAS_ESSENCE(player))
++                            {
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_VERDISA1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_VERDISA2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
++                                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_VERDISA1, creature->GetGUID());
++                            }
++                            else
++                            {
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_VERDISA2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
++                                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_VERDISA2, creature->GetGUID());
++                            }
++                            break;
++                        case GOSSIP_ACTION_INFO_DEF + 2:
++                        {
++                            player->AddItem(ITEM_EMERALD_ESSENCE, 1);
++                            player->CLOSE_GOSSIP_MENU();
++                            break;
++                        }
++                        case GOSSIP_ACTION_INFO_DEF + 3:
++                            player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_VERDISA3, creature->GetGUID());
++                            break;
++                    }
++                    break;
++                case NPC_BELGARISTRASZ:
++                    switch (action)
++                    {
++                        case GOSSIP_ACTION_INFO_DEF + 1:
++                            if (!HAS_ESSENCE(player))
++                            {
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BELGARISTRASZ1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BELGARISTRASZ2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
++                                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_BELGARISTRASZ1, creature->GetGUID());
++                            }
++                            else
++                            {
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BELGARISTRASZ2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
++                                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_BELGARISTRASZ2, creature->GetGUID());
++                            }
++                            break;
++                        case GOSSIP_ACTION_INFO_DEF + 2:
++                        {
++                            player->AddItem(ITEM_RUBY_ESSENCE, 1);
++                            player->CLOSE_GOSSIP_MENU();
++                            break;
++                        }
++                        case GOSSIP_ACTION_INFO_DEF + 3:
++                            player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_BELGARISTRASZ3, creature->GetGUID());
++                            break;
++                    }
++                    break;
++                case NPC_ETERNOS:
++                    switch (action)
++                    {
++                        case GOSSIP_ACTION_INFO_DEF + 1:
++                            if (!HAS_ESSENCE(player))
++                            {
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ETERNOS1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ETERNOS2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
++                                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ETERNOS1, creature->GetGUID());
++                            }
++                            else
++                            {
++                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ETERNOS2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
++                                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ETERNOS2, creature->GetGUID());
++                            }
++                            break;
++                        case GOSSIP_ACTION_INFO_DEF + 2:
++                        {
++                            player->AddItem(ITEM_AMBER_ESSENCE, 1);
++                            player->CLOSE_GOSSIP_MENU();
++                            break;
++                        }
++                        case GOSSIP_ACTION_INFO_DEF + 3:
++                            player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ETERNOS3, creature->GetGUID());
++                            break;
++                    }
++                    break;
++            }
++
++            return true;
++        }
++
++        bool OnGossipHello(Player* player, Creature* creature)
++        {
++            if (creature->isQuestGiver())
++                player->PrepareQuestMenu(creature->GetGUID());
++
++            if (InstanceScript* instance = creature->GetInstanceScript())
++            {
++                if (instance->GetBossState(DATA_DRAKOS_EVENT) == DONE)
+                 {
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BELGARISTRASZ1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BELGARISTRASZ2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+-                    player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_BELGARISTRASZ1, creature->GetGUID());
++                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_DRAKES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
++                    player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_DRAKES, creature->GetGUID());
+                 }
+-                else
++            }
++
++            return true;
++        }
++};
++
++class npc_oculus_mount : public CreatureScript
++{
++    public:
++        npc_oculus_mount() : CreatureScript("npc_oculus_mount") { }
++
++        struct npc_oculus_mountAI : public NullCreatureAI
++        {
++            npc_oculus_mountAI(Creature* c) : NullCreatureAI(c)
++            {
++                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
++                _enterTimer = 1500;
++                _entered = false;
++            }
++
++            void PassengerBoarded(Unit* /*unit*/, int8 /*seat*/, bool apply)
++            {
++                if (!apply)
++                    me->DespawnOrUnsummon(1500);
++            }
++
++            void UpdateAI(uint32 const diff)
++            {
++                if (!_entered)
+                 {
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BELGARISTRASZ2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+-                    player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_BELGARISTRASZ2, creature->GetGUID());
++                    if (_enterTimer <= diff)
++                    {
++                        uint32 spellId = 0;
++                        _entered = true;
++
++                        switch (me->GetEntry())
++                        {
++                            case NPC_EMERALD_DRAKE:
++                                spellId = 49346;
++                                break;
++                            case NPC_AMBER_DRAKE:
++                                spellId = 49460;
++                                break;
++                            case NPC_RUBY_DRAKE:
++                                spellId = 49464;
++                                break;
++                        }
++
++                        if (!me->ToTempSummon())
++                            return;
++
++                        Unit* summoner = me->ToTempSummon()->GetSummoner();
++
++                        if (summoner && summoner->isAlive() && summoner->GetDistance(me) < 30.0f && !summoner->isInCombat())
++                        {
++                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
++                            summoner->CastSpell(me, spellId, true);
++                        }
++                        else
++                            me->DespawnOrUnsummon();
++                    }
++                    else
++                        _enterTimer -= diff;
+                 }
+-                break;
+-            case GOSSIP_ACTION_INFO_DEF + 2:
+-            {
+-                ItemPosCountVec dest;
+-                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_RUBY_ESSENCE, 1);
+-                if (msg == EQUIP_ERR_OK)
+-                    player->StoreNewItem(dest, ITEM_RUBY_ESSENCE, true);
+-                player->CLOSE_GOSSIP_MENU();
+-                break;
+-            }
+-            case GOSSIP_ACTION_INFO_DEF + 3:
+-                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_BELGARISTRASZ3, creature->GetGUID());
+-                break;
+-            }
+-            break;
+-        case NPC_ETERNOS: //Eternos
+-            switch (uiAction)
+-            {
+-            case GOSSIP_ACTION_INFO_DEF + 1:
+-                if (!HAS_ESSENCE(player))
++            }
++
++        private:
++            bool _entered;
++            uint32 _enterTimer;
++        };
++
++        CreatureAI* GetAI(Creature* creature) const
++        {
++            return new npc_oculus_mountAI(creature);
++        }
++};
++
++class spell_amber_drake_shock_lance : public SpellScriptLoader
++{
++    public:
++        spell_amber_drake_shock_lance() : SpellScriptLoader("spell_amber_drake_shock_lance") { }
++
++        class spell_amber_drake_shock_lance_SpellScript : public SpellScript
++        {
++            PrepareSpellScript(spell_amber_drake_shock_lance_SpellScript);
++
++            void RecalculateDamage()
++            {
++                if (Aura* charge = GetHitUnit()->GetAura(SPELL_SHOCK_CHARGE))
+                 {
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ETERNOS1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ETERNOS2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+-                    player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ETERNOS1, creature->GetGUID());
++                    SetHitDamage(6525 * charge->GetStackAmount() + GetHitDamage());
++                    charge->Remove();
+                 }
+-                else
++            }
++
++            void Register()
++            {
++                OnHit += SpellHitFn(spell_amber_drake_shock_lance_SpellScript::RecalculateDamage);
++            }
++        };
++
++        SpellScript* GetSpellScript() const
++        {
++            return new spell_amber_drake_shock_lance_SpellScript();
++        }
++};
++
++class IsNoValidDrake
++{
++    public:
++        bool operator() (Unit* unit)
++        {
++            if (unit->ToCreature())
++            {
++                switch (unit->ToCreature()->GetEntry())
+                 {
+-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ETERNOS2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+-                    player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ETERNOS2, creature->GetGUID());
++                    case 27638: // Azure Ring Guardian
++                    case 27656: // Ley-Guardian Eregos
++                    case 28276: // Greater Ley-Whelp
++                        return false;
++                    default:
++                        break;
+                 }
+-                break;
+-            case GOSSIP_ACTION_INFO_DEF + 2:
++            }
++            return true;
++        }
++};
++
++class spell_amber_drake_stop_time : public SpellScriptLoader
++{
++    public:
++        spell_amber_drake_stop_time() : SpellScriptLoader("spell_amber_drake_stop_time") { }
++
++        class spell_amber_drake_stop_time_SpellScript : public SpellScript
++        {
++            PrepareSpellScript(spell_amber_drake_stop_time_SpellScript);
++
++            void FilterTargets(std::list<Unit*>& unitList)
+             {
+-                ItemPosCountVec dest;
+-                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_AMBER_ESSENCE, 1);
+-                if (msg == EQUIP_ERR_OK)
+-                    player->StoreNewItem(dest, ITEM_AMBER_ESSENCE, true);
+-                player->CLOSE_GOSSIP_MENU();
+-                break;
++                unitList.remove_if(IsNoValidDrake());
+             }
+-            case GOSSIP_ACTION_INFO_DEF + 3:
+-                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ETERNOS3, creature->GetGUID());
+-                break;
++
++            void HandleStun(SpellEffIndex /*effIndex*/)
++            {
++                if (GetHitUnit())
++                    GetHitUnit()->CastCustomSpell(SPELL_SHOCK_CHARGE, SPELLVALUE_AURA_STACK, 5, GetHitUnit(), true);
+             }
+-            break;
+-        }
+ 
+-        return true;
+-    }
++            void Register()
++            {
++                OnUnitTargetSelect += SpellUnitTargetFn(spell_amber_drake_stop_time_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
++                OnEffectHitTarget += SpellEffectFn(spell_amber_drake_stop_time_SpellScript::HandleStun, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
++            }
++        };
+ 
+-    bool OnGossipHello(Player* player, Creature* creature)
+-    {
+-        if (creature->isQuestGiver())
+-            player->PrepareQuestMenu(creature->GetGUID());
++        SpellScript* GetSpellScript() const
++        {
++            return new spell_amber_drake_stop_time_SpellScript();
++        }
++};
+ 
+-        if (InstanceScript* instance = creature->GetInstanceScript())
++class spell_amber_drake_temporal_rift : public SpellScriptLoader
++{
++    public:
++        spell_amber_drake_temporal_rift() : SpellScriptLoader("spell_amber_drake_temporal_rift") { }
++
++        class spell_amber_drake_temporal_rift_AuraScript : public AuraScript
+         {
+-            if (instance->GetBossState(DATA_DRAKOS_EVENT) == DONE)
++            PrepareAuraScript(spell_amber_drake_temporal_rift_AuraScript);
++
++            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+             {
+-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_DRAKES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+-                player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_DRAKES, creature->GetGUID());
++                if (GetTarget())
++                    _targetHealth = GetTarget()->GetHealth();
++
++                _damage = 0;
+             }
+-        }
+ 
+-        return true;
+-    }
++            void HandlePeriodicTick(AuraEffect const* /*aurEff*/)
++            {
++                _damage += _targetHealth - GetTarget()->GetHealth();
++
++                for (; _damage >= 15000; _damage -= 15000)
++                    GetTarget()->CastSpell(GetTarget(), SPELL_SHOCK_CHARGE, true);
+ 
++                _targetHealth = GetTarget()->GetHealth();
++            }
++
++            void Register()
++            {
++                OnEffectApply += AuraEffectApplyFn(spell_amber_drake_temporal_rift_AuraScript::OnApply, EFFECT_2, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
++                OnEffectPeriodic += AuraEffectPeriodicFn(spell_amber_drake_temporal_rift_AuraScript::HandlePeriodicTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
++            }
++
++            uint32 _targetHealth;
++            uint32 _damage;
++        };
++
++        AuraScript* GetAuraScript() const
++        {
++            return new spell_amber_drake_temporal_rift_AuraScript();
++        }
+ };
+ 
+ class npc_image_belgaristrasz : public CreatureScript
+@@ -213,5 +404,9 @@ public:
+ void AddSC_oculus()
+ {
+     new npc_oculus_drake();
++    new npc_oculus_mount();
+     new npc_image_belgaristrasz();
++    new spell_amber_drake_shock_lance();
++    new spell_amber_drake_stop_time();
++    new spell_amber_drake_temporal_rift();
+ }
+diff --git a/src/server/scripts/Northrend/Nexus/Oculus/oculus.h b/src/server/scripts/Northrend/Nexus/Oculus/oculus.h
+index 81d1e9f..9314365 100644
+--- a/src/server/scripts/Northrend/Nexus/Oculus/oculus.h
++++ b/src/server/scripts/Northrend/Nexus/Oculus/oculus.h
+@@ -24,7 +24,7 @@ enum Data
+     DATA_VAROS_EVENT,
+     DATA_UROM_EVENT,
+     DATA_EREGOS_EVENT,
+-    DATA_UROM_PLATAFORM
++    DATA_UROM_PLATFORM
+ };
+ 
+ enum Data64
+@@ -35,7 +35,7 @@ enum Data64
+     DATA_EREGOS
+ };
+ 
+-enum Bosses
++enum Creatures
+ {
+     NPC_DRAKOS                  = 27654,
+     NPC_VAROS                   = 27447,
+@@ -44,6 +44,11 @@ enum Bosses
+ 
+     NPC_AZURE_RING_GUARDIAN     = 28236,
+     NPC_CENTRIFUGE_CONSTRUCT    = 27641,
++    NPC_EMERALD_DRAKE           = 27692,
++    NPC_AMBER_DRAKE             = 27755,
++    NPC_RUBY_DRAKE              = 27756,
++
++    NPC_CENTRIFUGE_CORE         = 28183
+ };
+ 
+ enum GameObjects
+@@ -72,6 +77,8 @@ enum OculusWorldStates
+ enum OculusSpells
+ {
+     SPELL_CENTRIFUGE_SHIELD = 50053,
++    SPELL_ARCANE_SHIELD     = 53813,
++    SPELL_EVOCATION         = 51602,
+     SPELL_DEATH_SPELL       = 50415
+ };
+ #endif
+-- 
+1.7.8.msysgit.0
+

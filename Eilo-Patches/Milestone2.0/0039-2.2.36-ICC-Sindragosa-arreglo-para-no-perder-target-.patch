@@ -1,0 +1,29 @@
+From 180344adf670e41152f95226915e2f049cb74bf1 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 12:52:38 -0500
+Subject: [PATCH 39/65] 2.2.36 ICC: Sindragosa arreglo para no perder target
+ apenas baje
+
+---
+ .../Northrend/IcecrownCitadel/boss_sindragosa.cpp  |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+index 6f638ef..e817082 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+@@ -342,7 +342,10 @@ class boss_sindragosa : public CreatureScript
+                         me->SetReactState(REACT_AGGRESSIVE);
+                         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
+                             me->GetMotionMaster()->MovementExpired();
+-                        DoStartMovement(me->getVictim());
++                        if (Unit* target = me->getVictim())
++                            DoStartMovement(target);
++                        else if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,300.0f,true))
++                            DoStartMovement(target);
+                         _isInAirPhase = false;
+                         DoCast(me, SPELL_FROST_AURA);
+                         me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_FROST_AURA, false);
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,34 @@
+From 6c9c0374857fc3e543414db3d729a1ba370aef06 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 10 Feb 2012 02:13:30 -0500
+Subject: [PATCH 24/26] 1.24 Cada pj debe tener el logro para entrar en
+ heroico
+
+---
+ src/server/game/Entities/Player/Player.cpp |   10 ++--------
+ 1 files changed, 2 insertions(+), 8 deletions(-)
+
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index 5a41b63..0c5bc33 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -18584,14 +18584,8 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
+             missingQuest = ar->quest_H;
+ 
+         uint32 missingAchievement = 0;
+-        Player* leader = this;
+-        uint64 leaderGuid = GetGroup() ? GetGroup()->GetLeaderGUID() : GetGUID();
+-        if (leaderGuid != GetGUID())
+-            leader = ObjectAccessor::FindPlayer(leaderGuid);
+-
+-        if (ar->achievement)
+-            if (!leader || !leader->GetAchievementMgr().HasAchieved(ar->achievement))
+-                missingAchievement = ar->achievement;
++        if (ar->achievement && !GetAchievementMgr().HasAchieved(ar->achievement))
++            missingAchievement = ar->achievement;
+ 
+         Difficulty target_difficulty = GetDifficulty(mapEntry->IsRaid());
+         MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(target_map, target_difficulty);
+-- 
+1.7.8.msysgit.0
+

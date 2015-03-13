@@ -1,0 +1,30 @@
+From 7040dbb764a43b0e16f6ca378f49df403766da8f Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Tue, 3 Jan 2012 18:56:16 -0500
+Subject: [PATCH 3/3] Milestone6.0
+
+---
+ WHAT_IS_INSIDE |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/WHAT_IS_INSIDE b/WHAT_IS_INSIDE
+index ce0deab..e38260f 100644
+--- a/WHAT_IS_INSIDE
++++ b/WHAT_IS_INSIDE
+@@ -25,6 +25,7 @@ Milestone4.0  Arreglos en quests, y cadenas de mision, esto incluye scripts
+               en c++ y SmartAI.
+ Milestone5.0  Traducciones, e inclusion de varios dentro de tablas y strings
+               del emulador, ya sea en c++ o en sqls.
++Milestone6.0  Customs y varios
+ 
+ 
+ ##################################
+@@ -234,3 +235,5 @@ Milestone5.0  Traducciones, e inclusion de varios dentro de tablas y strings
+ ##########
+ # Custom #
+ ##########
++6.1  - 08/10/2011: NPC recupera anillos de icc por Karlos
++6.2  - 08/12/2011: NPC subastador en dalaran por Hispano
+-- 
+1.7.8.msysgit.0
+

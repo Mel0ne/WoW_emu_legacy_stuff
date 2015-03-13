@@ -1,0 +1,37 @@
+From 8bfbdb659b5769766e764b07426ac0bc7cf3a604 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 17:39:05 -0500
+Subject: [PATCH 28/65] 2.2.25 ICC: Trash mob Nerubar Broodkeeper correccion
+ en posiciones
+
+---
+ .../2011_11_24_100_world_correcciones_icc.sql      |   16 ++++++++++++++++
+ 1 files changed, 16 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+
+diff --git a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+new file mode 100644
+index 0000000..9bf67cc
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+@@ -0,0 +1,16 @@
++-- Eilo (https://github.com/eilo)
++-- ICC trash mob
++-- Corrigiendo arañas para que se las pueda pegar
++-- Nerubar Broodkeeper http://old.wowhead.com/npc=36725
++
++-- Las dos primeras del medio
++UPDATE `creature` SET `position_z` = 35.24 WHERE `guid`=201170;
++UPDATE `creature` SET `position_z` = 35.24 WHERE `guid`=201106;
++
++-- Las dos siguientes, osea arriba de las gradas
++UPDATE `creature` SET `position_z` = 44.57 WHERE `guid`=200949;
++UPDATE `creature` SET `position_z` = 44.57 WHERE `guid`=200956;
++
++-- Las dos siguientes, llegando a marrowgar
++UPDATE `creature` SET `position_z` = 42.1 WHERE `guid`=200912;
++UPDATE `creature` SET `position_z` = 42.1 WHERE `guid`=200934;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

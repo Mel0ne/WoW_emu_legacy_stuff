@@ -1,0 +1,218 @@
+From b685d2d3374ca8b9b38de134af2ec98155a0a3a2 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 18:08:27 -0500
+Subject: [PATCH 10/26] 1.10 DynamicLoS en DalaranSewers
+
+---
+ .../game/Battlegrounds/Zones/BattlegroundDS.cpp    |   90 ++++++++++++++++---
+ .../game/Battlegrounds/Zones/BattlegroundDS.h      |   20 ++---
+ src/server/game/Entities/Player/Player.cpp         |   16 ++++
+ src/server/game/Entities/Player/Player.h           |    2 +
+ 4 files changed, 102 insertions(+), 26 deletions(-)
+
+diff --git a/src/server/game/Battlegrounds/Zones/BattlegroundDS.cpp b/src/server/game/Battlegrounds/Zones/BattlegroundDS.cpp
+index 87f4ca4..e1eb455 100755
+--- a/src/server/game/Battlegrounds/Zones/BattlegroundDS.cpp
++++ b/src/server/game/Battlegrounds/Zones/BattlegroundDS.cpp
+@@ -46,25 +46,81 @@ BattlegroundDS::~BattlegroundDS()
+ 
+ void BattlegroundDS::PostUpdateImpl(uint32 diff)
+ {
+-    if (getWaterFallTimer() < diff)
++    if (m_knockback)
+     {
+-        if (isWaterFallActive())
++        if (m_knockback <= diff)
+         {
+-            setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
+-            for (uint32 i = BG_DS_OBJECT_WATER_1; i <= BG_DS_OBJECT_WATER_2; ++i)
+-                SpawnBGObject(i, getWaterFallTimer());
+-            setWaterFallActive(false);
++            for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
++            {
++                Player *plr = ObjectAccessor::FindPlayer(itr->first);
++                if (!plr)
++                    continue;
++
++                if (plr->GetDistance2d(1214.0f, 765.0f) <= 50.0f && plr->GetPositionZ() > 13.0f)
++                    plr->KnockBackWithAngle(0.0f, 55.0f, 9.0f);
++                else if (plr->GetDistance2d(1369.0f, 817.0f) <= 50.0f && plr->GetPositionZ() > 13.0f)
++                    plr->KnockBackWithAngle(M_PI, 55.0f, 9.0f);
++            }
++            m_knockback = 0;
+         }
+         else
++            m_knockback -= diff;
++    }
++
++    if (!m_knockback && m_teleport)
++    {
++        if (m_teleport <= diff)
++        {
++            for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
++            {
++                Player* plr = ObjectAccessor::FindPlayer(itr->first);
++                if (!plr)
++                    continue;
++
++                if (plr->GetPositionZ() > 13.0f)
++                    HandlePlayerUnderMap(plr);
++            }
++            m_teleport = 5 * IN_MILLISECONDS;
++        }
++        else
++            m_teleport -= diff;
++    }
++
++    if (m_waterFall <= diff)
++    {
++        if (m_waterFallStatus == 0) // Add the water
++        {
++            DoorClose(BG_DS_OBJECT_WATER_2);
++            m_waterFall = 7 * IN_MILLISECONDS;
++            m_waterFallStatus = 1;
++        }
++        else if (m_waterFallStatus == 1) // Knockback, spawn the LOS object
++        {
++            for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
++            {
++                Player *plr = ObjectAccessor::FindPlayer(itr->first);
++                if (!plr)
++                    continue;
++
++                if (plr->GetDistance2d(1291.56f, 790.837f) <= BG_DS_WATERFALL_RADIUS)
++                    plr->KnockbackFrom(1291.56f, 790.837f, 20.0f, 7.0f);
++            }
++            SpawnBGObject(BG_DS_OBJECT_WATER_1, RESPAWN_IMMEDIATELY);
++            GetBgMap()->SetDynLOSObjectState(m_dynamicLOSid, true);
++            m_waterFall = BG_DS_WATERFALL_DURATION;
++            m_waterFallStatus = 2;
++        }
++        else // remove LOS and water
+         {
+-            setWaterFallTimer(BG_DS_WATERFALL_DURATION);
+-            for (uint32 i = BG_DS_OBJECT_WATER_1; i <= BG_DS_OBJECT_WATER_2; ++i)
+-                SpawnBGObject(i, RESPAWN_IMMEDIATELY);
+-            setWaterFallActive(true);
++            DoorOpen(BG_DS_OBJECT_WATER_2);
++            SpawnBGObject(BG_DS_OBJECT_WATER_1, RESPAWN_ONE_DAY);
++            GetBgMap()->SetDynLOSObjectState(m_dynamicLOSid, false);
++            m_waterFall = urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX);
++            m_waterFallStatus = 0;
+         }
+     }
+     else
+-        setWaterFallTimer(getWaterFallTimer() - diff);
++        m_waterFall -= diff;
+ }
+ 
+ void BattlegroundDS::StartingEventCloseDoors()
+@@ -81,11 +137,15 @@ void BattlegroundDS::StartingEventOpenDoors()
+     for (uint32 i = BG_DS_OBJECT_BUFF_1; i <= BG_DS_OBJECT_BUFF_2; ++i)
+         SpawnBGObject(i, 60);
+ 
+-    setWaterFallTimer(urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX));
+-    setWaterFallActive(false);
++    SpawnBGObject(BG_DS_OBJECT_WATER_1, RESPAWN_ONE_DAY);
++    SpawnBGObject(BG_DS_OBJECT_WATER_2, RESPAWN_IMMEDIATELY);
++    DoorOpen(BG_DS_OBJECT_WATER_2);
+ 
+-    for (uint32 i = BG_DS_OBJECT_WATER_1; i <= BG_DS_OBJECT_WATER_2; ++i)
+-        SpawnBGObject(i, getWaterFallTimer());
++    m_knockback = 15 * IN_MILLISECONDS;
++    m_teleport = 5 * IN_MILLISECONDS;
++    m_waterFallStatus = 0;
++    m_waterFall = urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX);
++    m_dynamicLOSid = GetBgMap()->AddDynLOSObject(1291.56f, 790.837f, BG_DS_WATERFALL_RADIUS);
+ }
+ 
+ void BattlegroundDS::AddPlayer(Player* player)
+diff --git a/src/server/game/Battlegrounds/Zones/BattlegroundDS.h b/src/server/game/Battlegrounds/Zones/BattlegroundDS.h
+index f2ba2ce..0b61b2b 100755
+--- a/src/server/game/Battlegrounds/Zones/BattlegroundDS.h
++++ b/src/server/game/Battlegrounds/Zones/BattlegroundDS.h
+@@ -36,17 +36,18 @@ enum BattlegroundDSObjects
+ {
+     BG_DS_OBJECT_TYPE_DOOR_1    = 192642,
+     BG_DS_OBJECT_TYPE_DOOR_2    = 192643,
+-    BG_DS_OBJECT_TYPE_WATER_1   = 194395,
+-    BG_DS_OBJECT_TYPE_WATER_2   = 191877,
++    BG_DS_OBJECT_TYPE_WATER_1   = 194395, // LoS checker
++    BG_DS_OBJECT_TYPE_WATER_2   = 191877, // Visual
+     BG_DS_OBJECT_TYPE_BUFF_1    = 184663,
+     BG_DS_OBJECT_TYPE_BUFF_2    = 184664
+ };
+ 
+ enum BattlegroundDSData
+ { // These values are NOT blizzlike... need the correct data!
+-    BG_DS_WATERFALL_TIMER_MIN                    = 30000,
++    BG_DS_WATERFALL_TIMER_MIN                    = 35000,
+     BG_DS_WATERFALL_TIMER_MAX                    = 60000,
+     BG_DS_WATERFALL_DURATION                     = 10000,
++    BG_DS_WATERFALL_RADIUS                       = 4,
+ };
+ 
+ class BattlegroundDSScore : public BattlegroundScore
+@@ -76,14 +77,11 @@ class BattlegroundDS : public Battleground
+         void HandleKillPlayer(Player* player, Player* killer);
+         bool HandlePlayerUnderMap(Player* player);
+     private:
+-        uint32 m_waterTimer;
+-        bool m_waterfallActive;
+-
+         virtual void PostUpdateImpl(uint32 diff);
+-    protected:
+-        bool isWaterFallActive() { return m_waterfallActive; };
+-        void setWaterFallActive(bool active) { m_waterfallActive = active; };
+-        void setWaterFallTimer(uint32 timer) { m_waterTimer = timer; };
+-        uint32 getWaterFallTimer() { return m_waterTimer; };
++        uint8 m_waterFallStatus;
++        uint32 m_waterFall;
++        uint32 m_teleport;
++        uint32 m_knockback;
++        uint32 m_dynamicLOSid;
+ };
+ #endif
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index bf8d38f..efd44fd 100755
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -2415,6 +2415,22 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
+     return true;
+ }
+ 
++void Player::KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed)
++{
++    float vsin = sin(angle);
++    float vcos = cos(angle);
++
++    // Effect propertly implemented only for players
++    WorldPacket data(SMSG_MOVE_KNOCK_BACK, 8+4+4+4+4+4);
++    data.append(GetPackGUID());
++    data << uint32(0);                                  // Sequence
++    data << float(vcos);                                // x direction
++    data << float(vsin);                                // y direction
++    data << float(horizontalSpeed);                     // Horizontal speed
++    data << float(-verticalSpeed);                      // Z Movement speed (vertical)
++    GetSession()->SendPacket(&data);
++}
++
+ bool Player::TeleportToBGEntryPoint()
+ {
+     if (m_bgData.joinPos.m_mapId == MAPID_INVALID)
+diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
+index 0a3f671..3332e25 100755
+--- a/src/server/game/Entities/Player/Player.h
++++ b/src/server/game/Entities/Player/Player.h
+@@ -1131,6 +1131,8 @@ class Player : public Unit, public GridObject<Player>
+         void RemoveFromWorld();
+ 
+         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
++        void KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed);
++
+         bool TeleportTo(WorldLocation const &loc, uint32 options = 0)
+         {
+             return TeleportTo(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation(), options);
+-- 
+1.7.8.msysgit.0
+

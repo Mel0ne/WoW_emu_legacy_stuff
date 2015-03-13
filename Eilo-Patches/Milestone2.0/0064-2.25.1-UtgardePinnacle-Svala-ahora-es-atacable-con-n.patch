@@ -1,0 +1,24 @@
+From 8a8a3ecac9fe599655d8493256fed65201208913 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Thu, 29 Dec 2011 14:41:29 -0500
+Subject: [PATCH 64/65] 2.25.1 UtgardePinnacle: Svala ahora es atacable con
+ normalidad
+
+---
+ .../2011_12_25_100_world_utgarde_pinnacle.sql      |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_12_25_100_world_utgarde_pinnacle.sql
+
+diff --git a/sql/updates/world/reanemu/2011_12_25_100_world_utgarde_pinnacle.sql b/sql/updates/world/reanemu/2011_12_25_100_world_utgarde_pinnacle.sql
+new file mode 100644
+index 0000000..ab0c498
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_12_25_100_world_utgarde_pinnacle.sql
+@@ -0,0 +1,4 @@
++-- Eilo (https://github.com/eilo)
++-- Svala correccion de sus flags para atacarle
++UPDATE `creature_template` SET `unit_flags`=`unit_flags`&~254&~2 WHERE `entry` IN (29281,30809);
++UPDATE `creature` SET `unit_flags`=0,`dynamicflags`=`dynamicflags`&~32 WHERE `id` IN (29281,30809);
+-- 
+1.7.8.msysgit.0
+

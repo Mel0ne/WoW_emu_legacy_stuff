@@ -1,0 +1,64 @@
+From 01159dbf5d676b6d692fa1b3056f3ae6a0098cdc Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 11:42:30 -0500
+Subject: [PATCH 26/65] 2.2.23 ICC: Rimefang y Spinestalker aggrean a 20y
+
+---
+ .../Northrend/IcecrownCitadel/boss_sindragosa.cpp  |   20 ++++++++++++++++++--
+ 1 files changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+index 6eb8ae4..bc1ade7 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_sindragosa.cpp
+@@ -715,7 +715,6 @@ class npc_spinestalker : public CreatureScript
+                 _events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 25000));
+                 _events.ScheduleEvent(EVENT_CLEAVE_SPINESTALKER, urand(10000, 15000));
+                 _events.ScheduleEvent(EVENT_TAIL_SWEEP, urand(8000, 12000));
+-                me->SetReactState(REACT_DEFENSIVE);
+ 
+                 if (_instance->GetData(DATA_SPINESTALKER) != 255)
+                 {
+@@ -768,6 +767,15 @@ class npc_spinestalker : public CreatureScript
+                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+             }
+ 
++            void MoveInLineOfSight(Unit* who)
++            {
++                if (me->IsWithinDistInMap(who, 20.0f))
++                {
++                    me->SetReactState(REACT_AGGRESSIVE);
++                    me->SetInCombatWithZone();
++                }
++            }
++
+             void UpdateAI(uint32 const diff)
+             {
+                 if (!UpdateVictim())
+@@ -831,7 +839,6 @@ class npc_rimefang : public CreatureScript
+                 _events.Reset();
+                 _events.ScheduleEvent(EVENT_FROST_BREATH_RIMEFANG, urand(12000, 15000));
+                 _events.ScheduleEvent(EVENT_ICY_BLAST, urand(30000, 35000));
+-                me->SetReactState(REACT_DEFENSIVE);
+                 _icyBlastCounter = 0;
+ 
+                 if (_instance->GetData(DATA_RIMEFANG) != 255)
+@@ -885,6 +892,15 @@ class npc_rimefang : public CreatureScript
+                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+             }
+ 
++            void MoveInLineOfSight(Unit* who)
++            {
++                if (me->IsWithinDistInMap(who, 20.0f))
++                {
++                    me->SetReactState(REACT_AGGRESSIVE);
++                    me->SetInCombatWithZone();
++                }
++            }
++
+             void EnterCombat(Unit* /*victim*/)
+             {
+                 DoCast(me, SPELL_FROST_AURA_RIMEFANG, true);
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,136 @@
+From 936bd85017faa17328dc8120d2bafc0148f07cb5 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 24 Dec 2011 18:16:33 -0500
+Subject: [PATCH 12/26] 1.12 DynamicLoS complementos y activacion en la db,
+ ajuste circulo demoniaco en estas 2 arenas
+
+---
+ ...11_10_10_100_world_dynlos_circulo_demoniaco.sql |    4 ++
+ .../game/Battlegrounds/Zones/BattlegroundRV.cpp    |    7 +++
+ src/server/game/Handlers/MovementHandler.cpp       |   11 ++++-
+ src/server/scripts/Spells/spell_warlock.cpp        |   45 ++++++++++++++++++++
+ 4 files changed, 66 insertions(+), 1 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_10_10_100_world_dynlos_circulo_demoniaco.sql
+
+diff --git a/sql/updates/world/reanemu/2011_10_10_100_world_dynlos_circulo_demoniaco.sql b/sql/updates/world/reanemu/2011_10_10_100_world_dynlos_circulo_demoniaco.sql
+new file mode 100644
+index 0000000..27dd5a3
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_10_10_100_world_dynlos_circulo_demoniaco.sql
+@@ -0,0 +1,4 @@
++DELETE FROM spell_script_names WHERE ScriptName='spell_warl_demonic_circle_summon';
++INSERT INTO spell_script_names VALUES (48018, 'spell_warl_demonic_circle_summon');
++
++DELETE FROM disables WHERE sourceType=3 AND entry IN (10,11);
+\ No newline at end of file
+diff --git a/src/server/game/Battlegrounds/Zones/BattlegroundRV.cpp b/src/server/game/Battlegrounds/Zones/BattlegroundRV.cpp
+index 671f5a7..77c6aee 100755
+--- a/src/server/game/Battlegrounds/Zones/BattlegroundRV.cpp
++++ b/src/server/game/Battlegrounds/Zones/BattlegroundRV.cpp
+@@ -46,6 +46,9 @@ BattlegroundRV::~BattlegroundRV()
+ 
+ void BattlegroundRV::PostUpdateImpl(uint32 diff)
+ {
++    if(GetStatus() != STATUS_IN_PROGRESS)
++        return;
++
+     if (getTimer() < diff)
+     {
+         switch (getState())
+@@ -158,6 +161,10 @@ void BattlegroundRV::HandleKillPlayer(Player* player, Player* killer)
+ 
+ bool BattlegroundRV::HandlePlayerUnderMap(Player* player)
+ {
++    // Wait for elevators to Go up, before start checking for UnderMaped players
++    if(GetStartTime() < uint32(m_StartDelayTimes[BG_STARTING_EVENT_FIRST] + 20*IN_MILLISECONDS))
++        return true;
++
+     player->TeleportTo(GetMapId(), 763.5f, -284, 28.276f, 2.422f, false);
+     return true;
+ }
+diff --git a/src/server/game/Handlers/MovementHandler.cpp b/src/server/game/Handlers/MovementHandler.cpp
+index e568da9..967f1aa 100755
+--- a/src/server/game/Handlers/MovementHandler.cpp
++++ b/src/server/game/Handlers/MovementHandler.cpp
+@@ -696,7 +696,16 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
+     {
+         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
+ 
+-        if (movementInfo.pos.GetPositionZ() < -500.0f)
++        float underMapValueZ;
++
++        switch (plMover->GetMapId())
++        {
++            case 617: underMapValueZ = 3.0f; break; // Dalaran Sewers
++            case 618: underMapValueZ = 28.0f; break; // Ring of Valor
++            default: underMapValueZ = -500.0f; break;
++        }
++
++        if (movementInfo.pos.GetPositionZ() < underMapValueZ)
+         {
+             if (!(plMover->InBattleground()
+                 && plMover->GetBattleground()
+diff --git a/src/server/scripts/Spells/spell_warlock.cpp b/src/server/scripts/Spells/spell_warlock.cpp
+index 51b2de5..24e76de 100644
+--- a/src/server/scripts/Spells/spell_warlock.cpp
++++ b/src/server/scripts/Spells/spell_warlock.cpp
+@@ -308,6 +308,50 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
+         }
+ };
+ 
++class spell_warl_demonic_circle_summon : public SpellScriptLoader
++{
++public:
++    spell_warl_demonic_circle_summon() : SpellScriptLoader("spell_warl_demonic_circle_summon") { }
++
++    class spell_warl_demonic_circle_summon_SpellScript : public SpellScript
++    {
++        PrepareSpellScript(spell_warl_demonic_circle_summon_SpellScript)
++
++        SpellCastResult CheckIfInvalidPosition()
++        {
++            Unit* caster = GetCaster();
++            switch (caster->GetMapId())
++            {
++                case 617: // Dalaran Sewers
++                    // casting on starting pipes
++                    if (caster->GetPositionZ() > 13.0f)
++                        return SPELL_FAILED_NOT_HERE;
++                    break;
++                case 618: // Ring of Valor
++                    if(caster->GetDistance2d(763.632385f, -306.162384f) < 1.5f || // casting over a small pilar
++                        caster->GetDistance2d(763.611145f, -261.856750f) < 1.5f ||
++                        caster->GetDistance2d(723.644287f, -284.493256f) < 4.0f || // casting over a big pilar
++                        caster->GetDistance2d(802.211609f, -284.493256f) < 4.0f ||
++                        caster->GetPositionZ() < 28.0f) // casting on the elevator
++                        return SPELL_FAILED_NOT_HERE;
++                    break;
++            }
++
++            return SPELL_CAST_OK;
++        }
++
++        void Register()
++        {
++            OnCheckCast += SpellCheckCastFn(spell_warl_demonic_circle_summon_SpellScript::CheckIfInvalidPosition);
++        }
++    };
++
++    SpellScript* GetSpellScript() const
++    {
++        return new spell_warl_demonic_circle_summon_SpellScript();
++    }
++};
++
+ void AddSC_warlock_spell_scripts()
+ {
+     new spell_warl_banish();
+@@ -316,4 +360,5 @@ void AddSC_warlock_spell_scripts()
+     new spell_warl_everlasting_affliction();
+     new spell_warl_ritual_of_doom_effect();
+     new spell_warl_seed_of_corruption();
++    new spell_warl_demonic_circle_summon();
+ }
+-- 
+1.7.8.msysgit.0
+

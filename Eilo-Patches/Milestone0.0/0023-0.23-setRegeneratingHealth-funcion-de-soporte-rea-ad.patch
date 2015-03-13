@@ -1,0 +1,28 @@
+From 597765a93086c14efe0b84f13242cba6f1a9b924 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 30 Dec 2011 17:28:30 -0500
+Subject: [PATCH 23/29] =?UTF-8?q?0.23=20setRegeneratingHealth=20funcion=20de?=
+ =?UTF-8?q?=20soporte=20rea=C3=B1adida?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/game/Entities/Creature/Creature.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Entities/Creature/Creature.h b/src/server/game/Entities/Creature/Creature.h
+index e622c48..dc4f287 100755
+--- a/src/server/game/Entities/Creature/Creature.h
++++ b/src/server/game/Entities/Creature/Creature.h
+@@ -658,6 +658,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
+         bool hasInvolvedQuest(uint32 quest_id)  const;
+ 
+         bool isRegeneratingHealth() { return m_regenHealth; }
++        void setRegeneratingHealth(bool state) { m_regenHealth = state; }
+         virtual uint8 GetPetAutoSpellSize() const { return MAX_SPELL_CHARM; }
+         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
+         {
+-- 
+1.7.8.msysgit.0
+

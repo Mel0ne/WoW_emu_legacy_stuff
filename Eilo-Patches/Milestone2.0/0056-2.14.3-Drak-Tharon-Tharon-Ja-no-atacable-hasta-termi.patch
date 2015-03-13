@@ -1,0 +1,45 @@
+From 6d17e4dc14fca622f26b99de25d4e53845e79f68 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 17 Dec 2011 14:45:43 -0500
+Subject: [PATCH 56/65] 2.14.3 Drak'Tharon: Tharon'Ja no atacable hasta
+ terminar demas bosses
+
+---
+ .../DraktharonKeep/instance_drak_tharon_keep.cpp   |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/DraktharonKeep/instance_drak_tharon_keep.cpp b/src/server/scripts/Northrend/DraktharonKeep/instance_drak_tharon_keep.cpp
+index 8e5e7c3..1a308a7 100644
+--- a/src/server/scripts/Northrend/DraktharonKeep/instance_drak_tharon_keep.cpp
++++ b/src/server/scripts/Northrend/DraktharonKeep/instance_drak_tharon_keep.cpp
+@@ -122,6 +122,8 @@ public:
+                     break;
+                 case NPC_THARON_JA:
+                     uiTharonJa = creature->GetGUID();
++                    creature->SetReactState(REACT_PASSIVE);
++                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                     break;
+             }
+         }
+@@ -200,6 +202,18 @@ public:
+             return str_data;
+         }
+ 
++        void Update(uint32 diff)
++        {
++            if (!instance->HavePlayers())
++                return;
++
++            if (GetData(DATA_TROLLGORE_EVENT) == DONE && GetData(DATA_NOVOS_EVENT) == DONE && GetData(DATA_DRED_EVENT) == DONE)
++                if(Creature* pTharonJa = instance->GetCreature(uiTharonJa)){
++                    pTharonJa->SetReactState(REACT_AGGRESSIVE);
++                    pTharonJa->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
++                }
++        }
++
+         void Load(const char* in)
+         {
+             if (!in)
+-- 
+1.7.8.msysgit.0
+

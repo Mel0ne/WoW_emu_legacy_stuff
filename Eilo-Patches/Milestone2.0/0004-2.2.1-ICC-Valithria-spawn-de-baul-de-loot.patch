@@ -1,0 +1,103 @@
+From 8bae53a0e48f7175eccd622504c232f47088f3eb Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 00:13:07 -0500
+Subject: [PATCH 04/65] 2.2.1 ICC: Valithria spawn de baul de loot
+
+---
+ .../2011_07_08_100_world_icc_valithria_chest.sql   |    7 +++++++
+ .../IcecrownCitadel/boss_valithria_dreamwalker.cpp |    4 ++--
+ .../Northrend/IcecrownCitadel/icecrown_citadel.h   |    6 ++++++
+ .../IcecrownCitadel/instance_icecrown_citadel.cpp  |   10 ++++++++++
+ 4 files changed, 25 insertions(+), 2 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2011_07_08_100_world_icc_valithria_chest.sql
+
+diff --git a/sql/updates/world/reanemu/2011_07_08_100_world_icc_valithria_chest.sql b/sql/updates/world/reanemu/2011_07_08_100_world_icc_valithria_chest.sql
+new file mode 100644
+index 0000000..9e85193
+--- /dev/null
++++ b/sql/updates/world/reanemu/2011_07_08_100_world_icc_valithria_chest.sql
+@@ -0,0 +1,7 @@
++SET @GUID := 153100;
++DELETE FROM `gameobject` WHERE `id` IN(201959, 202338, 202339, 202340);
++INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
++(@GUID+0, 201959, 631, 1, 1, 4203.65, 2484.56, 364.873, 6.28004, 0, 0, 0.00157252, -1, -120, 0, 1),
++(@GUID+1, 202339, 631, 2, 1, 4203.65, 2484.56, 364.873, 6.28004, 0, 0, 0.00157252, -1, -120, 0, 1),
++(@GUID+2, 202338, 631, 4, 1, 4203.65, 2484.56, 364.873, 6.28004, 0, 0, 0.00157252, -1, -120, 0, 1),
++(@GUID+3, 202340, 631, 8, 1, 4203.65, 2484.56, 364.873, 6.28004, 0, 0, 0.00157252, -1, -120, 0, 1);
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/boss_valithria_dreamwalker.cpp b/src/server/scripts/Northrend/IcecrownCitadel/boss_valithria_dreamwalker.cpp
+index e099317..b1b514f 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/boss_valithria_dreamwalker.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/boss_valithria_dreamwalker.cpp
+@@ -389,8 +389,8 @@ class boss_valithria_dreamwalker : public CreatureScript
+                     me->SetDisplayId(11686);
+                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                     me->DespawnOrUnsummon(4000);
+-                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+-                        lichKing->CastSpell(lichKing, SPELL_SPAWN_CHEST, false);
++                    /*if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
++                        lichKing->CastSpell(lichKing, SPELL_SPAWN_CHEST, false);*/
+ 
+                     if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
+                         me->Kill(trigger);
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.h b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.h
+index 31d2192..68ec193 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.h
++++ b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.h
+@@ -332,6 +332,12 @@ enum GameObjectsIds
+     GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_03   = 201382,
+     GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_04   = 201383,
+ 
++    // Loot Chest
++    GO_DREAMWALKER_CACHE_10_N               = 201959,
++    GO_DREAMWALKER_CACHE_25_N               = 202339,
++    GO_DREAMWALKER_CACHE_10_H               = 202338,
++    GO_DREAMWALKER_CACHE_25_H               = 202340,
++
+     // Sindragosa
+     GO_SINDRAGOSA_ENTRANCE_DOOR             = 201373,
+     GO_SINDRAGOSA_SHORTCUT_ENTRANCE_DOOR    = 201369,
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+index 925c7f2..5e9c933 100755
+--- a/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/instance_icecrown_citadel.cpp
+@@ -130,6 +130,7 @@ class instance_icecrown_citadel : public InstanceMapScript
+                 SindragosaGUID = 0;
+                 SpinestalkerGUID = 0;
+                 RimefangGUID = 0;
++                uiDreamwalkerCache = 0;
+                 TheLichKingGUID = 0;
+                 HighlordTirionFordringGUID = 0;
+                 TerenasMenethilGUID = 0;
+@@ -490,6 +491,12 @@ class instance_icecrown_citadel : public InstanceMapScript
+                         if (GetBossState(DATA_THE_LICH_KING) == DONE)
+                             go->SetRespawnTime(7 * DAY);
+                         break;
++                    case GO_DREAMWALKER_CACHE_10_N:
++                    case GO_DREAMWALKER_CACHE_25_N:
++                    case GO_DREAMWALKER_CACHE_10_H:
++                    case GO_DREAMWALKER_CACHE_25_H:
++                        uiDreamwalkerCache = go->GetGUID();
++                        break;
+                     default:
+                         break;
+                 }
+@@ -717,6 +724,8 @@ class instance_icecrown_citadel : public InstanceMapScript
+                     case DATA_VALITHRIA_DREAMWALKER:
+                         if (state == DONE && sPoolMgr->IsSpawnedObject<Quest>(WeeklyQuestData[8].questId[instance->GetSpawnMode() & 1]))
+                             instance->SummonCreature(NPC_VALITHRIA_DREAMWALKER_QUEST, ValithriaSpawnPos);
++                        if (state == DONE)
++                            DoRespawnGameObject(uiDreamwalkerCache, 7*DAY);
+                         break;
+                     case DATA_SINDRAGOSA:
+                         HandleGameObject(FrostwingSigilGUID, state != DONE);
+@@ -1266,6 +1275,7 @@ class instance_icecrown_citadel : public InstanceMapScript
+             uint64 SindragosaGUID;
+             uint64 SpinestalkerGUID;
+             uint64 RimefangGUID;
++            uint64 uiDreamwalkerCache;
+             uint64 TheLichKingGUID;
+             uint64 HighlordTirionFordringGUID;
+             uint64 TerenasMenethilGUID;
+-- 
+1.7.8.msysgit.0
+

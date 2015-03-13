@@ -1,0 +1,23 @@
+From 88f42c088a3841f14777f530f6bfff7bf88eca47 Mon Sep 17 00:00:00 2001
+From: Muzashi <santiago_rho_psi@hotmail.com>
+Date: Mon, 13 Feb 2012 03:02:12 -0500
+Subject: [PATCH 25/26] 1.25 Ahora el loot de prospectar jade funciona como
+ debe
+
+---
+ ...2_02_11_100_world_prospecting_loot_template.sql |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2012_02_11_100_world_prospecting_loot_template.sql
+
+diff --git a/sql/updates/world/reanemu/2012_02_11_100_world_prospecting_loot_template.sql b/sql/updates/world/reanemu/2012_02_11_100_world_prospecting_loot_template.sql
+new file mode 100644
+index 0000000..b79dce5
+--- /dev/null
++++ b/sql/updates/world/reanemu/2012_02_11_100_world_prospecting_loot_template.sql
+@@ -0,0 +1,2 @@
++-- Fix en la probabilidad del Jade oscuro al prospectar saronita
++UPDATE `prospecting_loot_template` SET `ChanceOrQuestChance`=0 WHERE `entry`=36912 AND `item`=36932;
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

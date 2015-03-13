@@ -1,0 +1,27 @@
+From d218700f29ad8b185142ec78db0125c94b61edbf Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 12:34:25 -0500
+Subject: [PATCH 32/65] 2.2.29 ICC: LichKing Valkyrs ajuste inmunidades
+
+---
+ .../2011_11_24_100_world_correcciones_icc.sql      |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+diff --git a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+index d1adc90..831109b 100644
+--- a/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
++++ b/sql/updates/world/reanemu/2011_11_24_100_world_correcciones_icc.sql
+@@ -32,4 +32,8 @@ DELETE FROM `creature` WHERE `guid`=201494;
+ DELETE FROM `creature` WHERE `guid`=201600;
+ DELETE FROM `creature` WHERE `guid`=201648;
+ DELETE FROM `creature` WHERE `guid`=201441;
+-DELETE FROM `creature` WHERE `guid`=200922;
+\ No newline at end of file
++DELETE FROM `creature` WHERE `guid`=200922;
++
++-- Icc adds Lich King
++-- Valkyrs de lich king(36609)
++UPDATE `creature_template` SET `mechanic_immune_mask` = `mechanic_immune_mask`|1|2|4|8|16|32|64|128|256|512|4096|8192|65536|131072|524288|1048576|4194304|8388608|33554432|67108864|536870912 WHERE `entry` IN (36609,39120,39121,39122);
+-- 
+1.7.8.msysgit.0
+

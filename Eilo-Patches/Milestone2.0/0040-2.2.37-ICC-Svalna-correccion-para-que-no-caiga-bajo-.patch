@@ -1,0 +1,28 @@
+From a3e14f75270f644f90038010e30c29b47caacfc6 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 16 Dec 2011 13:54:24 -0500
+Subject: [PATCH 40/65] 2.2.37 ICC: Svalna correccion para que no caiga bajo
+ el suelo
+
+---
+ .../Northrend/IcecrownCitadel/icecrown_citadel.cpp |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
+index d781c5f..b53b290 100644
+--- a/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
++++ b/src/server/scripts/Northrend/IcecrownCitadel/icecrown_citadel.cpp
+@@ -885,6 +885,10 @@ class boss_sister_svalna : public CreatureScript
+                             Talk(SAY_SVALNA_EVENT_START);
+                             break;
+                         case EVENT_SVALNA_RESURRECT:
++                            me->setActive(false);
++                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_NPC);
++                            me->SetFlying(false);
++                            me->SetPosition(4356.33f, 2484.21f, 358.43f, 1.54f);
+                             Talk(SAY_SVALNA_RESURRECT_CAPTAINS);
+                             me->CastSpell(me, SPELL_REVIVE_CHAMPION, false);
+                             break;
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,24 @@
+From 2bc0d1494f937f7b9b3eae19459042bbd5c3aad3 Mon Sep 17 00:00:00 2001
+From: Muzashi <santiago_rho_psi@hotmail.com>
+Date: Mon, 6 Feb 2012 22:07:54 -0500
+Subject: [PATCH 5/6] 4.5 Shadowmourne: Retocando las quests para que solo la
+ puedan tomar las clases que son
+
+---
+ .../2012_01_14_100_world_shadowmourne_quests.sql   |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+ create mode 100644 sql/updates/world/reanemu/2012_01_14_100_world_shadowmourne_quests.sql
+
+diff --git a/sql/updates/world/reanemu/2012_01_14_100_world_shadowmourne_quests.sql b/sql/updates/world/reanemu/2012_01_14_100_world_shadowmourne_quests.sql
+new file mode 100644
+index 0000000..49cfe4f
+--- /dev/null
++++ b/sql/updates/world/reanemu/2012_01_14_100_world_shadowmourne_quests.sql
+@@ -0,0 +1,3 @@
++-- Quest de la cadena de Shadowmourne sólo disponible para paladin, dk y guerrero
++
++UPDATE `quest_template` SET `RequiredClasses`=35 WHERE `Id` IN (24545,24743,24547,24749,24756,24757,24548,24549,24748);
+\ No newline at end of file
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,34 @@
+From 3286da97cc4afe70773bb1bc0e2ebfb06c92d881 Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Tue, 3 Jan 2012 19:47:37 -0500
+Subject: [PATCH 3/3] Milestone5.0
+
+---
+ WHAT_IS_INSIDE |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/WHAT_IS_INSIDE b/WHAT_IS_INSIDE
+index b6dedfe..ce0deab 100644
+--- a/WHAT_IS_INSIDE
++++ b/WHAT_IS_INSIDE
+@@ -23,6 +23,8 @@ Milestone3.0  Arreglos a Spells, sobre todo para estabilidad del pve y del
+               pvp dentro de los reinos.
+ Milestone4.0  Arreglos en quests, y cadenas de mision, esto incluye scripts
+               en c++ y SmartAI.
++Milestone5.0  Traducciones, e inclusion de varios dentro de tablas y strings
++              del emulador, ya sea en c++ o en sqls.
+ 
+ 
+ ##################################
+@@ -225,6 +227,8 @@ Milestone4.0  Arreglos en quests, y cadenas de mision, esto incluye scripts
+ #################
+ # Traducciones: #
+ #################
++5.1  - 29/12/2011: Traducciones de eswow2 de varias tablas de world, actualizadas por Eilo
++5.2  - 08/12/2011: Adecuaciones de nombres de 2 game_tele por Eilo
+ 
+ 
+ ##########
+-- 
+1.7.8.msysgit.0
+

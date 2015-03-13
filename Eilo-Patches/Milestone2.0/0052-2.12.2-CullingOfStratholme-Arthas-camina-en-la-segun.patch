@@ -1,0 +1,26 @@
+From 4518b525f3d925d70ce3fa4f2e27c0cd507f0d2b Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Sat, 17 Dec 2011 00:34:36 -0500
+Subject: [PATCH 52/65] 2.12.2 CullingOfStratholme: Arthas camina en la
+ segunda fase
+
+---
+ .../CullingOfStratholme/culling_of_stratholme.cpp  |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/scripts/Kalimdor/CavernsOfTime/CullingOfStratholme/culling_of_stratholme.cpp b/src/server/scripts/Kalimdor/CavernsOfTime/CullingOfStratholme/culling_of_stratholme.cpp
+index 0c026b4..f6120a9 100644
+--- a/src/server/scripts/Kalimdor/CavernsOfTime/CullingOfStratholme/culling_of_stratholme.cpp
++++ b/src/server/scripts/Kalimdor/CavernsOfTime/CullingOfStratholme/culling_of_stratholme.cpp
+@@ -1054,7 +1054,7 @@ public:
+                                 if (uiStep == 76) DoScriptText(SAY_PHASE310, me);
+                                 SetHoldState(false);
+                                 bStepping = false;
+-                                SetRun(true);
++                                SetRun(false);
+                                 JumpToNextStep(2000);
+                             }
+                             break;
+-- 
+1.7.8.msysgit.0
+

@@ -1,0 +1,35 @@
+From ec17c36f80a37303a8213c46f3f67d9f1d886d2c Mon Sep 17 00:00:00 2001
+From: Eilo <eilo2518@gmail.com>
+Date: Fri, 20 Jan 2012 12:02:09 -0500
+Subject: [PATCH 17/26] 1.17 Mejoras altura(z) criaturas que vuelan o nadan
+
+---
+ src/server/game/Maps/Map.cpp |   11 ++++++++++-
+ 1 files changed, 10 insertions(+), 1 deletions(-)
+
+diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
+index b01db4c..b2ed895 100755
+--- a/src/server/game/Maps/Map.cpp
++++ b/src/server/game/Maps/Map.cpp
+@@ -1600,8 +1600,17 @@ float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float
+         else
+             return vmapHeight;                              // we have only vmapHeight (if have)
+     }
++    else
++    {
++        if (!checkVMap)
++            return mapHeight;                               // explicitly use map data (if have)
++        else if (mapHeight > INVALID_HEIGHT && (z < mapHeight + 2 || z == MAX_HEIGHT))
++            return mapHeight;                               // explicitly use map data if original z < mapHeight but map found (z+2 > mapHeight)
++        else
++            return VMAP_INVALID_HEIGHT_VALUE;               // we not have any height
++    }
+ 
+-    return mapHeight;                               // explicitly use map data
++    //return mapHeight;                               // explicitly use map data
+ }
+ 
+ inline bool IsOutdoorWMO(uint32 mogpFlags, int32 /*adtId*/, int32 /*rootId*/, int32 /*groupId*/, WMOAreaTableEntry const* wmoEntry, AreaTableEntry const* atEntry)
+-- 
+1.7.8.msysgit.0
+

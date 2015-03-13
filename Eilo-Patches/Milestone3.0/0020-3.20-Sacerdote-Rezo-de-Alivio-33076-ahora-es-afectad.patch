@@ -1,0 +1,38 @@
+From 8eac6aa87a07668adc2c5ba87ec7f852d7e2ab66 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Mon, 2 Jan 2012 00:08:52 +0100
+Subject: [PATCH 20/22] 3.20 Sacerdote: Rezo de Alivio(33076) ahora es
+ afectado por Disciplinas gemelas(47588), Sanacion
+ espiritual(87336) y Divina providencia(47567)
+
+---
+ src/server/game/Spells/SpellMgr.cpp |   13 +++++++++++++
+ 1 files changed, 13 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/game/Spells/SpellMgr.cpp b/src/server/game/Spells/SpellMgr.cpp
+index 7853906..11a2772 100755
+--- a/src/server/game/Spells/SpellMgr.cpp
++++ b/src/server/game/Spells/SpellMgr.cpp
+@@ -3588,6 +3588,19 @@ void SpellMgr::LoadDbcDataCorrections()
+                 else
+                     break;
+                 break;
++            	case SPELLFAMILY_PRIEST:
++                // Twin Disciplines ahora es afectado a Prayer of Mending
++                if (spellInfo->SpellIconID == 2292)
++                    spellInfo->EffectSpellClassMask[0][1] |= 0x20;
++                // Spiritual Healing ahora es afectado a Prayer of Mending
++                else if (spellInfo->SpellIconID == 46)
++                    spellInfo->EffectSpellClassMask[0][1] |= 0x20;
++                // Divine Providence ahora es afectado a Prayer of Mending
++                else if (spellInfo->SpellIconID == 2845 && spellInfo->Id != 64844)
++                    spellInfo->EffectSpellClassMask[0][1] |= 0x20;
++                else
++                    break;
++                break;
+             case SPELLFAMILY_DRUID:
+                 // Starfall Target Selection
+                 if (spellInfo->SpellFamilyFlags[2] & 0x100)
+-- 
+1.7.8.msysgit.0
+

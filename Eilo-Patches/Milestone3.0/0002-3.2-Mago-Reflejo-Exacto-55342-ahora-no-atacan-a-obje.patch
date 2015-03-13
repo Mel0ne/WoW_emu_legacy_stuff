@@ -1,0 +1,85 @@
+From 17fb5a7e2fcd8bb61736b113bf874ce05d955f19 Mon Sep 17 00:00:00 2001
+From: Hispano <jesus.diaz.gutierrez@gmail.com>
+Date: Tue, 3 Jan 2012 17:29:21 +0100
+Subject: [PATCH 02/22] =?UTF-8?q?3.2=20Mago:=20Reflejo=20Exacto=20(55342)=20?=
+ =?UTF-8?q?ahora=20no=20atacan=20a=20objetivos=20que=20est=C3=A1n=20bajo=20l?=
+ =?UTF-8?q?os=20efectos=20de=20Polimorfia=20(118)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/server/scripts/World/npcs_special.cpp |   57 +++++++++++++++++++++++++++++
+ 1 files changed, 57 insertions(+), 0 deletions(-)
+
+diff --git a/src/server/scripts/World/npcs_special.cpp b/src/server/scripts/World/npcs_special.cpp
+index 04e9c05..175d53f 100644
+--- a/src/server/scripts/World/npcs_special.cpp
++++ b/src/server/scripts/World/npcs_special.cpp
+@@ -1905,6 +1905,63 @@ public:
+             // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
+             // Clone Me!
+             owner->CastSpell(me, 45204, false);
++
++            if (owner->ToPlayer() && owner->ToPlayer()->GetSelectedUnit())
++                me->AI()->AttackStart(owner->ToPlayer()->GetSelectedUnit());
++        }
++
++        void EnterCombat(Unit *who)
++        {
++            if (spells.empty())
++                return;
++
++            for (SpellVct::iterator itr = spells.begin(); itr != spells.end(); ++itr)
++            {
++                if (AISpellInfo[*itr].condition == AICOND_AGGRO)
++                    me->CastSpell(who, *itr, false);
++                else if (AISpellInfo[*itr].condition == AICOND_COMBAT)
++                {
++                    uint32 cooldown = GetAISpellInfo(*itr)->realCooldown;
++                    events.ScheduleEvent(*itr, cooldown);
++                }
++            }
++        }
++
++
++        void UpdateAI(const uint32 diff)
++        {
++            if (!UpdateVictim())
++                return;
++
++            events.Update(diff);
++
++            bool hasCC = false;
++            if (me->GetCharmerOrOwnerGUID() && me->getVictim())
++                hasCC = me->getVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE);
++
++            if (hasCC)
++            {
++                if (me->HasUnitState(UNIT_STATE_CASTING))
++                    me->CastStop();
++                me->AI()->EnterEvadeMode();  
++                return;
++            }
++
++            if (me->HasUnitState(UNIT_STATE_CASTING))
++                return;
++
++            if (uint32 spellId = events.ExecuteEvent())
++            {
++                if (hasCC)
++                {
++                    events.ScheduleEvent(spellId, 500);
++                    return;
++                }
++                DoCast(spellId);
++                uint32 casttime = me->GetCurrentSpellCastTime(spellId);
++                events.ScheduleEvent(spellId, (casttime ? casttime : 500) + GetAISpellInfo(spellId)->realCooldown);
++            }
++
+         }
+ 
+         // Do not reload Creature templates on evade mode enter - prevent visual lost
+-- 
+1.7.8.msysgit.0
+
