@@ -1,0 +1,55 @@
+=  Emerald Nightmare Launcher
+
+
+
+
+THIS IS NOT COMPLETE
+
+A "Preview" version is in the downloads, I am not done coding things I want into this. The generic launcher will be coded when I am done with this one's features.
+
+Basically it's missing everything advanced in the UI besides the basic launcher features like the "play button" and the cleanup options
+
+
+No estimate on when I get around to finishing this as it's not my highest priority.
+
+
+
+
+
+Simple implementation of repacker found in Marforius Client repo with aspects of a "official" launcher, this is the repository for hosting our released files and sourcecode.
+
+
+This launcher is for those in Marforius' modding project named "Emerald Nightmare", do not use this launcher if you intend to play on a different server.
+
+
+No authorization is given for any project other then EMERALD NIGHTMARE to use this launcher. Use the Marforius-Client Generic Launcher https://github.com/Marforius/Generic-MarforiusClient-Launcher if you intend to use this for anything other then its intended use.
+
+= Compiling
+
+Download and install:
+http://www.boostpro.com/download
+
+Install MSVC 10 multi-threaded static libraries.
+
+
+The launcher will compile after you install Boost like any other project.
+(select release and compile)
+
+
+= Licence
+
+No authorization is given for use of this launcher or related tools in other projects' launchers or toolchains. Emerald Nightmare AND all related tools by Marforius in this repo are licensed under a Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+
+
+= Screens
+
+http://suxorz.com/i5/untitlcfc.png
+
+
+
+= Contact the Developers  
+
+irc.rizon.net #Marforius
+
+
+
