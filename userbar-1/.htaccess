@@ -1,0 +1,15 @@
+# UTF8 support
+AddDefaultCharset utf8
+<IfModule mod_charset.c>
+	CharsetDisable on
+	CharsetRecodeMultipartForms Off
+</IfModule>
+php_value default_charset UTF-8
+
+# graph files
+RewriteEngine On
+RewriteBase /userbar/
+RewriteRule  ^mini/(.*)\.(png|jpg|jpeg|gif)$ ub.php?name=$1&mini [L,QSA]
+RewriteEngine On
+RewriteBase /userbar/
+RewriteRule  ^(.*)\.(png|jpg|jpeg|gif)$ ub.php?name=$1&normal [L,QSA]
