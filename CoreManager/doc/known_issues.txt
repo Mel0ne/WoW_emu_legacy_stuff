@@ -1,0 +1,30 @@
+Here's a list of the things we're aware are wrong with CoreManager
+================================================================================
+(This doesn't mean that we've given up on them, rather that we haven't gotten to
+them yet)
+================================================================================
+
+Not all searches on the Character List Page work.  (this is due to the nature of
+the data)
+
+Trinity Core support is only for the "Stable" release.  Other revisions may not
+function.
+
+The Character Sheet Page on Trinity Servers will display "ERR" for some stats.
+(see below for list)
+
+MaNGOS support is limited to MaNGOS 2.  Other versions may not work.
+
+
+THINGS COREMANAGER CAN DO THAT SERVERS DON'T SUPPORT:
+(we'd REALLY like to be able to have these things)
+================================================================================
+Online Player List on Main Page can show the Zone, Map AND Area of players.
+MaNGOS and Trinity do not save Area.
+
+The Character Sheet is meant to display the following stats: Melee Hit,
+Expertise, Spell Heal, Spell Hit, Spell Haste, and Ranged Hit.  MaNGOS & Trinity
+do not save these.
+
+MaNGOS doesn't store Player Latency so Average Latency & Player Latency are
+unavailable.

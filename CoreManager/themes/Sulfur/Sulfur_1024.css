@@ -1,0 +1,2238 @@
+/*
+    CoreManager, PHP Front End for ArcEmu, MaNGOS, and TrinityCore
+    Copyright (C) 2010-2013  CoreManager Project
+    Copyright (C) 2009-2010  ArcManager Project
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+ * Date: 17.10.2006 inital version (0.0.1a)
+ * Author: SixSixNine
+ */
+html
+{
+  overflow-x: auto; /* fixes MSIE scrollbar bug DO NOT REMOVE, has no effect in Mozilla, or Opera */
+                    /* http://www.blooberry.com/indexdot/css/properties/position/overflowx.htm */
+}
+html, body
+{
+  background-color: /body_background_color/;
+  background-image: /body_background_image/;
+  background-repeat: /body_background_repeat/;
+  background-attachment: /body_background_attachment/;
+  background-position: /body_background_position/;
+  height: 100%;
+  padding: 0px; /* required for Opera to have 0 margin */
+  margin: 0;
+  font: /font_size_7/ /font_1/;
+  cursor: default;
+}
+
+a:link, a:visited
+{
+  color: /focus_color/;
+  text-decoration: none;
+}
+a:hover, a:focus
+{
+  color: /anchor_hover/;
+  text-decoration: none;
+}
+
+.table_top 
+{
+  position: relative;
+  width: 838px;
+  height: 120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.table_top_left
+{
+  position: absolute;
+  background-image: url(logo_l.gif);
+  background-repeat: no-repeat;
+  width: 47px;
+  height: 120px;
+}
+.table_top_middle 
+{
+  position: absolute;
+  background-image: url(logo_m.gif);
+  left: 47px;
+  width: 744px;
+  height: 120px;
+}
+.table_top_right
+ {
+  position: absolute;
+  background-image: url(logo_r.gif);
+  background-repeat: no-repeat;
+  left: 791px;
+  width: 47px;
+  height: 120px;
+}
+.header_logo
+{
+  position: absolute;
+  background-image: /header_logo/;
+  background-repeat: no-repeat;
+  width: 554px;
+  height: 120px;
+  z-index: 100;
+}
+.header_middle
+{
+  position: absolute;
+  text-align: right;
+  left: 500px;
+  width: 310px;
+  height: 120px;
+}
+
+/*********** MENU BAR***********/
+#menubar 
+{
+  position: relative;
+  left: 20px;
+  top: 81px;
+  z-index: 100;
+  width: 36em; /*total len*/
+  text-align: left;
+}
+#menuwrapper 
+{
+  font: /font_size_7/ /font_1/;
+}
+#menubar, #menubar ul 
+{
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  line-height: 160%;
+}
+#menubar a 
+{
+  display: block;
+  text-decoration: none;
+  padding: 5px 15px 5px 15px;
+  border-right: 1px solid /input_border_color/;
+  font-size: /font_size_5/;
+  color: /focus_color/; /*main menu text color*/
+}
+#menubar a.trigger
+ {
+  padding: 5px 15px 5px 15px;
+}
+#menubar li 
+{
+  float: left;
+  width: 9em;
+}
+#menubar li
+{
+  position: relative;
+}
+/* hide from IE mac \*/
+#menubar li
+{
+  position: static;
+  width: auto;
+}
+/* end hiding from IE5 mac */
+#menubar li ul, #menubar ul li
+{
+  width: 13em; /*submenu len*/
+}
+#menubar ul li a
+{
+  color: /focus_color/;
+  border-right: 0;
+  padding: 3px 12px 3px 15px;
+}
+#menubar li ul
+{
+  position: absolute;
+  display: none;
+  background-color: /submenu_background_color/; /*submenu bg color*/
+  border-right: 1px solid /input_border_color/;
+  border-bottom: 1px solid /input_border_color/;
+  filter: alpha(opacity=85);
+  -moz-opacity: .85;
+  opacity: 0.85;
+}
+#menubar li:hover a, #menubar a:focus, #menubar a:active, #menubar li.hvr a
+{
+  color: /focus_color/; /*menu selected text color*/
+  background-color: /submenu_background_color/; /*menu selected bg color*/
+}
+#menubar li:hover ul, #menubar li.hvr ul
+{
+  display: block;
+}
+#menubar li:hover ul a, #menubar li.hvr ul a
+{
+  color: /focus_color/; /*submenu text color*/
+  background-color: transparent;
+}
+#menubar ul a:hover
+{
+  background-color: /submenu_hilite_background_color/ !important; /*submenu selected bg color*/
+  color: /anchor_hover/ !important; /*submenu selected text color*/
+}
+.menubar_item_disabled
+{
+  display: block;
+  color: /default_text_color/;
+  padding: 5px 15px 5px 15px;
+  border-right: 1px solid /input_border_color/;
+  font-size: /font_size_5/;
+}
+/*********** MENU BAR END***********/
+
+#username
+{
+  position: relative;
+  top: 88px;
+  z-index: 20;
+  color: /focus_color/;
+  font: /font_size_8/ /font_1/;
+}
+#version
+{
+  position: relative;
+  /*left:46%;*/
+  text-align: center;
+  /*top:122px;*/
+  z-index: 10;
+  color: /default_text_color/;
+  font: /font_size_2/ /font_1/;
+}
+h1
+{
+  margin: 0px;
+  font: /font_size_13/ /font_2/;
+  font-weight: bold;
+  color: #e9e6e6;
+  line-height: 1.2em;
+}
+
+form
+{
+  margin: 0px;
+}
+input, input.mouseover, a.button
+{
+  border: 1px solid /input_border_color/;
+  background: /input_background_color/;
+  font: /font_size_4/ /font_1/;
+  font-weight: bold;
+  line-height: 100%;
+}
+
+input
+{
+  background: /input_background_color/;
+  color: /default_text_color/;
+  padding: 2px 1px;
+  margin-right: 4px;
+  margin-left: 0px;
+}
+input[type="text"], input[type="password"]
+{
+  background: /input_background_color/;
+}
+input[type="text"]:hover, input[type="password"]:hover
+{
+  background: /input_background_color/;
+  border-color: /hilite_color/;
+  cursor: default;
+}
+input[type="text"]:focus, input[type="password"]:focus
+{
+  background: /input_background_color/;
+  border-color: /focus_color/;
+}
+input[type="radio"], input[type="checkbox"]
+{
+  background: none;
+  border: 0px;
+}
+select, textarea
+{
+  color: /default_text_color/;
+  border: 1px solid /input_border_color/;
+  background-color: /input_background_color/;
+  }
+img
+{
+  border: 0px;
+  padding: 0px;
+}
+a.button
+{
+  background: /input_background_color/;
+  color: /default_text_color/;
+  padding: 4px 2px;
+  text-decoration: none;
+  text-align: center;
+  float: left;
+  margin-right: 3px;
+  margin-left: 3px;
+}
+
+a.button:visited
+{   
+  background-color: /input_background_color/; 
+  color: /default_text_color/;
+}
+a.button:hover
+{   
+  background-color: /btn_background_color/; 
+  color: /default_text_color/;
+}
+a.button:active, a.button:focus
+{   
+  border-color: /btn_border/;
+}
+a[type="wrn"].button:hover
+{
+  background-color: /btn_wrn_background_color/;
+  background-image: url(../../img/sml_warn.png);
+  background-repeat: no-repeat;
+  background-position: 99% 1px;
+}
+a[type="def"].button:hover
+{
+  background-color: /btn_def_background_color/;
+  background-image: url(../../img/sml_tick.png);
+  background-repeat: no-repeat;
+  background-position: 99% 1px;
+}
+
+div.half_frame
+{
+  width: 550px;
+}
+div.tquarter_frame
+{
+  width: 680px;
+}
+div.full_frame
+{
+  width: 760px;
+}
+.legend
+{
+  margin-top: -5px;
+  color: /focus_color/;
+  background-color: /table_background_color/;
+  padding: 2px 6px;
+  position: absolute;
+  top: -5px;
+  left: 5px;
+}
+.fieldset_border
+{
+  position: relative;
+  margin-top: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  top: 5px;
+  background-color: /table_background_color/;
+  border: 1px solid /default_text_color/;
+}
+
+/*****TABLES******/
+table.flat
+{
+  border-width: 5px;
+  border-spacing: 5px;
+  border-style: none;
+  border-collapse: collapse;
+  background-color: /table_background_color/;
+  text-align: left;
+}
+table.flat td
+{
+  padding: 5px;
+}
+table.hidden
+{
+  border-width: 0px;
+  border-spacing: 0px;
+  border-style: none;
+  border-collapse: collapse;
+  text-align: center;
+}
+table.top_hidden
+{
+  width: 770px;
+  border: 0px none #d4ddd8;
+  border-spacing: 0px;
+  border-collapse: collapse;
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+}
+table.top_hidden td, table.hidden td
+{
+  padding: 4px 0px;
+}
+table.lined
+{
+  width: 770px;
+  border-collapse: collapse;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.lined, table.lined td, table.lined td.hidden
+{
+  border-bottom: 1px solid  #383838;
+  border-top: 1px solid  #383838;
+  padding: 5px;
+}
+table.lined td.head
+{
+  border-bottom: 3px solid  #383838;
+  border-top: 3px solid  #383838;
+  padding: 5px;
+  padding-top: 20px;
+  padding-bottom: 2px;
+  font-weight: bold;
+}
+
+table.lined, table.lined tr, table.lined tr.hidden
+{
+  border-left: 1px solid  #383838;
+  border-right: 1px solid  #383838;
+}
+table.lined tr th
+{
+  background-color: #484848;
+  font-weight: bold;
+  font-size: /font_size_2/;
+  color: /focus_color/;
+  padding: 5px;
+}
+table.lined td.hidden
+{
+  background-color: transparent;
+}
+table.lined td
+{
+  background-color: /btn_background_color/;
+}
+tr td div.gradient_p, div.gradient_pp
+{
+  /*position: relative;*/
+  float: left;
+  clear: right;
+  display: table-cell;
+  text-align: right;
+  padding: 1px 5px;
+}
+tr td div.gradient_p
+{
+  background-color: #444;
+  width: 130px;
+}
+tr td div.gradient_pp
+{
+  background-color: #333;
+  width: 50px;
+}
+img.bag_icon
+{
+  float: left;
+  width: 24px; 
+  height: 24px;
+  border: 1px solid #585858;
+  margin-left: 5px;
+}
+
+.bag
+{
+  position: relative;
+  border: 0px;
+  margin: 2px;
+  background-image: url(../../img/INV/Slot_Bag.gif);
+  background-repeat: repeat;
+  background-color: #242424;
+}
+.bank
+{
+  background-color: #858585;
+}
+.bag_slot, .bank_slot
+{
+  position: absolute;
+  background: none;
+}
+.inv_icon
+{
+  border: 0px;
+  width: 35px; 
+  height: 35px;
+}
+.no_slot
+{
+  position: absolute;
+  margin: 0px;
+  width: 86px;
+  height: 41px;
+  background-image: url(../../img/INV/Slot_Bag_Out.gif);
+}
+
+tr th a
+{
+  padding-right: 10px;
+  background-repeat: no-repeat;
+}
+tr th a.ASC
+{
+  background-image: url(../../img/arr_up.gif);
+  background-position: 100% 2px;
+}
+tr th a.DESC
+{
+  background-image: url(../../img/arr_dw.gif);
+  background-position: 100% 6px;
+}
+/*****TABLES END******/
+
+#body_main
+ {
+  position: relative;
+  /*left: 50%;*/
+  width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  /*margin-left: -400px;*/ /* half of the width */
+  line-height: 120%;
+  text-align: center;
+  font-size: /font_size_2/;
+  color: /default_text_color/;
+}
+
+.body_main_deep
+{
+  /*top: 150px;*/
+  margin-top: 3px;
+}
+.body_main_shallow
+{
+  /*top: 135px;*/
+  margin-top: 10px;
+}
+
+.error
+{
+  color: /focus_color/;
+}
+.bold
+{
+  font: /font_size_9/ /font_2/;
+  font-weight: bold;
+}
+.small
+{
+  font-size: /font_size_1/;
+}  
+.large_bold
+{
+  font-size: /font_size_4/;
+  font-weight: bold;
+}
+.large
+{
+  font-size: /font_size_4/;
+}
+.half_line
+{
+  font-size: /font_size_3/;
+  line-height: 1.6em;
+}
+/*****BUBBLE******/
+div.bubble 
+{
+  position: relative;
+  padding: 7px 0px;
+  background-color: /table_background_color/;
+  margin-bottom: 15px;
+  text-align: left;
+  border: 1px solid /input_border_color/;
+}
+div.bubble div.top
+{
+  text-align: center;
+  background-color: /btn_background_color/;
+  padding: 7px 15px;
+  margin: -7px -0px 12px -0px;
+}
+div.bubble div.top h1
+{
+  color: #1a1a1a;
+}
+i.tl, i.tr, i.bl, i.br
+{
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  overflow: hidden;
+  z-index: 30;
+}
+i.tl
+{
+  top: 0px;
+  left: 0px;
+}
+i.tr
+{
+  top: 0px;
+  right: 0px;
+}
+i.bl
+{
+  bottom: 0px;
+  left: 0px;
+}
+i.br
+{
+  bottom: 0px;
+  right: 0px;
+}
+/*****BUBBLE END******/
+
+#body_bottom 
+{
+  position: relative;
+  font: /font_size_2/ /font_1/;
+  text-align: center;
+  color: /default_text_color/;
+}
+.table_bottom
+{
+  background: /table_background_color/;
+  border: 1px solid /input_border_color/;
+  width: 800px;
+  height: 100px;
+}
+.table_bottom_left
+{
+  width: 6px;
+}
+.table_bottom_middle
+{
+  width: 784px;
+}
+.table_bottom_right
+{
+  width: 6px;
+}
+
+#body_bottom a:link, #body_bottom a:visited
+{
+    color: #C0D0CA;
+    text-decoration: none;
+}
+#body_bottom a:hover, #body_bottom a:focus
+{
+    text-decoration: underline;
+} 
+.logo_border
+{
+  border: 1px solid /input_border_color/;
+  background-color: /input_background_color/;
+  padding: 6px;
+}
+
+.icon_border_0
+{
+  border: 0px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  background: url(../../img/INV/icon_border_0.png);
+}
+
+.icon_border_1
+{
+  border: 0px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  background: url(../../img/INV/icon_border_1.png);
+}
+
+.icon_border_2
+{
+  border: 0px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  background: url(../../img/INV/icon_border_2.png);
+}
+
+.icon_border_3
+{
+  border: 0px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  background: url(../../img/INV/icon_border_3.png);
+}
+
+.icon_border_4
+{
+  border: 0px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  background: url(../../img/INV/icon_border_4.png);
+}
+
+.icon_border_5
+{
+  border: 0px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  background: url(../../img/INV/icon_border_5.png);
+}
+
+.icon_border_6
+{
+  border: 0px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  background: url(../../img/INV/icon_border_6.png);
+}
+
+.icon_border_7
+{
+  border: 0px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  background: url(../../img/INV/icon_border_7.png);
+}
+
+/*** graphs and bars ***/
+.bargraph
+{
+  font: /font_size_2/ /font_1/;
+  border-collapse: collapse;
+  width: 720px;
+}
+.bargraph td
+{
+  padding: 0;
+  margin: 0;
+  vertical-align: bottom;
+  text-align: center;
+  background: url(gridline.gif) 15px bottom;
+}
+
+a.graph_link:link, a.graph_link:visited
+{
+  color: /focus_color/;
+  text-decoration: none;
+}
+a.graph_link:hover, a.graph_link:focus
+{
+  color: /anchor_hover/;
+  text-decoration: none;
+}
+
+.bargraph img
+{
+  display: block;
+  border: 1px solid #000;
+}
+
+table.stat_hidden
+{
+  width: 720px;
+  border-spacing: 2px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tot_bar
+{
+  width: 730px;
+  border: 1px solid #000000;
+  padding: 10px;
+  border-collapse: collapse;
+  text-align: center;
+  font-weight: bold;
+}
+.tot_bar a:link, .tot_bar a:visited
+{
+  color: #000;
+  text-decoration: none
+}
+.tot_bar a:hover, .tot_bar a:focus
+{
+  color: /focus_color/;
+  text-decoration: none
+}
+.tot_bar_horde
+{
+  background: url(../../img/bar_horde.gif);
+}
+.tot_bar_alliance
+{
+  background: url(../../img/bar_allie.gif);
+}
+
+tr td.bar
+{
+  width: 385px;
+  background-repeat: no-repeat;
+  background-position: -385px;
+  padding: 1px;
+}
+tr td.bar span
+{
+  float: left;
+  width: 65%;
+  text-align: right;
+  margin-top: 3px;
+  color: #fff !important;
+}
+tr td.skill_bar
+{
+  background-image: url(../../img/bar_skill.png);
+}
+tr td.xp_bar
+{
+  width: 580px;
+  background-image: url(../../img/bar_xp.png);
+}
+
+.faction-bar
+{
+  border: 1px solid black;
+  width: 100%;
+  text-align: left;
+  height: 16px;
+  background: url('../../img/bar_empty.gif') repeat-x;
+  position: relative;
+}
+span.rep-data
+{
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  color: white;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+.bar-color
+{
+  width: 100%;
+  height: 16px;
+}
+.rep7 .bar-color
+{
+  background: url('../../img/bar_exalted.gif') repeat-x;
+}
+.rep6 .bar-color
+{
+  background: url('../../img/bar_revered.gif') repeat-x;
+}
+.rep5 .bar-color
+{
+  background: url('../../img/bar_honored.gif') repeat-x;
+}
+.rep4 .bar-color
+{
+  background: url('../../img/bar_friendly.gif') repeat-x;
+}
+.rep3 .bar-color
+{
+  background: url('../../img/bar_neutral.gif') repeat-x;
+}
+.rep2 .bar-color
+{
+  background: url('../../img/bar_unfriendly.gif') repeat-x;
+}
+.rep1 .bar-color
+{
+  background: url('../../img/bar_hostile.gif') repeat-x;
+}
+.rep0 .bar-color
+{
+  background: url('../../img/bar_hated.gif') repeat-x;
+}
+tr td.rep7
+{
+  color: cyan;
+}
+tr td.rep6
+{
+  color: #00ffcc;
+}
+tr td.rep5
+{
+  color: #00ff88;
+}
+tr td.rep4
+{
+  color: lime;
+}
+tr td.rep3
+{
+  color: yellow;
+}
+tr td.rep2
+{
+  color: #ee6622;
+}
+tr td.rep1
+{
+  color: red;
+}
+tr td.rep0
+{
+  color: #cc2222
+}
+
+
+/*** link tabs ***/
+.tab ul
+{
+  padding: 0px 30px;
+  margin: 0px;
+  list-style: none;
+}
+.tab li
+{
+  float: left;
+  border: 1px solid /input_border_color/;
+  border-bottom-width: 0;
+}
+.tab a
+{
+  display: block;
+  background: /table_background_color/;
+  padding: 1em 2em;
+}
+.tab a:hover
+{
+  background: #484848;
+}  
+.tab  .selected
+{
+  border-color: /default_text_color/;
+}
+.tab .selected a
+{
+  position: relative;
+  top: 1px;
+  background: #484848;
+  font-weight: bold;
+  padding: 1em 1.5em;
+}
+.tab_content
+{
+  padding: 10px;
+  border: 1px solid /default_text_color/;
+  background: #484848;
+  width: 740px;
+  clear: both;
+}
+
+.tab_content2
+{
+  padding: 10px;
+  border: 1px solid /default_text_color/;
+  background: #484848;
+  width: 700px;
+  clear: both;
+}
+
+/*** Java layer tabs ***/
+.jtabs
+{
+  margin: 0;
+  padding: 0px 0px 0px 30px;
+  list-style: none;
+}
+.jtabs li
+{
+  float: left;
+}
+.jtabs a.jtab-disabled:hover, .jtabs a.jtab-active
+{
+  background: #484848;
+  border-bottom-color: #484848;
+}
+.jtabs a.jtab-disabled
+{
+  background: /table_background_color/;
+  border: 1px solid /input_border_color/;
+  border-bottom-width: 0;
+}
+.jtabs a
+{
+  position: relative;
+  top: -25px;
+  background: #484848;
+  font-weight: bold;
+  padding: 1em 1.3em;
+  border: 1px solid /default_text_color/;
+  text-decoration: none;
+}
+.jtab-container
+{
+  border: 1px solid /default_text_color/;
+  background: #484848;
+  width: 760px;
+  clear: both;
+}
+.jtab-panes
+{
+  margin: 3px;
+}
+
+/*** item tooltips***/
+.old_item_tooltip  td
+{
+  float: none;
+  font-size: /font_size_2/;
+  color: /default_text_color/;
+  border: 1px solid #F0D070;
+  padding: 7px;
+  width: auto;
+  background-color: #000;
+  text-align: left;
+  filter: alpha(opacity=80);
+  -moz-opacity: .80;
+  opacity: 0.80;
+}
+.info_tooltip  td
+{
+  float: none;
+  font-size: /font_size_2/;
+  color: /default_text_color/;
+  border: 0px solid #F0D070;
+  padding: 10px;
+  width: 240px;
+  background-color: #000;
+  text-align: left;
+  filter: alpha(opacity=85);
+  -moz-opacity: .85;
+  opacity: 0.85;
+}
+.map_tooltip
+{
+  visibility: hidden;
+  position: absolute;
+  z-index: 99;
+}
+.map_tooltip table
+{
+  background-color: #454545;
+  border: 1px solid #F0D070;
+  color: #ffffff;
+  width: 150px;
+}
+.map_tooltip table .name_level
+{
+  border-bottom: 1px solid  #F0D070;
+  text-align: center;
+}
+.map_tooltip table .race
+{
+  text-align: left;
+}
+.map_tooltip table .class
+{
+  text-align: left;
+}
+.map_tooltip table .zone
+{
+  border-top: 1px solid  #F0D070;
+  text-align: center;
+}
+
+.item_tooltip
+{
+  visibility: hidden;
+  position: absolute;
+  z-index: 99;
+  text-align: left;
+}
+.item_tooltip table
+{
+  background-color: #000000;
+  border: 1px solid #F0D070;
+  color: #ffffff;
+  width: 300px;
+}
+.item_tooltip table td
+{
+  background-color: #000000;
+  border: 0px;
+}
+.item_tooltip .item_tooltip_socket
+{
+  width: 14px;
+  height: 14px;
+}
+.item_tooltip .item_tooltip_price
+{
+  width: 13px;
+  height: 13px;
+}
+
+.answerbox
+{
+  font-size: /font_size_2/;
+  color: /default_text_color/;
+  border: 1px solid #F0D070;
+  padding: 10px;
+  width: auto;
+  background-color: #000;
+  text-align: center;
+  filter: alpha(opacity=85);
+  -moz-opacity: .85;
+  opacity: 0.85;
+}
+.answerbox th
+{
+  font: /font_size_13/ /font_2/;
+  font-weight: bold;
+  color: /focus_color/;
+  line-height: 1.2em;
+}
+.answerbox td a
+{
+  float: none;
+  display: block;
+}
+
+.no_display
+{
+  display: none;
+}
+.center_text
+{
+  text-align: center;
+}
+.center
+{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* PAGE SPECIFIC STYLES */
+
+/* CHANGE_CHAR_NAME.PHP */
+/* CHANGE_CHAR_RACE.PHP */
+/* HEARTHSTONE.PHP */
+#xname_fieldset
+{
+  width: 310px;
+  margin-bottom: 10px;
+}
+#xname_choose
+{
+  width: 370px;
+}
+#xname_char_table
+{
+  width: 300px;
+  margin-bottom: 10px;
+}
+.xname_radio
+{
+  width: 10px;
+}
+.xname_name
+{
+  width: 100px;
+}
+.xname_info
+{
+  position: relative;
+  right: -2px;
+}
+.xname_LRC
+{
+  width: 10px;
+}
+.xname_char_name
+{
+  font-size: /font_size_11/;
+  font-weight: bold;
+}
+
+/* LOGIN.PHP */
+#login_table
+{
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#login_realm
+{
+  width: 190px;
+}
+
+/* QUESTITEM_VENDOR.PHP */
+#qiv_quest_requires
+{
+  color: YellowGreen;
+}
+#qiv_player_has
+{
+  color: YellowGreen;
+}
+#qiv_insuffiecient_funds
+{
+  color: YellowGreen;
+}
+#qiv_approve_quantity
+{
+  color: YellowGreen;
+}
+#qiv_quest_select
+{
+  width: 300px;
+  margin-right: auto;
+  margin-left: auto;
+}
+#qiv_item_select
+{
+  width: 300px;
+  margin-right: auto;
+  margin-left: auto;
+}
+#qiv_item_quantity
+{
+  width: 300px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* REGISTER.PHP */
+#reg_username
+{
+  width: 335px;
+}
+#reg_screenname
+{
+  width: 335px;
+}
+#reg_pass1
+{
+  width: 335px;
+}
+#reg_pass2
+{
+  width: 335px;
+}
+#reg_email
+{
+  width: 335px;
+}
+#reg_invitationkey
+{
+  width: 335px;
+}
+#recaptcha_response_field 
+{
+  border-color: black;
+  background-color: white;
+}
+
+/* SPELLD.PHP */
+#spelld_add_field
+{
+  width: 550px;
+}
+
+/* TELE.PHP */
+#tele_delete_cursor
+{
+  cursor: pointer;
+}
+
+/* TICKET.PHP */
+#ticket_edit_field
+{
+  width: 550px;
+}
+
+/* TOP100.PHP */
+#top100_realms
+{
+  width: 720px;
+}
+#top100_mainlist
+{
+  width: 720px;
+}
+#top100_mainlist_wide
+{
+  width: 740px;
+}
+#top100_total_etc
+{
+  width: 720px;
+}
+
+/* ULTRA_VENDOR.PHP */
+#uv_mul
+{
+  color: YellowGreen;
+}
+#uv_insufficient_funds
+{
+  color: YellowGreen;
+}
+#uv_approve_quantity
+{
+  color: YellowGreen;
+}
+#uv_poor_quality
+{
+  color: DarkGray;
+}
+#uv_uncommon_quality
+{
+  color: Chartreuse;
+}
+#uv_rare_quality
+{
+  color: Blue;
+}
+#uv_epic_quality
+{
+  color: DarkOrchid;
+}
+#uv_legendary_quality
+{
+  color: DarkOrange;
+}
+#uv_artifact_quality
+{
+  color: Tan;
+}
+#uv_heirloom_quality
+{
+  color: Tan;
+}
+
+/* USER.PHP */
+#user_new_account
+{
+  width: 360px;
+}
+.user_edit_account
+{
+  width: 550px;
+}
+#user_recruits
+{
+  width: 550px;
+}
+#user_bubble
+{
+  width: 960px;
+  margin-left: -80px; /* half of the difference in width of normal body_main*/
+}
+
+/* WORLDBROADCAST.PHP */
+#delete_entry_cursor
+{
+  cursor: pointer;
+}
+
+/* VENDOR.PHP */
+#vend_req_item
+{
+  padding: 2px;
+}
+#vendor_item_icon
+{
+  padding: 2px;
+}
+#vendor_edit_vendor
+{
+  width: 720px;
+}
+#vendor_restrictions
+{
+  width: 720px;
+}
+
+/* ARENATEAM.PHP */
+.arenateam_delete_cursor
+{
+  cursor: pointer;
+}
+#arenateam_bubble
+{
+  width: 928px;
+  left: -64px;
+}
+.arena_fieldset
+{
+  width: 100%;
+}
+#arena_table_with_banner
+{
+  width: 898px;
+}
+.arena_banner
+{
+  position: relative;
+  width: 128px;
+  height: 256px;
+}
+.banner_img
+{
+  position: absolute;
+  left: 10px;
+  z-index: 97;
+}
+.border_img
+{
+  position: absolute;
+  left: 10px;
+  z-index: 98;
+}
+.emblem_img
+{
+  position: absolute;
+  top: 40px;
+  left: 22px;
+  z-index: 99;
+}
+.color_white
+{
+  color: white;
+}
+
+/* BANNED.PHP */
+#banned_delete_cursor
+{
+  cursor: pointer;
+}
+#new_banned
+{
+  width: 410px;
+}
+
+/* CHAR.PHP */
+#char_character_sheet
+{
+  width: 600px;
+}
+.char_icon_padding
+{
+  padding: 2px;
+}
+#char_hp_name
+{
+  width: 90px;
+}
+#char_hp_value
+{
+  width: 90px;
+}
+#char_energy_name
+{
+  width: 90px;
+}
+#char_energy_value
+{
+  width: 90px;
+}
+#char_melee_name
+{
+  width: 100px;
+}
+#char_melee_value
+{
+  width: 80px;
+}
+#char_ranged_name
+{
+  width: 110px;
+}
+#char_ranged_value
+{
+  width: 70px;
+}
+#ch_item_delete
+{
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: -20px;
+  left: 32px;
+}
+#ch_item_delete_wrap
+{
+  width: 300px;
+}
+#ch_item_delete_table
+{
+  width: 300px;
+}
+
+/* CHAR_ACHIEVE.PHP */
+#ch_ach_info
+{
+  width: 90%;
+}
+#ch_ach_main
+{
+  width: 90%;
+}
+#ch_ach_categories
+{
+  width: 30%;
+}
+#ch_ach_categories_list
+{
+  width: 100%;
+}
+#ch_ach_opacity
+{
+  opacity: 0.2;
+}
+
+/* CHAR_FRIENDS.PHP */
+#ch_fri_large_screen
+{
+  width: 1%;
+}
+#ch_fri_unk_1
+{
+  width: 1%;
+}
+#ch_fri_unk_2
+{
+  width: 1%;
+}
+
+/* CHAR_INV.PHP */
+#ch_inv_bags
+{
+  position: relative;
+  width: 700px;
+}
+#ch_inv_bags_wrap
+{
+  width: 760px;
+  text-align: center;
+}
+.ch_inv_padding
+{
+  /*padding: 2px;*/
+}
+.ch_inv_quantity
+{
+  position: absolute;
+  top: 20px;
+  left: 17px;
+  width: 25px;
+  font-weight: bold;
+  font-size: /font_size_6/;
+  pointer-events: none;
+}
+.ch_inv_quantity_shadow
+{
+  position: absolute;
+  top: 21px;
+  left: 18px;
+  width: 25px;
+  color: black;
+  font-weight: bold;
+  font-size: /font_size_6/;
+  pointer-events: none;
+}
+.ch_inv_delete
+{
+  position: relative;
+  width: 16px;
+  height: 16px;
+  top: -20px;
+  left: 10px;
+}
+#ch_backpack_icon_margin
+{
+  margin-left: 100px;
+}
+#ch_backpack_name_margin
+{
+  margin-left: 30px;
+}
+#ch_backpack
+{
+  margin-left: auto;
+  margin-right: auto;
+}
+#ch_money
+{
+  text-align: right;
+  width: 168px;
+  background-image: none;
+  background-color: #393936;
+  padding: 2px;
+  padding-bottom: 7px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* CHAR_PETS.PHP */
+.ch_pet_padding
+{
+  padding: 2px;
+}
+#ch_pet_xp
+{
+  width: 550px;
+}
+
+/* CHAR_QUEST.PHP */
+#ch_que_questsA
+{
+  width: 550px;
+}
+#ch_que_questsB
+{
+  width: 550px;
+}
+#ch_que_questsC
+{
+  width: 550px;
+}
+
+/* CHAR_REP.PHP */
+#ch_rep_rep_alliance, #ch_rep_rep_horde, #ch_rep_rep_alliance_forces, #ch_rep_rep_horde_forces, #ch_rep_rep_steamwheedle_cartel,
+#ch_rep_rep_the_burning_crusade, #ch_rep_rep_shattrath_city, #ch_rep_rep_alliance_vanguard, #ch_rep_rep_horde_expedition,
+#ch_rep_rep_sholazar_basin, #ch_rep_rep_wrath_of_the_lich_king, #ch_rep_rep_other, #ch_rep_rep_unknown
+{
+  width: 550px;
+}
+
+/* CHAR_SKILL.PHP */
+#ch_ski_main
+{
+  width: 550px;
+}
+
+/* CHAR_TALENT.PHP */
+#ch_tal_main
+{
+  width: 550px;
+}
+#ch_tal_0_width
+{
+  width: 0px;
+}
+#ch_tal_0_bottom_width
+{
+  border-bottom-width: 0px;
+}
+#ch_tal_0_top_bottom_width
+{
+  border-top-width: 0px;
+  border-bottom-width: 0px;
+}
+.ch_tal_level_shadow
+{
+  width: 0px;
+  margin: -14px 0px 0px 30px;
+  font-size: /font_size_6/;
+  color: black
+}
+.ch_tal_level
+{
+  width: 0px;
+  margin: -14px 0px 0px 29px;
+  font-size: /font_size_6/;
+  color: white
+}
+
+/* CHAR_MAIL.php */
+#ch_mail_table
+{
+  width: 550px;
+}
+#ch_read_mail_field
+{
+  width: 425px;
+}
+#ch_read_mail
+{
+  width: 400px;
+}
+
+/* CHAR_EDIT.PHP */
+#button_margins
+{
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* CHAR_VIEW.PHP */
+#model_view
+{
+  width: 400px;
+}
+
+/* CREATURE.PHP */
+#ch_cre_proto
+{
+  width: 720px;
+}
+
+/* EDIT.PHP */
+#edit_fieldset
+{
+  width: 550px;
+}
+#edit_fieldset_table
+{
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#edit_profile_fieldset
+{
+  width: 550px;
+}
+#edit_profile_table
+{
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+#edit_invites_fieldset
+{
+  width: 550px;
+}
+#edit_invites_table
+{
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#active_invites_table
+{
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#edit_prizebags_fieldset
+{
+  width: 550px;
+}
+#edit_prizebags_table
+{
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+#edit_theme_fieldset
+{
+  width: 550px;
+}
+#edit_theme_table
+{
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* FOOTER.PHP */
+.footer_register_login
+{
+  width: 130px;
+}
+.realm_fieldset
+{
+  width: 97%;
+  margin-top: 0px;
+  margin-bottom: 5px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* FORUM.PHP */
+#forum_topic_list_header
+{
+  text-align: right;
+}
+#forum_topic_list_header_title
+{
+  width: 35%;
+  text-align: left;
+}
+#forum_topic_list_header_author
+{
+  width: 15%;
+}
+#forum_topic_list_title
+{
+  text-align: left;
+}
+#forum_topic_header_info
+{
+  width: 25%;
+}
+#forum_topic_header_text
+{
+  text-align: left;
+}
+#forum_topic_header_misc
+{
+  width: 50%;
+  text-align: right;
+}
+#forum_topic_avatar
+{
+  width: 15%;
+  text-align: center;
+}
+#forum_topic_text
+{
+  text-align: left
+}
+#forum_topic_controls
+{
+  text-align: right;
+}
+#forum_topic_reply_avatar
+{
+  width: 15%;
+  text-align: center;
+}
+#forum_topic_reply_text
+{
+  text-align: left;
+}
+#forum_topic_reply_controls
+{
+  text-align: right;
+}
+#forum_topic_reply_color_bg
+{
+  background-color: #D7D7D7
+}
+#forum_topic_reply_0_border
+{
+  border: 0px;
+}
+
+/* GUILD.PHP */
+.guild_fieldset
+{
+  width: 100%;
+}
+#guild_edit_guild
+{
+  width: 100%;
+}
+.guild_edit_delete_cursor
+{
+  cursor: pointer;
+}
+#guild_view_background
+{
+  position: absolute;
+  left: 315px;
+  top: 19px;
+  z-index: 1;
+}
+#guild_view_border
+{
+  position: absolute;
+  left: 315px;
+  top: 19px;
+  z-index: 3;
+}
+#guild_view_emblem
+{
+  position: absolute;
+  left: 315px;
+  top: 19px;
+  z-index: 2;
+}
+#guild_emblem
+{
+  position: relative;
+  height: 115px;
+}
+#guild_emblem_border
+{
+  position: absolute;
+  left: -5px;
+  top: -20px;
+  z-index: 99;
+}
+#guild_pages_background
+{
+  background-color: #383838;
+}
+
+/* GUILDBANK.PHP */
+#guildbank_tabs
+{
+  width: 510px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#guildbank_padding
+{
+  /*padding: 2px;*/
+}
+.guildbank_quantity_shadow
+{
+  position: absolute;
+  top: 20px;
+  left: 17px;
+  width: 25px;
+  color: black;
+  font-weight: bold;
+  font-size: /font_size_6/;
+  pointer-events: none;
+}
+.guildbank_quantity
+{
+  position: absolute;
+  top: 21px;
+  left: 18px;
+  width: 25px;
+  color: white;
+  font-weight: bold;
+  font-size: /font_size_6/;
+  pointer-events: none;
+}
+
+/* HONOR.PHP */
+.honor_faction
+{
+  width: 776px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#honor_alliance_ranks
+{
+  width: 705px;
+}
+#honor_horde_ranks
+{
+  width: 705px;
+}
+.honor_tooltip
+{
+  color: white;
+}
+.honor_faction_icon
+{
+  margin-top: -5px;
+  background-color: /table_background_color/;
+  padding: 2px 6px;
+  position: absolute;
+  top: -25px;
+  left: 5px;
+}
+
+/* INDEX.PHP */
+#index_explorer_warning
+{
+  font-size: /font_size_10/;
+  color: orange;
+  text-align: center;
+  width: 100%;
+}
+#index_realm_info
+{
+  color: #55aa55;
+}
+.index_realm_info_value
+{
+  color: YellowGreen;
+}
+#coupon_item_quantity
+{
+  width: 25px;
+  margin: -10px 0px 0px 20px;
+  font-weight: bold;
+  font-size: /font_size_6/;
+  pointer-events: none;
+}
+#coupon_item_quantity_shadow
+{
+  width: 25px;
+  margin: -20px 0px 0px 18px;
+  color: black;
+  font-weight: bold;
+  font-size: /font_size_6/;
+  pointer-events: none;
+}
+.coupon_item
+{
+  position: relative;
+}
+
+/* ITEM.PHP */
+#item_padding
+{
+  padding: 2px;
+}
+
+/* MAIL.PHP */
+#mail_type_field
+{
+  width: 740px;
+}
+#mail_type
+{
+  width: 720px;
+}
+#mail_body_field
+{
+  width: 740px;
+}
+#mail_body_table
+{
+  margin-left: 10px;
+  margin-right: 10px;
+}
+#mail_body
+{
+  width: 720px;
+}
+#mail_items
+{
+  width: 100%;
+}
+
+
+/* MAP.PHP */
+#map_bubble
+{
+  width: 1002px;
+  margin-left: -102px; /* half of the difference in width */
+}
+.map_horde
+{
+  color: #ff0000;
+}
+.map_alliance
+{
+  color: #0000ff;
+}
+.map_map
+{
+  position: relative;
+}
+.map_image
+{
+  position: relative;
+}
+.dis_button
+{
+  background: /btn_def_background_color/;
+  color: /default_text_color/;
+  border-color: /btn_border/;
+  padding: 4px 2px;
+  text-decoration: none;
+  text-align: center;
+  float: left;
+  margin-right: 3px;
+  margin-left: 3px;
+  border: 1px solid /input_border_color/;
+  font: /font_size_4/ /font_1/;
+  font-weight: bold;
+  line-height: 100%;
+}
+
+/* CHAR_LIST.PHP */
+#char_list_bubble
+{
+  width: 835px;
+  left: -17px;
+}
+#char_list_delete_wrap
+{
+  width: 300px;
+}
+
+/* CHAR_PVP.PHP */
+#ch_pvp_top
+{
+  width: 550px;
+}
+#ch_pvp_main
+{
+  width: 550px;
+}
+.ch_pvp_highlight
+{
+  color: /focus_color/;
+}
+.ch_pvp_dim
+{
+  color: #909090;
+}
+.ch_pvp_banner_space
+{
+  width: 140px;
+}
+
+/* CHAR_TOOLS.PHP */
+.char_tools_table
+{
+  width: 500px;
+}
+.char_tools_avatar
+{
+  width: 150px;
+}
+
+/* ERROR.PHP */
+#error_message_table
+{
+  width: 400px;
+}
+#error_buttons
+{
+  width: 300px;
+}
+
+/* OBJECT.PHP */
+.mini_map
+{
+  position: relative;
+  width: 488px;
+  height: 326px;
+  margin: 10px;
+}
+.gob_header
+{
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.gob_name
+{
+  font-size: /font_size_12/;
+}
+.zone_active
+{
+  font-weight: bold;
+}
+
+/* GPS Tooltip */
+.gps_tooltip
+{
+  visibility: hidden;
+  position: absolute;
+  z-index: 99;
+}
+.gps_tooltip table
+{
+  background-color: #454545;
+  border: 1px solid #F0D070;
+  color: #ffffff;
+  width: 80px;
+}
+.gps_tooltip table .name_level
+{
+  border-bottom: 1px solid  #F0D070;
+  text-align: center;
+}
+.gps_tooltip table .race
+{
+  text-align: left;
+}
+.gps_tooltip table .class
+{
+  text-align: left;
+}
+.gps_tooltip table .zone
+{
+  border-top: 1px solid  #F0D070;
+  text-align: center;
+}
+
+/* POINT_SYSTEM.PHP */
+#coupon_table
+{
+  width: 720px;
+}
+.coupon_parts
+{
+  width: 100%;
+  text-align: left;
+  float: left;
+  margin-top: 3px;
+  margin-bottom: 5px;
+}
+.coupon_part_title
+{
+  width: 100%;
+  text-align: left;
+  float: left;
+  margin-top: 3px;
+  margin-bottom: 5px;
+  margin-left: 25px;
+}
+.coupon_part_chars
+{
+  width: 100%;
+  text-align: left;
+  float: left;
+  margin-top: 3px;
+  margin-bottom: 5px;
+  margin-left: 50px;
+}
+.prize_bag_check
+{
+  position: absolute;
+  top: -3px;
+  left: 22px;
+  width: 25px;
+}
+.fake_table
+{
+  width: 425px;
+}
+.fake_table_cell
+{
+  float: left;
+  width: 50%;
+  height: 28px;
+}
+.points_credit_highlight
+{
+  color: /focus_color/;
+}
